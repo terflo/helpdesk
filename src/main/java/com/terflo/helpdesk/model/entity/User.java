@@ -39,9 +39,15 @@ public class User implements UserDetails {
     String password;
 
     /**
+     * Почта пользователя
+     */
+    @Column(name = "email")
+    String email;
+
+    /**
      * Множество ролей пользователя
      */
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 
     /**

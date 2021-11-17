@@ -2,11 +2,11 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
+import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -33,6 +33,12 @@ public class RegistrationController {
         return "registration";
     }
 
+    /**
+     * 
+     * @param user
+     * @param model
+     * @return
+     */
     @PostMapping("/registration")
     public String registerUser(User user, Map<String, Object> model) {
 
@@ -45,5 +51,4 @@ public class RegistrationController {
 
         return "redirect:/login";
     }
-
 }

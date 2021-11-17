@@ -63,6 +63,15 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * Функция ищет пользователя в базе данных
+     * @param username имя пользователя
+     * @return результат поиска пользователя
+     */
+    public boolean userIsExistByUsername(String username) {
+        return userRepository.findByUsername(username).isPresent();
+    }
+
+    /**
      * Функция поиска всех пользователей из базы данных
      * @return все пользователи из базы данных
      */
@@ -81,6 +90,10 @@ public class UserService implements UserDetailsService {
 
         user.setRoles(Collections.singleton(roleRepository.findByName("ROLE_USER")));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setEnabled(true);
+        user.setCredentials_expired(false);
+        user.setExpired(false);
+        user.setLocked(false);
         userRepository.save(user);
     }
 

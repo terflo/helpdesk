@@ -33,6 +33,7 @@ public class Role implements GrantedAuthority {
     /**
      * Множество пользователей, которые имеют данную роль
      */
+    @Transient
     @ManyToMany(mappedBy = "roles")
     private Set<User> users;
 
