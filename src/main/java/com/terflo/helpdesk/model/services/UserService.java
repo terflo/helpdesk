@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -72,6 +73,15 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * Функция ищет пользователя в базе данных
+     * @param email email пользователя
+     * @return результат поиска пользователя
+     */
+    public boolean userIsExistByEmail(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    /**
      * Функция поиска всех пользователей из базы данных
      * @return все пользователи из базы данных
      */
@@ -97,6 +107,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void deleteUserById(Long id) throws UserNotFoundException{
         if(!userRepository.findById(id).isPresent()) {
             throw new UserNotFoundException("Пользователь не найден");
@@ -104,6 +115,7 @@ public class UserService implements UserDetailsService {
         userRepository.deleteById(id);
     }
 
+    @Transactional
     public void deleteUserByUsername(String username) throws UserNotFoundException{
         if(!userRepository.findByUsername(username).isPresent()) {
             throw new UserNotFoundException("Пользователь не найден");
