@@ -11,7 +11,7 @@
     </head>
 
     <body>
-        <main class="login-form">
+        <main>
             <div class="container">
                 <div class="row justify-content-center">
                     <div class="col-md-8">
@@ -22,7 +22,7 @@
                                     <div class="form-group row">
                                         <label for="username" class="col-md-4 col-form-label text-md-right">Имя пользователя</label>
                                         <div class="col-md-6">
-                                            <input type="text" id="username" class="form-control" name="username" onchange="checkRegistrationData();" required autofocus>
+                                            <input th:value="${data?.username}" type="text" id="username" class="form-control" name="username" onchange="checkRegistrationData();" required autofocus>
                                         </div>
                                         <img id="username-status-picture" th:src="@{img/cross-mark.png}" class="hidden">
                                     </div>
@@ -30,7 +30,7 @@
                                     <div class="form-group row">
                                         <label for="email" class="col-md-4 col-form-label text-md-right">Почта</label>
                                         <div class="col-md-6">
-                                            <input type="text" id="email" class="form-control" name="email" onchange="checkRegistrationData();" required autofocus>
+                                            <input th:value="${data?.email}" type="text" id="email" class="form-control" name="email" onchange="checkRegistrationData();" required autofocus>
                                         </div>
                                         <img id="email-status-picture" th:src="@{img/cross-mark.png}" class="hidden">
                                     </div>
@@ -38,14 +38,14 @@
                                     <div class="form-group row">
                                         <label for="password" class="col-md-4 col-form-label text-md-right">Пароль</label>
                                         <div class="col-md-6">
-                                            <input type="password" id="password" class="form-control" name="password" required>
+                                            <input th:value="${data?.password}" type="password" id="password" class="form-control" name="password" required>
                                         </div>
                                     </div>
 
                                     <div class="form-group row">
                                         <label for="password-confirm" class="col-md-4 col-form-label text-md-right">Подтвердите пароль</label>
                                         <div class="col-md-6">
-                                            <input type="password" id="password-confirm" class="form-control" name="passwordConfirm" onchange="checkRegistrationData();" required>
+                                            <input th:value="${data?.passwordConfirm}" type="password" id="password-confirm" class="form-control" name="passwordConfirm" onchange="checkRegistrationData();" required>
                                         </div>
                                         <img id="password-status-picture" th:src="@{img/cross-mark.png}" class="hidden">
                                     </div>

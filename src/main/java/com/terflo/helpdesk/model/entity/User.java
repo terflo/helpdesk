@@ -24,25 +24,25 @@ public class User implements UserDetails {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     /**
      * Имя пользователя
      */
     @Column(name = "username")
-    String username;
+    private String username;
 
     /**
      * Пароль пользователя (преобразуется в хэш)
      */
     @Column(name = "password")
-    String password;
+    private String password;
 
     /**
      * Почта пользователя
      */
     @Column(name = "email")
-    String email;
+    private String email;
 
     /**
      * Множество ролей пользователя

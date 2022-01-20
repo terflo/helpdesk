@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.3
  * REST контроллер сервера
  */
 @org.springframework.web.bind.annotation.RestController
@@ -37,9 +37,12 @@ public class RestController {
 
         //Работа с именем пользователя
         if(!request.getUsername().isEmpty()) {
-            if (request.getUsername().length() < 4) {
-                response.setUsernameStatus("TOO SHORT");
-            } else if (userService.userIsExistByUsername(request.getUsername())) {
+
+            String username = request.getUsername();
+
+            if (!regexUtil.checkUsername(username)) {
+                response.setUsernameStatus("INCORRECT USERNAME");
+            } else if (userService.userIsExistByUsername(username)) {
                 response.setUsernameStatus("ALREADY EXISTS");
             } else {
                 response.setUsernameStatus("OK");
@@ -48,9 +51,12 @@ public class RestController {
 
         //Работа с email пользователя
         if(!request.getEmail().isEmpty()) {
-            if(userService.userIsExistByEmail(request.getEmail())) {
+
+            String email = request.getEmail();
+
+            if(userService.userIsExistByEmail(email)) {
                 response.setEmailStatus("ALREADY EXISTS");
-            } else if (!regexUtil.checkEmail(request.getEmail())) {
+            } else if (!regexUtil.checkEmail(email)) {
                 response.setEmailStatus("INCORRECT EMAIL");
             } else {
                 response.setEmailStatus("OK");
@@ -59,7 +65,13 @@ public class RestController {
 
         //Работа с паролем пользователя
         if(!request.getPassword().isEmpty() && !request.getPasswordConfirm().isEmpty()) {
-            if (request.getPassword().equals(request.getPasswordConfirm())) {
+
+            String password = request.getPassword();
+            String confirm = request.getPasswordConfirm();
+
+            if (password.length() < 5) {
+                response.setPasswordStatus("TOO SHORT");
+            } else if (password.equals(confirm)) {
                 response.setPasswordStatus("OK");
             } else {
                 response.setPasswordStatus("NOT MATCH");

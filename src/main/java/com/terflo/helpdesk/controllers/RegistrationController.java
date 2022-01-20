@@ -34,6 +34,7 @@ public class RegistrationController {
 
     /**
      * Контроллер страницы регистрации (метод GET)
+     *
      * @return название страницы html
      */
     @GetMapping("/registration")
@@ -44,34 +45,45 @@ public class RegistrationController {
     @PostMapping("/registration")
     public String registerUser(RegistrationRequest request, Model model) {
 
+        /* Список ошибок */
         ArrayList<String> errors = new ArrayList<>();
 
-        if(!request.getPassword().equals(request.getPasswordConfirm())) {
+        /* Работа с паролем */
+        if (request.getPassword().length() < 5) {
+            errors.add("Пароль слишком короткий");
+        } else if (!request.getPassword().equals(request.getPasswordConfirm())) {
             errors.add("Пароли не совпадают");
         }
 
-        if(!regexUtil.checkEmail(request.getEmail())) {
+        /* Работа с email */
+        if (!regexUtil.checkEmail(request.getEmail())) {
             errors.add("Некорректный email");
+        } else if (userService.userIsExistByEmail(request.getEmail())) {
+            errors.add("Данный email уже зарегестрирован");
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword());
-        user.setEmail(request.getEmail());
+        /* Работа с username */
+        if (regexUtil.checkUsername(request.getUsername())) {
 
-        if(request.getUsername().length() >= 4) {
+            User user = new User();
+            user.setUsername(request.getUsername());
+            user.setPassword(request.getPassword());
+            user.setEmail(request.getEmail());
+
             try {
                 userService.saveUser(user);
             } catch (UserAlreadyExistException userAlreadyExistsException) {
                 errors.add(userAlreadyExistsException.getMessage());
             }
+
         } else {
-            errors.add("Слишком короткое имя");
+            errors.add("Некорректное имя пользователя");
         }
 
-        if(errors.isEmpty())
+        if (errors.isEmpty())
             return "redirect:/login";
         else {
+            model.addAttribute("data", request);
             model.addAttribute("errors", errors);
             return "/registration";
         }

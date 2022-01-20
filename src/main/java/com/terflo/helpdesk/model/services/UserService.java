@@ -46,6 +46,7 @@ public class UserService implements UserDetailsService {
 
     /**
      * Функция поиска пользователя по индификатору
+     *
      * @param id индификатор пользователя
      * @return найденный пользователь из базы данных
      */
@@ -55,6 +56,7 @@ public class UserService implements UserDetailsService {
 
     /**
      * Функция поиска пользователя по имени
+     *
      * @param username имя пользователя
      * @return пользователь
      * @throws UserNotFoundException возникает при ненахождении пользователя
@@ -65,6 +67,7 @@ public class UserService implements UserDetailsService {
 
     /**
      * Функция ищет пользователя в базе данных
+     *
      * @param username имя пользователя
      * @return результат поиска пользователя
      */
@@ -74,6 +77,7 @@ public class UserService implements UserDetailsService {
 
     /**
      * Функция ищет пользователя в базе данных
+     *
      * @param email email пользователя
      * @return результат поиска пользователя
      */
@@ -83,6 +87,7 @@ public class UserService implements UserDetailsService {
 
     /**
      * Функция поиска всех пользователей из базы данных
+     *
      * @return все пользователи из базы данных
      */
     public List<User> getAllUsers() {
@@ -91,11 +96,12 @@ public class UserService implements UserDetailsService {
 
     /**
      * Функция добавления пользователя в базу данных
+     *
      * @param user пользователь, которого нужно добавить
      */
     public void saveUser(User user) throws UserAlreadyExistException {
 
-        if(userRepository.findByUsername(user.getUsername()).isPresent())
+        if (userRepository.findByUsername(user.getUsername()).isPresent())
             throw new UserAlreadyExistException("Такой пользователь уже существует");
 
         user.setRoles(Collections.singleton(roleRepository.findByName("ROLE_USER")));
@@ -108,16 +114,16 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void deleteUserById(Long id) throws UserNotFoundException{
-        if(!userRepository.findById(id).isPresent()) {
+    public void deleteUserById(Long id) throws UserNotFoundException {
+        if (!userRepository.findById(id).isPresent()) {
             throw new UserNotFoundException("Пользователь не найден");
         }
         userRepository.deleteById(id);
     }
 
     @Transactional
-    public void deleteUserByUsername(String username) throws UserNotFoundException{
-        if(!userRepository.findByUsername(username).isPresent()) {
+    public void deleteUserByUsername(String username) throws UserNotFoundException {
+        if (!userRepository.findByUsername(username).isPresent()) {
             throw new UserNotFoundException("Пользователь не найден");
         }
         userRepository.deleteUserByUsername(username);
@@ -125,6 +131,7 @@ public class UserService implements UserDetailsService {
 
     /**
      * Функция поиска пользователя по имени
+     *
      * @param s имя пользователя
      * @return найденный пользователь
      * @throws UsernameNotFoundException возникает при ненахождения пользователя в базе данных

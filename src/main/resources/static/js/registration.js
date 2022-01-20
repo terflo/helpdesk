@@ -51,7 +51,3 @@ function checkRegistrationData() {
     });
 }
 
-function checkDataStatus() {
-
-}
-
