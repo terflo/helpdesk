@@ -25,7 +25,7 @@ public class AdminController {
      * @param model
      * @return
      */
-    @GetMapping("/admin/")
+    @GetMapping("/admin")
     public String admin(Model model) {
         return "admin";
     }

@@ -4,69 +4,71 @@
     <head>
         <meta charset="UTF-8" content="text/html">
         <title>Регистрация</title>
+        <link th:href="@{css/toast.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{css/registration.css}" rel="stylesheet" type="text/css"/>
-        <link th:href="@{css/bootstrap.css}" rel="stylesheet" type="text/css"/>
+        <link th:href="@{css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
+
         <script th:src="@{js/registration.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{js/jQuery.js}" rel="script" type="text/javascript"></script>
+        <script th:src="@{js/toast.js}" rel="script" type="text/javascript"></script>
+
     </head>
 
     <body>
         <main>
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-                        <div class="card">
-                            <div class="card-header">Регистрация</div>
-                            <div class="card-body">
-                                <form th:action="@{/registration}" method="post">
-                                    <div class="form-group row">
-                                        <label for="username" class="col-md-4 col-form-label text-md-right">Имя пользователя</label>
-                                        <div class="col-md-6">
-                                            <input th:value="${data?.username}" type="text" id="username" class="form-control" name="username" onchange="checkRegistrationData();" required autofocus>
-                                        </div>
-                                        <img id="username-status-picture" th:src="@{img/cross-mark.png}" class="hidden">
-                                    </div>
+            <section class="login-clean">
+                <form th:action="@{/registration}" method="post">
 
-                                    <div class="form-group row">
-                                        <label for="email" class="col-md-4 col-form-label text-md-right">Почта</label>
-                                        <div class="col-md-6">
-                                            <input th:value="${data?.email}" type="text" id="email" class="form-control" name="email" onchange="checkRegistrationData();" required autofocus>
-                                        </div>
-                                        <img id="email-status-picture" th:src="@{img/cross-mark.png}" class="hidden">
-                                    </div>
-
-                                    <div class="form-group row">
-                                        <label for="password" class="col-md-4 col-form-label text-md-right">Пароль</label>
-                                        <div class="col-md-6">
-                                            <input th:value="${data?.password}" type="password" id="password" class="form-control" name="password" required>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group row">
-                                        <label for="password-confirm" class="col-md-4 col-form-label text-md-right">Подтвердите пароль</label>
-                                        <div class="col-md-6">
-                                            <input th:value="${data?.passwordConfirm}" type="password" id="password-confirm" class="form-control" name="passwordConfirm" onchange="checkRegistrationData();" required>
-                                        </div>
-                                        <img id="password-status-picture" th:src="@{img/cross-mark.png}" class="hidden">
-                                    </div>
-
-                                    <div class="col-md-6 offset-md-4">
-                                        <button id="sign-up-button" type="submit" class="btn btn-primary" onchange="">
-                                            Зарегестрироваться
-                                        </button>
-                                    </div><br>
-
-                                    <section th:if="not ${errors.empty}" th:each="error : ${errors}">
-                                        <div class="warning-message form-group row">
-                                            <label th:text="${error}" class="col-md-6 offset-md-4 text-md-left error"></label>
-                                        </div>
-                                    </section>
-                                </form>
-                            </div>
-                        </div>
+                    <div class="mb-3">
+                        <input th:value="${data?.username}" class="form-control" type="text" id="username" name="username" placeholder="Имя пользователя" onchange="checkRegistrationData();" required autofocus/>
                     </div>
-                </div>
-            </div>
+
+                    <div class="mb-3">
+                        <input th:value="${data?.email}" class="form-control" type="text" id="email" name="email" placeholder="Почта" onchange="checkRegistrationData();" required autofocus/>
+                    </div>
+
+                    <div class="mb-3">
+                        <input th:value="${data?.password}" class="form-control" type="password" id="password" name="password" placeholder="Пароль" onchange="checkRegistrationData();" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <input th:value="${data?.passwordConfirm}" class="form-control" type="password" id="password-confirm" name="passwordConfirm" placeholder="Повторите пароль" onchange="checkRegistrationData();" required />
+                    </div>
+
+                    <div class="mb-3 alert alert-danger hidden" id="username-already-exists" role="alert">
+                        <span>Такое имя пользователя уже существует</span>
+                    </div>
+
+                    <div class="mb-3 alert alert-danger hidden" id="incorrect-username" role="alert">
+                        <span>Некорректное имя пользователя</span>
+                    </div>
+
+                    <div class="mb-3 alert alert-danger hidden" id="incorrect-email" role="alert">
+                        <span>Некорректный email</span>
+                    </div>
+
+                    <div class="mb-3 alert alert-danger hidden" id="password-not-match" role="alert">
+                        <span>Пароль не совпадает</span>
+                    </div>
+
+                    <div class="mb-3 alert alert-danger hidden" id="password-too-short" role="alert">
+                        <span>Пароль слишком короткий</span>
+                    </div>
+
+                    <section th:if="not ${errors.empty}" th:each="error : ${errors}">
+                        <div class="mb-3 alert alert-danger hidden" role="alert">
+                            <span th:text="${error}"></span>
+                        </div>
+                    </section>
+
+                    <div class="mb-3">
+                        <button class="btn btn-primary d-block w-100" type="submit">Зарегестрироваться</button>
+                    </div>
+                </form>
+            </section>
         </main>
+
+        <footer th:insert="blocks/footer"></footer>
+
     </body>
 </html>

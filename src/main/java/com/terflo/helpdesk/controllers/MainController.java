@@ -11,9 +11,9 @@ public class MainController {
         return "index";
     }
 
-    @GetMapping("/index")
-    public String main2() {
-        return "index";
+    @GetMapping("/test")
+    public String test() {
+        return "registration2";
     }
 
 }

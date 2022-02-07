@@ -1,3 +1,13 @@
+function showToast(text) {
+    new Toast({
+        title: false,
+        text: text,
+        theme: 'light',
+        autohide: true,
+        interval: 5000
+    })
+}
+
 function checkRegistrationData() {
     $.ajax({
         type: "POST",
@@ -13,39 +23,28 @@ function checkRegistrationData() {
         cache: false,
         timeout: 600000,
         success: function (data) {
+
             console.log(data)
 
-            let img = document.getElementById("username-status-picture")
-            if(data.usernameStatus === "OK") {
-                img.classList = null
-                img.src = "img/ok.png"
-            } else if(data.usernameStatus !== null) {
-                img.classList = null
-                img.src = "img/cross-mark.png"
-            } else {
-                img.classList.add("hidden")
+            if(data.usernameStatus !== null && data.usernameStatus !== 'OK') {
+                if(data.usernameStatus === 'INCORRECT USERNAME')
+                    showToast('Некорректное имя пользователя')
+                else if(data.usernameStatus === 'ALREADY EXISTS')
+                    showToast('Пользователь с таким именем уже существует')
             }
 
-            img = document.getElementById("email-status-picture")
-            if(data.emailStatus === "OK") {
-                img.classList = null
-                img.src = "img/ok.png"
-            } else if(data.emailStatus !== null) {
-                img.classList = null
-                img.src = "img/cross-mark.png"
-            } else {
-                img.classList.add("hidden")
+            if(data.emailStatus !== null && data.emailStatus !== 'OK') {
+                if(data.emailStatus === 'INCORRECT EMAIL')
+                    showToast('Некорректный email')
+                else if(data.emailStatus === 'ALREADY EXISTS')
+                    showToast('Пользователь с таким email уже существует')
             }
 
-            img = document.getElementById("password-status-picture")
-            if(data.passwordStatus === "OK") {
-                img.classList = null
-                img.src = "img/ok.png"
-            } else if(data.passwordStatus !== null) {
-                img.classList = null
-                img.src = "img/cross-mark.png"
-            } else {
-                img.classList.add("hidden")
+            if(data.passwordStatus !== null && data.passwordStatus !== 'OK') {
+                if(data.passwordStatus === 'TOO SHORT')
+                    showToast('Пароль слишком короткий')
+                else if(data.passwordStatus === 'NOT MATCH')
+                    showToast('Пароли не совпадают')
             }
         }
     });
