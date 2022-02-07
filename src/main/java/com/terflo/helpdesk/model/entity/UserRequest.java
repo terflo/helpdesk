@@ -17,26 +17,27 @@ import javax.persistence.*;
 public class UserRequest {
 
     /**
-     * Уникальный индификатор чат-комнаты
+     * Уникальный индификатор обращения пользователя
      */
     @Id
     @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
-     * Оператор тех-поддержки в чате
+     * Оператор тех-поддержки, прикрепленный к обращению
      */
     @ManyToOne(optional = true, fetch = FetchType.LAZY)
     private User operator;
 
     /**
-     * Пользователь в чате
+     * Владелец обращения
      */
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
     /**
-     * Статус обработки сообщения
+     * Статус обработки обращения
      */
     @Column(name = "status")
     private RequestStatus status;
@@ -46,4 +47,17 @@ public class UserRequest {
      */
     @Column(name = "priority")
     private PriorityStatus priority;
+
+    /**
+     * Название проблемы
+     */
+    @Column(name= "name")
+    private String name;
+
+    /**
+     * Описание проблемы
+     */
+    @Column(name="description")
+    private String description;
+
 }

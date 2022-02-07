@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Создать запрос</title>
+        <link th:href="@{../css/requests.css}" rel="stylesheet" type="text/css"/>
+        <link th:href="@{../css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
+    </head>
+    <body>
+
+        <form th:action="@{/requests/add}" method="post">
+            <ul class="form-style-1">
+                <li>
+                    <label>Название проблемы <span class="required">*</span></label>
+                    <input th:value="${userRequest?.name}" type="text" name="name" class="field-long" />
+                </li>
+                <li>
+                    <label>Приоритет</label>
+                    <label>
+                        <select name="priority" class="field-select">
+                            <option value="LOW">Низкий</option>
+                            <option value="NORMAL">Нормальный</option>
+                            <option value="MAX">Высокий</option>
+                        </select>
+                    </label>
+                </li>
+                <li>
+                    <label>Описание проблемы <span class="required">*</span></label>
+                    <label for="description"></label><textarea th:value="${userRequest?.description}" name="description" id="description" class="field-long field-textarea"></textarea>
+                </li>
+                <li>
+                    <input type="submit" value="Отправить" />
+                </li>
+            </ul>
+        </form>
+
+        <section th:if="not ${errors.empty}" th:each="error : ${errors}">
+            <div class="mb-3 alert alert-danger hidden" role="alert">
+                <span th:text="${error}"></span>
+            </div>
+        </section>
+
+    </body>
+</html>
