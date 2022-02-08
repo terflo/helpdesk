@@ -1,6 +1,7 @@
 package com.terflo.helpdesk.model.entity;
 
 import com.terflo.helpdesk.model.entity.enums.MessageStatus;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -13,6 +14,7 @@ import java.util.Date;
  */
 @Data
 @Entity
+@AllArgsConstructor
 @Table(name = "messages")
 public class Message {
 
@@ -25,16 +27,16 @@ public class Message {
     private Long id;
 
     /**
-     * Уникальный индификатор отправителя сообщения
+     * Отправитель сообщения
      */
     @ManyToOne(fetch = FetchType.LAZY)
     private User sender;
 
     /**
-     * Уникальный индификатор получателя сообщения
+     * Запрос пользователя, к которому относится сообщение
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    private User recipient;
+    private UserRequest userRequest;
 
     /**
      * Содержание сообщения

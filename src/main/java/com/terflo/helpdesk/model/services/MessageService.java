@@ -1,8 +1,9 @@
 package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.Message;
+import com.terflo.helpdesk.model.entity.UserRequest;
+import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.repositories.MessageRepository;
-import com.terflo.helpdesk.model.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +24,17 @@ public class MessageService {
     private MessageRepository messageRepository;
 
     /**
-     * Репозиторий пользователей
+     * Метод поиска сообщений, находящиеся в запросе пользователя
+     * @param userRequest запрос пользователя
+     * @return список сообщений
+     * @throws MessageNotFoundException возникает при ненахождении сообщений
      */
-    @Autowired
-    private UserRepository userRepository;
-
-    public List<Message> findMessagesBySenderID (Long id) {
-        return null;
+    public List<Message> findMessagesByUserRequest (UserRequest userRequest) throws MessageNotFoundException {
+        List<Message> messages = messageRepository.findMessageByUserRequest(userRequest);
+        if(messages.isEmpty())
+            throw new MessageNotFoundException("Сообщения не найдены");
+        else
+            return messages;
     }
 
 }

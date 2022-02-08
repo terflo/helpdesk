@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Запрос</title>
+
+        <!-- TODO: перенести библиотеку в локальное хранилище -->
+        <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+
+        <link th:href="@{../css/requests.css}" rel="stylesheet" type="text/css"/>
+        <link th:href="@{../css/chat.css}" rel="stylesheet" type="text/css"/>
+
+        <script th:src="@{../js/chat.js}" rel="script" type="text/javascript"></script>
+        <script th:src="@{../js/jQuery.js}" rel="script" type="text/javascript"></script>
+        <script th:src="@{../js/stomp.js}" rel="script" type="text/javascript"></script>
+
+        <script th:inline="javascript">
+            /*let requestID = [[${userRequestID}]];
+            let senderID = [[${senderID}]];*/
+        </script>
+    </head>
+    <body>
+        <ul class="form-style-1">
+            <li>
+                <label th:text="'Обращение №' + ${userRequest.id}"></label>
+            </li>
+            <li>
+                <label for="name">Наименование проблемы</label>
+                <input th:value="${userRequest.name}" type="text" id="name" name="name" class="field-long" readonly/>
+            </li>
+            <li>
+                <label for="priority">Приоритет</label>
+                <input th:value="${userRequest.priority}" type="text" id="priority" name="priority" class="field-long" readonly/>
+            </li>
+            <li>
+                <label for="priority">Статус</label>
+                <input th:value="${userRequest.status}" type="text" id="priority" name="priority" class="field-long" readonly/>
+            </li>
+            <li>
+                <label>Описание проблемы</label>
+                <label for="description"></label><textarea th:text="${userRequest.description}" name="description" id="description" class="field-long field-textarea" readonly></textarea>
+            </li>
+        </ul>
+
+        <h2>Чат с оператором технической поддержки:</h2>
+
+        <div class="chat-container">
+            <div class="message-container">
+                <div class="container">
+                    <img th:src="@{../img/support.png}" alt="Avatar" style="width:100%;">
+                    <p>Hello. How are you today?</p>
+                    <span class="time-right">11:00</span>
+                </div>
+
+                <div class="container darker">
+                    <img th:src="@{../img/support.png}" alt="Avatar" class="right" style="width:100%;">
+                    <p>Hey! I'm fine. Thanks for asking!</p>
+                    <span class="time-left">11:01</span>
+                </div>
+            </div>
+
+            <br>
+
+            <div class="message-field-container">
+                <label for="message">Сообщение: </label>
+                <input class="message-field" id="message" name="message" type="text" required>
+                <button id="send-button" name="send-button" onclick="sendMessage()">Отправить</button>
+            </div>
+        </div>
+    </body>
+</html>

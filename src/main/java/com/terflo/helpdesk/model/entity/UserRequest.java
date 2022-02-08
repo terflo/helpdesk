@@ -2,9 +2,11 @@ package com.terflo.helpdesk.model.entity;
 
 import com.terflo.helpdesk.model.entity.enums.PriorityStatus;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Date;
 
 /**
  * @author Danil Krivoschiokov
@@ -13,6 +15,7 @@ import javax.persistence.*;
  */
 @Data
 @Entity
+@AllArgsConstructor
 @Table(name = "users_requests")
 public class UserRequest {
 
@@ -59,5 +62,11 @@ public class UserRequest {
      */
     @Column(name="description")
     private String description;
+
+    /**
+     * Дата создания запроса
+     */
+    @Column(name="date")
+    private Date date;
 
 }

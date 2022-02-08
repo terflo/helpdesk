@@ -3,8 +3,10 @@ package com.terflo.helpdesk.controllers;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
+import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
+import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,9 @@ public class UserRequestsController {
 
     @Autowired
     UserRequestService userRequestService;
+
+    @Autowired
+    MessageService messageService;
 
     /**
      * Контроллер GET-запроса на вывод страницы
@@ -124,7 +128,16 @@ public class UserRequestsController {
      */
     @GetMapping("/requests/{id}")
     public String showRequest(@PathVariable(value = "id") Long id, Model model) throws UserRequestNotFoundException {
-        model.addAttribute("userRequest", userRequestService.findUserRequestByID(id));
+
+        UserRequest userRequest = userRequestService.findUserRequestByID(id);
+
+        model.addAttribute("userRequestID", userRequest);
+
+        //Если сообщений в запросе пользователя не найдуется, то исключение проигнорируется и сообщения не будут выводится
+        try {
+            model.addAttribute("messages", messageService.findMessagesByUserRequest(userRequest));
+        } catch (MessageNotFoundException ignored) {}
+
         return "request";
     }
 }
