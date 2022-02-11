@@ -1,11 +1,13 @@
 let stompClient = null;
 
+/* Функция срабатывает при загрузке страницы и открывает соединение с сервером по протоколу STOMP поверх SockJS */
 window.onload = function connect() {
     let socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
+    stompClient.reconnect_delay = 1000;
     stompClient.connect({}, function(frame) {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/requestMessages/' + requestID, function(messageOutput) {
+        stompClient.subscribe('/requestMessages/' + requestID + '/queue/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
     });
@@ -26,9 +28,7 @@ function sendMessage() {
         JSON.stringify({
             'sender':senderID,
             'message': textField.val(),
-            'date': new Date().getTime(),
-            'userRequest': requestID,
-            'status': 'RECEIVED'
+            'userRequest': requestID
         }));
     textField.val('')
 }

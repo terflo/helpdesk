@@ -1,8 +1,10 @@
 package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.Message;
+import com.terflo.helpdesk.model.entity.Notification;
 import com.terflo.helpdesk.model.entity.dto.MessageDTO;
 import com.terflo.helpdesk.model.entity.enums.MessageStatus;
+import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.factory.MessageFactory;
@@ -10,9 +12,11 @@ import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,45 +27,65 @@ import java.util.Date;
 public class ChatController {
 
     @Autowired
-    MessageService messageService;
+    private MessageService messageService;
 
     @Autowired
-    UserRequestService userRequestService;
+    private UserRequestService userRequestService;
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    MessageFactory messageFactory;
+    private MessageFactory messageFactory;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat")
     public void processMessage(@Payload MessageDTO messageDTO) throws UserNotFoundException, UserRequestNotFoundException {
 
+        messageDTO.date = new Date();
+        messageDTO.status = MessageStatus.RECEIVED;
+
         Message message = messageFactory.convertToMessage(messageDTO);
-        System.out.println(messageDTO);
-        System.out.println(message);
+        messageService.saveMessage(message);
+
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(messageDTO.userRequest),"/queue/messages",
+                new Notification(
+                        message.getId(),
+                        message.getUserRequest().getId(),
+                        message.getSender().getId()));
     }
 
-    /*
-    @GetMapping("/messages/{senderId}/{recipientId}/count")
-    public ResponseEntity<Long> countNewMessages(
-            @PathVariable String senderId,
-            @PathVariable String recipientId) {
 
-        return ResponseEntity
-                .ok(chatMessageService.countNewMessages(senderId, recipientId));
+    /**
+     * Метод для поучения кол-ва новых сообщений
+     * @param userRequest уникальный индификатор запроса пользователя
+     * @return кол-во новых сообщений
+     */
+    @GetMapping("/messages/{userRequest}/count")
+    public ResponseEntity<?> countNewMessages(@PathVariable Long userRequest) {
+
+        try {
+            return ResponseEntity.ok(messageService.countNewMessages(userRequest));
+        } catch (UserRequestNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @GetMapping("/messages/{senderId}/{recipientId}")
-    public ResponseEntity<?> findChatMessages ( @PathVariable String senderId,
-                                                @PathVariable String recipientId) {
-        return ResponseEntity
-                .ok(chatMessageService.findChatMessages(senderId, recipientId));
-    }
-
+    /**
+     * Метод получения сообщения пользователем из клиента
+     * @param id уникальный индификатор сообщения
+     * @return Сообщение для пользователя
+     */
     @GetMapping("/messages/{id}")
-    public ResponseEntity<?> findMessage ( @PathVariable String id) {
-        return ResponseEntity.ok(chatMessageService.findById(id));
+    public ResponseEntity<?> findMessage (@PathVariable Long id) {
+
+        try {
+            return ResponseEntity.ok(messageService.findMessageByID(id));
+        } catch (MessageNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
-    */
 }

@@ -14,6 +14,6 @@ public interface MessageRepository extends CrudRepository<Message, Long> {
 
     List<Message> findMessageByDate(Date date);
 
-    List<Message> findMessageByUserRequest(UserRequest userRequest);
+    List<Message> findAllByUserRequest(UserRequest userRequest);
 
 }

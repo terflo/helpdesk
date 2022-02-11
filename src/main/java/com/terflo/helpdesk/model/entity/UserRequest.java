@@ -4,6 +4,9 @@ import com.terflo.helpdesk.model.entity.enums.PriorityStatus;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -15,6 +18,8 @@ import java.util.Date;
  */
 @Data
 @Entity
+@Transactional
+@NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users_requests")
 public class UserRequest {
@@ -30,13 +35,13 @@ public class UserRequest {
     /**
      * Оператор тех-поддержки, прикрепленный к обращению
      */
-    @ManyToOne(optional = true, fetch = FetchType.LAZY)
+    @ManyToOne(optional = true, fetch = FetchType.EAGER)
     private User operator;
 
     /**
      * Владелец обращения
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private User user;
 
     /**

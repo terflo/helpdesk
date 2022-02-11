@@ -3,6 +3,8 @@ package com.terflo.helpdesk.model.entity;
 import com.terflo.helpdesk.model.entity.enums.MessageStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -14,6 +16,8 @@ import java.util.Date;
  */
 @Data
 @Entity
+@Transactional
+@NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "messages")
 public class Message {
@@ -23,19 +27,19 @@ public class Message {
      */
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * Отправитель сообщения
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private User sender;
 
     /**
      * Запрос пользователя, к которому относится сообщение
      */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     private UserRequest userRequest;
 
     /**

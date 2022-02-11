@@ -30,7 +30,7 @@ public class UserRequestService {
      * @return список запросов пользователя
      * @throws UserRequestNotFoundException возникает при ненахождении запросов пользователя
      */
-    public List<UserRequest> findUserRequestsByUser(User user) throws UserRequestNotFoundException {
+    public List<UserRequest> findAllUserRequestsByUser(User user) throws UserRequestNotFoundException {
         List<UserRequest> userRequests = userRequestRepository.findAllByUser(user);
         if(userRequests.isEmpty())
             throw new UserRequestNotFoundException("Запросов пользователя не нашлось");
@@ -72,7 +72,9 @@ public class UserRequestService {
      * @throws UserRequestNotFoundException возникает при ненахождении запроса пользователя
      */
     public UserRequest findUserRequestByID(Long id) throws UserRequestNotFoundException {
-        return userRequestRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("Запрос пользователя не найден"));
+        return userRequestRepository.
+                findById(id).
+                orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не найден"));
     }
 
     /**
@@ -84,17 +86,15 @@ public class UserRequestService {
     }
 
     /**
-     * Метод удаляет запрос пользователя из базы данных
+     * Метод изменяет статус запроса пользователя на "закрыто" из базы данных
      * @param id уникальный индификатор запроса пользователя
      * @throws UserRequestNotFoundException возникает при ненахождении запроса пользователя в базе данных
      */
     @Transactional
     public void closeUserRequestByID(Long id) throws UserRequestNotFoundException {
-        Optional<UserRequest> userRequest = userRequestRepository.findById(id);
-        if(!userRequest.isPresent())
-            throw new UserRequestNotFoundException("Запрос пользователя не найден");
-        else {
-            userRequest.get().setStatus(RequestStatus.CLOSED);
-        }
+        userRequestRepository
+                .findById(id)
+                .orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"))
+                .setStatus(RequestStatus.CLOSED);
     }
 }

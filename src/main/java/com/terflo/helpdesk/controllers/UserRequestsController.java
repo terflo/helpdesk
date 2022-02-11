@@ -2,10 +2,12 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
+import com.terflo.helpdesk.model.entity.dto.UserRequestDTO;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
+import com.terflo.helpdesk.model.factory.UserRequestFactory;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
@@ -41,6 +43,9 @@ public class UserRequestsController {
     @Autowired
     MessageService messageService;
 
+    @Autowired
+    UserRequestFactory userRequestFactory;
+
     /**
      * Контроллер GET-запроса на вывод страницы
      * @param authentication информация о пользователе
@@ -53,7 +58,7 @@ public class UserRequestsController {
 
         try {
             User user = userService.findUserByUsername(authentication.getName());
-            List<UserRequest> userRequests = userRequestService.findUserRequestsByUser(user);
+            List<UserRequest> userRequests = userRequestService.findAllUserRequestsByUser(user);
             model.addAttribute("name", user.getUsername());
             model.addAttribute("requests", userRequests);
         } catch (UserNotFoundException | UserRequestNotFoundException e) {
@@ -127,11 +132,12 @@ public class UserRequestsController {
      * @throws UserRequestNotFoundException возникает при ненахождении запроса пользователя
      */
     @GetMapping("/requests/{id}")
-    public String showRequest(@PathVariable(value = "id") Long id, Model model) throws UserRequestNotFoundException {
+    public String showRequest(@PathVariable(value = "id") Long id, Model model, Authentication authentication) throws UserRequestNotFoundException, UserNotFoundException {
 
         UserRequest userRequest = userRequestService.findUserRequestByID(id);
 
-        model.addAttribute("userRequestID", userRequest);
+        model.addAttribute("userRequest", userRequestFactory.convertToUserRequestDTO(userRequest));
+        model.addAttribute("senderID", userService.findUserByUsername(authentication.getName()).getId());
 
         //Если сообщений в запросе пользователя не найдуется, то исключение проигнорируется и сообщения не будут выводится
         try {

@@ -7,6 +7,8 @@ import com.terflo.helpdesk.model.responses.RegistrationResponse;
 import com.terflo.helpdesk.model.services.UserService;
 import com.terflo.helpdesk.utils.RegexUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -97,7 +99,7 @@ public class RegistrationController {
      */
     @RequestMapping(method = RequestMethod.POST, value = "/api/checkRegistrationData")
     @ResponseBody
-    public RegistrationResponse checkRegistrationData(@RequestBody RegistrationRequest request) {
+    public ResponseEntity<RegistrationResponse> checkRegistrationData(@RequestBody RegistrationRequest request) {
 
         RegistrationResponse response = new RegistrationResponse();
 
@@ -144,6 +146,6 @@ public class RegistrationController {
             }
         }
 
-        return response;
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

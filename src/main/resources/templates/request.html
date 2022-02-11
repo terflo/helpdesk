@@ -15,8 +15,8 @@
         <script th:src="@{../js/stomp.js}" rel="script" type="text/javascript"></script>
 
         <script th:inline="javascript">
-            /*let requestID = [[${userRequestID}]];
-            let senderID = [[${senderID}]];*/
+            let requestID = [[${userRequest.id}]];
+            let senderID = [[${senderID}]];
         </script>
     </head>
     <body>
