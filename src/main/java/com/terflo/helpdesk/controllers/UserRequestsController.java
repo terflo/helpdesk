@@ -2,17 +2,13 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
-import com.terflo.helpdesk.model.entity.dto.UserRequestDTO;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
-import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
-import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
-import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
+import com.terflo.helpdesk.model.exceptions.*;
 import com.terflo.helpdesk.model.factory.MessageFactory;
 import com.terflo.helpdesk.model.factory.UserRequestFactory;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -32,23 +28,23 @@ import java.util.List;
 @Controller
 public class UserRequestsController {
 
-    /**
-     * Сервис для работы с пользователями
-     */
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    UserRequestService userRequestService;
+    private final UserRequestService userRequestService;
 
-    @Autowired
-    MessageService messageService;
+    private final MessageService messageService;
 
-    @Autowired
-    UserRequestFactory userRequestFactory;
+    private final UserRequestFactory userRequestFactory;
 
-    @Autowired
-    MessageFactory messageFactory;
+    private final MessageFactory messageFactory;
+
+    public UserRequestsController(UserService userService, UserRequestService userRequestService, MessageService messageService, UserRequestFactory userRequestFactory, MessageFactory messageFactory) {
+        this.userService = userService;
+        this.userRequestService = userRequestService;
+        this.messageService = messageService;
+        this.userRequestFactory = userRequestFactory;
+        this.messageFactory = messageFactory;
+    }
 
     /**
      * Контроллер GET-запроса на вывод страницы
@@ -58,16 +54,11 @@ public class UserRequestsController {
      * @return название страницы
      */
     @GetMapping("/requests")
-    public String requests(Authentication authentication, Model model) throws AccessDeniedException {
-
-        try {
-            User user = userService.findUserByUsername(authentication.getName());
-            List<UserRequest> userRequests = userRequestService.findAllUserRequestsByUser(user);
-            model.addAttribute("name", user.getUsername());
-            model.addAttribute("requests", userRequests);
-        } catch (UserNotFoundException e) {
-            throw new AccessDeniedException(e.getMessage());
-        }
+    public String requests(Authentication authentication, Model model) throws UserNotFoundException {
+        User user = userService.findUserByUsername(authentication.getName());
+        List<UserRequest> userRequests = userRequestService.findAllUserRequestsByUser(user);
+        model.addAttribute("name", user.getUsername());
+        model.addAttribute("requests", userRequestFactory.convertToUserRequestDTO(userRequests));
         return "requests";
     }
 
@@ -81,6 +72,20 @@ public class UserRequestsController {
     }
 
     /**
+     * Контроллер GET-запроса на принятия курирования запроса пользователя оператором
+     * @param id индификатор запроса пользователя
+     * @param authentication данные аунтефикации клиента
+     * @return результат запроса
+     */
+    @PostMapping("/requests/accept/{id}")
+    public String acceptRequest(@PathVariable(value = "id") Long id, Authentication authentication) throws UserRequestAlreadyHaveOperatorException, UserRequestNotFoundException, UserNotFoundException, UserRequestClosedException {
+
+        User operator = userService.findUserByUsername(authentication.getName());
+        userRequestService.acceptRequest(id, operator);
+        return("redirect:/requests/free");
+    }
+
+    /**
      * Контроллер GET-запроса на вывод страницы свободных запросов (без операторов)
      * @param model еременные для отрисовки страницы
      * @return название страницы
@@ -89,6 +94,21 @@ public class UserRequestsController {
     public String freeRequests(Model model) {
         model.addAttribute("requests", userRequestService.findAllNonOperatorRequests());
         return "free-requests";
+    }
+
+    /**
+     * Контроллер GET-запроса для отображения курируемых запросов пользователей
+     * @param model переменные для отображения страницы
+     * @param authentication данные аунтификации пользователя
+     * @return страница с списком курируемых запросов
+     * @throws UserNotFoundException возникает при ненахождении пользователя
+     */
+    @GetMapping("/requests/supervised")
+    public String supervisedRequests(Model model, Authentication authentication) throws UserNotFoundException {
+        User operator = userService.findUserByUsername(authentication.getName());
+        model.addAttribute("requests", userRequestService.findUserRequestsByOperator(operator));
+        model.addAttribute("name", operator.getUsername());
+        return "supervised";
     }
 
     /**

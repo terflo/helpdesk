@@ -8,7 +8,7 @@ import java.util.Date;
 /**
  * @author Danil Krivoschiokov
  * @version 1.0
- * Сущность решения какой-либо проблемы
+ * Сущность решения какой-либо проблемы (частые вопросы)
  */
 @Data
 @Entity

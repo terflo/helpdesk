@@ -26,14 +26,17 @@ public class RegistrationController {
     /**
      * Утилита для проверки строк через регулярные выражения
      */
-    @Autowired
-    RegexUtil regexUtil;
+    private final RegexUtil regexUtil;
 
     /**
      * Сервис для работы с пользователями
      */
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public RegistrationController(RegexUtil regexUtil, UserService userService) {
+        this.regexUtil = regexUtil;
+        this.userService = userService;
+    }
 
     /**
      * Контроллер страницы регистрации (метод GET)

@@ -9,25 +9,55 @@ import lombok.ToString;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * @author Danil Krivoschiokov
+ * @version 1.0
+ * Сущность для транспортировки информации о запросе пользователя по сети
+ * (Шаблон Data Transfer Object)
+ */
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserRequestDTO implements Serializable {
 
+    /**
+     * ID запроса
+     */
     public Long id;
 
-    public Long operator;
+    /**
+     * Оператор запроса
+     */
+    public UserDTO operator;
 
-    public Long user;
+    /**
+     * Создать запроса
+     */
+    public UserDTO user;
 
+    /**
+     * Статус запроса
+     */
     public RequestStatus status;
 
+    /**
+     * Приоритет запроса
+     */
     public PriorityStatus priority;
 
+    /**
+     * Имя запроса
+     */
     public String name;
 
+    /**
+     * Описание запроса
+     */
     public String description;
 
+    /**
+     * Дата создания запроса
+     */
     public Date date;
 
 }

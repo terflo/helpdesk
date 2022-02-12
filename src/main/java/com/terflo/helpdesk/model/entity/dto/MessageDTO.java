@@ -8,6 +8,12 @@ import lombok.ToString;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * @author Danil Krivoschiokov
+ * @version 1.0
+ * Сущность для транспортировки информации о сообщении по сети
+ * (Шаблон Data Transfer Object)
+ */
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor

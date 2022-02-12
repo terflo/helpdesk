@@ -27,11 +27,11 @@
             </thead>
             <tbody th:if="not ${requests.empty}" th:each="request : ${requests}">
                 <tr>
-                    <td th:text="${request.id}"></td>
-                    <td th:text="${request.name}"></td>
-                    <td th:text="${request.status}"></td>
-                    <td th:text="${request.priority}"></td>
-                    <td th:text="${request.operator}"></td>
+                    <td th:text="${request?.id}"></td>
+                    <td th:text="${request?.name}"></td>
+                    <td th:text="${request?.status}"></td>
+                    <td th:text="${request?.priority}"></td>
+                    <td th:text="${request?.operator?.username}"></td>
                     <td><a th:href="@{/requests/} + ${request.id}">Просмотреть</a></td>
                     <td><a th:href="@{/requests/close/} + ${request.id}">Завершить</a></td>
                 </tr>

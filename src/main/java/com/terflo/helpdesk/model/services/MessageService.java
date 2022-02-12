@@ -6,7 +6,6 @@ import com.terflo.helpdesk.model.entity.enums.MessageStatus;
 import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.MessageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,11 +21,14 @@ public class MessageService {
     /**
      * Репозиторий сообщений
      */
-    @Autowired
-    private MessageRepository messageRepository;
+    private final MessageRepository messageRepository;
 
-    @Autowired
-    private UserRequestService userRequestService;
+    private final UserRequestService userRequestService;
+
+    public MessageService(MessageRepository messageRepository, UserRequestService userRequestService) {
+        this.messageRepository = messageRepository;
+        this.userRequestService = userRequestService;
+    }
 
     /**
      * Метод для подсчёта кол-ва новых сообщний

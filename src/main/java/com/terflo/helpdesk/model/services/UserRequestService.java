@@ -3,15 +3,15 @@ package com.terflo.helpdesk.model.services;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
+import com.terflo.helpdesk.model.exceptions.UserRequestAlreadyHaveOperatorException;
+import com.terflo.helpdesk.model.exceptions.UserRequestClosedException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.UserRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author Danil Krivoschiokov
@@ -41,18 +41,27 @@ public class UserRequestService {
         return userRequestRepository.findAllByOperator(null);
     }
 
+    public void acceptRequest(Long id, User operator) throws UserRequestNotFoundException, UserRequestAlreadyHaveOperatorException, UserRequestClosedException {
+        UserRequest userRequest = userRequestRepository.findById(id).orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"));
+
+        if(userRequest.getStatus() == RequestStatus.CLOSED)
+            throw new UserRequestClosedException("Данный запрос уже закрыт");
+
+        if(userRequest.getOperator() == null) {
+            userRequest.setOperator(operator);
+        } else {
+            throw new UserRequestAlreadyHaveOperatorException("Данный запрос уже имеет оператора");
+        }
+        userRequestRepository.save(userRequest);
+    }
+
     /**
      * Метод поиска всех запросов пользователей, который решает данные оператор
      * @param operator оператор, который прикреплен к запросом
      * @return список всех запросов связанные с указанным оператором
-     * @throws UserRequestNotFoundException возникает при ненахождении запросов пользователей
      */
-    public List<UserRequest> findUserRequestsByOperator(User operator) throws UserRequestNotFoundException {
-        List<UserRequest> userRequests = userRequestRepository.findAllByOperator(operator);
-        if(userRequests.isEmpty())
-            throw new UserRequestNotFoundException("Запросы решаемые оператором не нашлись");
-        else
-            return userRequests;
+    public List<UserRequest> findUserRequestsByOperator(User operator) {
+        return userRequestRepository.findAllByOperator(operator);
     }
 
     /**

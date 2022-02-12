@@ -21,17 +21,26 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Date;
 
+/**
+ * @author Danil Krivoschiokov
+ * @version 1.2
+ * Контроллер чата для общения пользователей в запросах
+ * в том числе по STOMP поверх SockJS протоколу
+ */
 @Controller
 public class ChatController {
 
-    @Autowired
-    private MessageService messageService;
+    private final MessageService messageService;
 
-    @Autowired
-    private MessageFactory messageFactory;
+    private final MessageFactory messageFactory;
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
+    private final SimpMessagingTemplate messagingTemplate;
+
+    public ChatController(MessageService messageService, MessageFactory messageFactory, SimpMessagingTemplate messagingTemplate) {
+        this.messageService = messageService;
+        this.messageFactory = messageFactory;
+        this.messagingTemplate = messagingTemplate;
+    }
 
     /**
      * Метод обработки входящего на сервер сообщения от пользователей

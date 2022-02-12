@@ -29,20 +29,23 @@ public class UserService implements UserDetailsService {
     /**
      * Репозиторий пользователей
      */
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     /**
      * Репозиторий ролей
      */
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
     /**
      * Кодировщик паролей
      */
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     /**
      * Функция поиска пользователя по индификатору
@@ -113,6 +116,24 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    /**
+     * Метод обновления данных пользователя в базе
+     * @param user обновляемый пользователь
+     * @throws UserNotFoundException возникает при ненахождении пользователя в базе данных
+     */
+    @Transactional
+    public void updateUser(User user) throws UserNotFoundException {
+        if(userRepository.findById(user.getId()).isPresent())
+            userRepository.save(user);
+        else
+            throw new UserNotFoundException("Пользователь не найден");
+    }
+
+    /**
+     * Метод удаляет пользователя из базы данных
+     * @param id уникальный индификатор пользователя
+     * @throws UserNotFoundException возникает при ненахождении пользователя в базе данных
+     */
     @Transactional
     public void deleteUserById(Long id) throws UserNotFoundException {
         if (!userRepository.findById(id).isPresent()) {
@@ -121,6 +142,11 @@ public class UserService implements UserDetailsService {
         userRepository.deleteById(id);
     }
 
+    /**
+     * Метод удаляет пользователя из базы данных
+     * @param username имя пользователя
+     * @throws UserNotFoundException возникает при ненахождении пользователя в базе данных
+     */
     @Transactional
     public void deleteUserByUsername(String username) throws UserNotFoundException {
         if (!userRepository.findByUsername(username).isPresent()) {
@@ -131,7 +157,6 @@ public class UserService implements UserDetailsService {
 
     /**
      * Функция поиска пользователя по имени
-     *
      * @param s имя пользователя
      * @return найденный пользователь
      * @throws UsernameNotFoundException возникает при ненахождения пользователя в базе данных

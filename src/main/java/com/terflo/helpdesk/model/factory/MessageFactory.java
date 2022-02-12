@@ -20,11 +20,14 @@ import java.util.List;
 @Component
 public class MessageFactory {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    UserRequestService userRequestService;
+    private final UserRequestService userRequestService;
+
+    public MessageFactory(UserService userService, UserRequestService userRequestService) {
+        this.userService = userService;
+        this.userRequestService = userRequestService;
+    }
 
     public Message convertToMessage(MessageDTO messageDTO) throws UserNotFoundException, UserRequestNotFoundException {
         return new Message(

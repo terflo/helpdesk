@@ -5,7 +5,6 @@
         <meta charset="UTF-8" content="text/html">
         <title>Пользователи</title>
         <link th:href="@{../css/bootstrap.css}" rel="stylesheet" type="text/css"/>
-        <link th:href="@{../css/users.css}" rel="stylesheet" type="text/css"/>
         <script th:src="@{../js/jQuery.js}" rel="script" type="text/javascript"></script>
     </head>
 
@@ -43,12 +42,12 @@
                                         <td th:text="${user?.locked}"></td>
                                         <td>
                                             <form th:method="get" th:action="@{/admin/users/} + ${user?.id}">
-                                                <input class="panel-button" type="image" th:src="@{../img/loupe.png}" alt="">
+                                                <input style="width: 25%" class="panel-button" type="image" th:src="@{../img/loupe.png}" alt="">
                                             </form>
                                         </td>
                                         <td>
                                             <form th:method="post" th:action="@{/admin/deleteUser/} + ${user?.id}">
-                                                <input class="panel-button" type="image" th:src="@{../img/trash.png}" alt="">
+                                                <input style="width: 25%" class="panel-button" type="image" th:src="@{../img/trash.png}" alt="">
                                             </form>
                                         </td>
                                     </tr>

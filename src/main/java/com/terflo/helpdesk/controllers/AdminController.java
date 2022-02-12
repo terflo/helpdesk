@@ -2,7 +2,6 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,13 +16,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Controller
 public class AdminController {
 
-    @Autowired
-    UserService userService;
+    private final UserService userService;
+
+    public AdminController(UserService userService) {
+        this.userService = userService;
+    }
 
     /**
      * Mapping для вывода страницы админ-панели
-     * @param model
-     * @return
+     * @param model переменные для отрисовки страницы
+     * @return страница админ-панели
      */
     @GetMapping("/admin")
     public String admin(Model model) {
@@ -32,8 +34,8 @@ public class AdminController {
 
     /**
      * Mapping для вывода списка всех пользователей
-     * @param model
-     * @return
+     * @param model переменные для отрисовки страницы
+     * @return страница с списком пользователей
      */
     @GetMapping("/admin/users")
     public String getUsers(Model model) {
@@ -44,8 +46,8 @@ public class AdminController {
     /**
      * Mapping для вывода конкретной информации по пользователю
      * @param id уникальный индификатор пользователя
-     * @param model
-     * @return
+     * @param model переменные для отрисовки страницы
+     * @return страница с информацией по конкретному пользователю
      */
     @GetMapping("/admin/users/{id}")
     public String getUserDetail(@PathVariable(value = "id") Long id, Model model) {
@@ -61,8 +63,8 @@ public class AdminController {
     /**
      * Mapping для удаления пользователя из базы методом post
      * @param id уникальный индификатор пользователя
-     * @param model
-     * @return
+     * @param model переменные для отрисовки страницы
+     * @return возврат на страницу с списком пользователей
      */
     @PostMapping("/admin/deleteUser/{id}")
     public String deleteUser(@PathVariable(value = "id") Long id, Model model) {

@@ -51,7 +51,7 @@
                         </div>
                         <div th:case="*" class="container">
                             <img th:src="@{../img/support.png}" alt="Avatar" style="width:100%;">
-                            <p th:text="${message?.message}"></p>
+                            <p style="text-align: right" th:text="${message?.message}"></p>
                             <span th:text="${#dates.format(message?.date, 'dd.MM.yyyy HH:mm')}" class="time-right"></span>
                         </div>
                     </div>

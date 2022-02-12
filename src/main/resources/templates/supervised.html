@@ -6,7 +6,9 @@
     <link th:href="@{../css/requests.css}" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<h1 th:text="'Cвободные обращения'"></h1>
+<h1 th:text="'Курируемые обращения пользователем ' + ${name}"></h1>
+
+<a th:href="@{/requests/add}">Добавить обращение</a>
 
 <br>
 <br>
@@ -18,18 +20,20 @@
         <th>Наименование</th>
         <th>Статус</th>
         <th>Приоритет</th>
+        <th>Оператор</th>
         <th></th>
         <th></th>
     </tr>
     </thead>
     <tbody th:if="not ${requests.empty}" th:each="request : ${requests}">
     <tr>
-        <td th:text="${request.id}"></td>
-        <td th:text="${request.name}"></td>
-        <td th:text="${request.status}"></td>
-        <td th:text="${request.priority}"></td>
+        <td th:text="${request?.id}"></td>
+        <td th:text="${request?.name}"></td>
+        <td th:text="${request?.status}"></td>
+        <td th:text="${request?.priority}"></td>
+        <td th:text="${request?.operator?.username}"></td>
         <td><a th:href="@{/requests/} + ${request.id}">Просмотреть</a></td>
-        <td><form th:method="post" th:action="@{/requests/accept/} + ${request.id}"><input style="width: 5%" class="panel-button" type="image" th:src="@{../img/ok.png}" alt=""></form></td>
+        <td><a th:href="@{/requests/close/} + ${request.id}">Завершить</a></td>
     </tr>
     </tbody>
 </table>
