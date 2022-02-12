@@ -28,14 +28,17 @@ public class UserRequestService {
      * Метод поиска всех запросов созданным пользователем
      * @param user пользователь
      * @return список запросов пользователя
-     * @throws UserRequestNotFoundException возникает при ненахождении запросов пользователя
      */
-    public List<UserRequest> findAllUserRequestsByUser(User user) throws UserRequestNotFoundException {
-        List<UserRequest> userRequests = userRequestRepository.findAllByUser(user);
-        if(userRequests.isEmpty())
-            throw new UserRequestNotFoundException("Запросов пользователя не нашлось");
-        else
-            return userRequests;
+    public List<UserRequest> findAllUserRequestsByUser(User user)  {
+        return userRequestRepository.findAllByUser(user);
+    }
+
+    /**
+     * Метод поиска всех запросов, к которым не привязан оператор
+     * @return список свободных запросов
+     */
+    public List<UserRequest> findAllNonOperatorRequests() {
+        return userRequestRepository.findAllByOperator(null);
     }
 
     /**

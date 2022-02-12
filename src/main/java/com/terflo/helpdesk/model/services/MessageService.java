@@ -55,14 +55,9 @@ public class MessageService {
      * Метод поиска сообщений, находящиеся в запросе пользователя
      * @param userRequest запрос пользователя
      * @return список сообщений
-     * @throws MessageNotFoundException возникает при ненахождении сообщений
      */
-    public List<Message> findMessagesByUserRequest (UserRequest userRequest) throws MessageNotFoundException {
-        List<Message> messages = messageRepository.findAllByUserRequest(userRequest);
-        if(messages.isEmpty())
-            throw new MessageNotFoundException("Сообщения не найдены");
-        else
-            return messages;
+    public List<Message> findMessagesByUserRequest (UserRequest userRequest) {
+        return messageRepository.findAllByUserRequest(userRequest);
     }
 
     /**

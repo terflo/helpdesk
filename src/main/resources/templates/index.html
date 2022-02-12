@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
     <head>
-        <meta charset="UTF-8">
+        <meta charset="UTF-8" content="text/html">
         <title>Главная</title>
+
+
     </head>
     <body>
+        <nav th:insert="blocks/navigation"></nav>
+
         <a th:href="@{/login}">Авторизация</a>
         <br>
         <a th:href="@{/registration}">Регистрация</a>
@@ -12,6 +16,10 @@
         <a th:href="@{/admin}">Админ-панель</a>
         <br>
         <a th:href="@{/requests}">Ваши обращения</a>
+        <br>
+        <a th:href="@{/requests}">Список свободных обращений</a>
+        <br>
+        <a th:href="@{/requests}">Курируемые обращения</a>
         <br>
         <a th:href="@{/logout}">Покинуть сессию</a>
     </body>

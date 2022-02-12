@@ -7,6 +7,7 @@ import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
+import com.terflo.helpdesk.model.factory.MessageFactory;
 import com.terflo.helpdesk.model.factory.UserRequestFactory;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
@@ -46,6 +47,9 @@ public class UserRequestsController {
     @Autowired
     UserRequestFactory userRequestFactory;
 
+    @Autowired
+    MessageFactory messageFactory;
+
     /**
      * Контроллер GET-запроса на вывод страницы
      * @param authentication информация о пользователе
@@ -61,7 +65,7 @@ public class UserRequestsController {
             List<UserRequest> userRequests = userRequestService.findAllUserRequestsByUser(user);
             model.addAttribute("name", user.getUsername());
             model.addAttribute("requests", userRequests);
-        } catch (UserNotFoundException | UserRequestNotFoundException e) {
+        } catch (UserNotFoundException e) {
             throw new AccessDeniedException(e.getMessage());
         }
         return "requests";
@@ -74,6 +78,17 @@ public class UserRequestsController {
     @GetMapping("/requests/add")
     public String requests_add() {
         return "add-request";
+    }
+
+    /**
+     * Контроллер GET-запроса на вывод страницы свободных запросов (без операторов)
+     * @param model еременные для отрисовки страницы
+     * @return название страницы
+     */
+    @GetMapping("/requests/free")
+    public String freeRequests(Model model) {
+        model.addAttribute("requests", userRequestService.findAllNonOperatorRequests());
+        return "free-requests";
     }
 
     /**
@@ -137,12 +152,8 @@ public class UserRequestsController {
         UserRequest userRequest = userRequestService.findUserRequestByID(id);
 
         model.addAttribute("userRequest", userRequestFactory.convertToUserRequestDTO(userRequest));
-        model.addAttribute("senderID", userService.findUserByUsername(authentication.getName()).getId());
-
-        //Если сообщений в запросе пользователя не найдуется, то исключение проигнорируется и сообщения не будут выводится
-        try {
-            model.addAttribute("messages", messageService.findMessagesByUserRequest(userRequest));
-        } catch (MessageNotFoundException ignored) {}
+        model.addAttribute("userID", userService.findUserByUsername(authentication.getName()).getId());
+        model.addAttribute("messages", messageFactory.convertToMessageDTO(messageService.findMessagesByUserRequest(userRequest)));
 
         return "request";
     }

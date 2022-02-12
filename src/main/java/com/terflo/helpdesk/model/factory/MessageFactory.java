@@ -4,12 +4,13 @@ import com.terflo.helpdesk.model.entity.Message;
 import com.terflo.helpdesk.model.entity.dto.MessageDTO;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
-import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import java.util.stream.Collectors;
+import java.util.List;
 
 /**
  * @author Danil Krivoschiokov
@@ -18,9 +19,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MessageFactory {
-
-    @Autowired
-    MessageService messageService;
 
     @Autowired
     UserService userService;
@@ -46,6 +44,13 @@ public class MessageFactory {
                 message.getDate(),
                 message.getStatus()
         );
+    }
+
+    public List<MessageDTO> convertToMessageDTO(List<Message> messages) {
+        return messages
+                .stream()
+                .map(this::convertToMessageDTO)
+                .collect(Collectors.toList());
     }
 
 }
