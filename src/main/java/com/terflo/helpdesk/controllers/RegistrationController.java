@@ -6,7 +6,6 @@ import com.terflo.helpdesk.model.requests.RegistrationRequest;
 import com.terflo.helpdesk.model.responses.RegistrationResponse;
 import com.terflo.helpdesk.model.services.UserService;
 import com.terflo.helpdesk.utils.RegexUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -54,6 +53,9 @@ public class RegistrationController {
         /* Список ошибок */
         ArrayList<String> errors = new ArrayList<>();
 
+        if(request.getPassword().trim().isEmpty() || request.getUsername().trim().isEmpty()) {
+            errors.add("Заполните все поля");
+        } else
         /* Работа с паролем */
         if (request.getPassword().length() < 5) {
             errors.add("Пароль слишком короткий");

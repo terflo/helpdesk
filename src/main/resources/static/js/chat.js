@@ -19,8 +19,7 @@ window.onload = function connect() {
     stompClient = Stomp.over(socket);
     stompClient.reconnect_delay = 1000;
     stompClient.connect({}, function(frame) {
-        console.log('Connected: ' + frame);
-        stompClient.subscribe('/requestMessages/' + requestID + '/queue/messages', function(messageOutput) {
+        stompClient.subscribe('/requestMessages/' + request.id + '/queue/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
     });
@@ -37,31 +36,32 @@ function disconnect() {
 /* Функция отправки сообщения */
 function sendMessage() {
     let textField = $("#message")
-    stompClient.send("/app/chat", {},
-        JSON.stringify({
-            'sender': userID,
-            'message': textField.val(),
-            'userRequest': requestID
-        }));
-    textField.val('')
+    if(textField.val().trim() !== "") {
+        stompClient.send("/app/chat", {},
+            JSON.stringify({
+                'sender': user.id,
+                'message': textField.val().trim(),
+                'userRequest': request.id
+            }));
+        textField.val('')
+    }
 }
 
 /* Функция отображения полученого сообщения */
 function showMessageOutput(messageOutput) {
     let message = getMessage(messageOutput['messageID']);
-    console.log(message);
 
     let element;
-    if(message['sender'] !== userID) {
+    if(message['sender'] !== user.id) {
         element = $('<div class="container">')
             .append('<img src="../img/support.png" alt="Avatar" style="width:100%;">')
-            .append('<p>' + message['message'] + '</p>')
-            .append('<span class="time-right">' + $.format.date(new Date(message['date']), "dd.MM.yyyy hh:mm") + '</span>');
+            .append('<p style="text-align: right">' + message['message'] + '</p>')
+            .append('<span class="time-right">' + $.format.date(new Date(message['date']), "dd.MM.yyyy HH:mm") + '</span>');
     } else {
         element = $('<div class="container darker">')
             .append('<img src="../img/support.png" class="right" alt="Avatar" style="width:100%;">')
             .append('<p>' + message['message'] + '</p>')
-            .append('<span class="time-left">' + $.format.date(new Date(message['date']), "dd.MM.yyyy hh:mm") + '</span>');
+            .append('<span class="time-left">' + $.format.date(new Date(message['date']), "dd.MM.yyyy HH:mm") + '</span>');
     }
     $("#message-container").append(element);
     messageContainer.scrollTop = messageContainer.scrollHeight;

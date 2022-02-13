@@ -4,12 +4,13 @@ import com.terflo.helpdesk.model.entity.Message;
 import com.terflo.helpdesk.model.entity.Notification;
 import com.terflo.helpdesk.model.entity.dto.MessageDTO;
 import com.terflo.helpdesk.model.entity.enums.MessageStatus;
+import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.factory.MessageFactory;
 import com.terflo.helpdesk.model.services.MessageService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.terflo.helpdesk.model.services.UserRequestService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -34,11 +35,14 @@ public class ChatController {
 
     private final MessageFactory messageFactory;
 
+    private final UserRequestService userRequestService;
+
     private final SimpMessagingTemplate messagingTemplate;
 
-    public ChatController(MessageService messageService, MessageFactory messageFactory, SimpMessagingTemplate messagingTemplate) {
+    public ChatController(MessageService messageService, MessageFactory messageFactory, UserRequestService userRequestService, SimpMessagingTemplate messagingTemplate) {
         this.messageService = messageService;
         this.messageFactory = messageFactory;
+        this.userRequestService = userRequestService;
         this.messagingTemplate = messagingTemplate;
     }
 
@@ -51,9 +55,19 @@ public class ChatController {
     @MessageMapping("/chat")
     public void processMessage(@Payload MessageDTO messageDTO) throws UserNotFoundException, UserRequestNotFoundException {
 
+        //Если запрос закрыт, то игнорируем
+        if(userRequestService.findUserRequestByID(messageDTO.userRequest).getStatus() == RequestStatus.CLOSED)
+            return;
+
+        //Если сообщение пустое, то игнорируем
+        if(messageDTO.message.trim().isEmpty())
+            return;
+
         messageDTO.date = new Date();
         messageDTO.status = MessageStatus.RECEIVED;
 
+        //Конвертируем сообщение в нормальный вид из DTO вида,
+        //сохраняем в базе данных и отправляем подписчикам уведомление о новом сообщении
         Message message = messageFactory.convertToMessage(messageDTO);
         messageService.saveMessage(message);
         messagingTemplate.convertAndSendToUser(

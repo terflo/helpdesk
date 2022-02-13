@@ -27,8 +27,8 @@
                 <input th:value="${userRequest.priority}" type="text" id="priority" name="priority" class="field-long" readonly/>
             </li>
             <li>
-                <label for="priority">Статус</label>
-                <input th:value="${userRequest.status}" type="text" id="priority" name="priority" class="field-long" readonly/>
+                <label for="status">Статус</label>
+                <input th:value="${userRequest.status}" type="text" id="status" name="priority" class="field-long" readonly/>
             </li>
             <li>
                 <label>Описание проблемы</label>
@@ -44,7 +44,7 @@
             <div class="message-container" id="message-container">
                 <div class="" th:each="message : ${messages}">
                     <div th:switch="${message?.sender}">
-                        <div th:case="${userID}" class="darker container">
+                        <div th:case="${user.id}" class="darker container">
                             <img th:src="@{../img/support.png}" class="right" alt="Avatar" style="width:100%;">
                             <p th:text="${message?.message}"></p>
                             <span th:text="${#dates.format(message?.date, 'dd.MM.yyyy HH:mm')}" class="time-left"></span>
@@ -71,9 +71,13 @@
     <!-- Инициализация переменных и работа с элементами страницы -->
     <script th:inline="javascript">
         const messageContainer = document.getElementById('message-container');
-        const requestID = [[${userRequest.id}]];
-        const userID = [[${userID}]];
+        const request = [[${userRequest}]];
+        const user = [[${user}]];
         messageContainer.scrollTop = messageContainer.scrollHeight;
+        if(request.status === 'CLOSED') {
+            $('#send-button').prop('disabled', true);
+            $('#message').prop('disabled', true);
+        }
     </script>
 
 </html>

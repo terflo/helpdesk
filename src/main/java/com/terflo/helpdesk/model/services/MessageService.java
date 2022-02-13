@@ -37,7 +37,7 @@ public class MessageService {
      */
     public Long countNewMessages(Long userRequestID) throws UserRequestNotFoundException {
         return messageRepository
-                .findAllByUserRequest(userRequestService.findUserRequestByID(userRequestID))
+                .findAllByUserRequestOrderByDate(userRequestService.findUserRequestByID(userRequestID))
                 .stream()
                 .filter((message -> message.getStatus() == MessageStatus.RECEIVED))
                 .count();
@@ -59,7 +59,7 @@ public class MessageService {
      * @return список сообщений
      */
     public List<Message> findMessagesByUserRequest (UserRequest userRequest) {
-        return messageRepository.findAllByUserRequest(userRequest);
+        return messageRepository.findAllByUserRequestOrderByDate(userRequest);
     }
 
     /**

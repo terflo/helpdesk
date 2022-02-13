@@ -1,14 +1,18 @@
 package com.terflo.helpdesk.controllers;
 
+import com.terflo.helpdesk.model.entity.Message;
+import com.terflo.helpdesk.model.entity.Notification;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import com.terflo.helpdesk.model.exceptions.*;
 import com.terflo.helpdesk.model.factory.MessageFactory;
+import com.terflo.helpdesk.model.factory.UserFactory;
 import com.terflo.helpdesk.model.factory.UserRequestFactory;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,14 +41,20 @@ public class UserRequestsController {
 
     private final UserRequestFactory userRequestFactory;
 
+    private final SimpMessagingTemplate messagingTemplate;
+
     private final MessageFactory messageFactory;
 
-    public UserRequestsController(UserService userService, UserRequestService userRequestService, MessageService messageService, UserRequestFactory userRequestFactory, MessageFactory messageFactory) {
+    private final UserFactory userFactory;
+
+    public UserRequestsController(UserService userService, UserRequestService userRequestService, MessageService messageService, UserRequestFactory userRequestFactory, SimpMessagingTemplate messagingTemplate, MessageFactory messageFactory, UserFactory userFactory) {
         this.userService = userService;
         this.userRequestService = userRequestService;
         this.messageService = messageService;
         this.userRequestFactory = userRequestFactory;
+        this.messagingTemplate = messagingTemplate;
         this.messageFactory = messageFactory;
+        this.userFactory = userFactory;
     }
 
     /**
@@ -57,7 +68,7 @@ public class UserRequestsController {
     public String requests(Authentication authentication, Model model) throws UserNotFoundException {
         User user = userService.findUserByUsername(authentication.getName());
         List<UserRequest> userRequests = userRequestService.findAllUserRequestsByUser(user);
-        model.addAttribute("name", user.getUsername());
+        model.addAttribute("user", userFactory.convertToUserDTO(user));
         model.addAttribute("requests", userRequestFactory.convertToUserRequestDTO(userRequests));
         return "requests";
     }
@@ -139,6 +150,7 @@ public class UserRequestsController {
         }
 
         if(errors.isEmpty()) {
+            userRequest.setDate(new Date());
             userRequestService.saveUserRequest(userRequest);
             return "redirect:/requests";
         } else {
@@ -154,8 +166,20 @@ public class UserRequestsController {
      * @return страница с запросами
      */
     @GetMapping("/requests/close/{id}")
-    public String closeRequest(@PathVariable(value = "id") Long id) throws UserRequestNotFoundException {
-        userRequestService.closeUserRequestByID(id);
+    public String closeRequest(@PathVariable(value = "id") Long id, Authentication authentication) throws UserRequestNotFoundException, UserNotFoundException {
+
+        userRequestService.setStatusUserRequestByID(id, RequestStatus.CLOSED);
+
+        User operator = userService.findUserByUsername(authentication.getName());
+        Message message = messageFactory.getCloseRequestMessage(operator, id);
+        messageService.saveMessage(message);
+
+        messagingTemplate.convertAndSendToUser(
+                String.valueOf(id),"/queue/messages",
+                new Notification(
+                        message.getId(),
+                        message.getUserRequest().getId(),
+                        message.getSender().getId()));
         return "redirect:/requests";
     }
 
@@ -170,10 +194,12 @@ public class UserRequestsController {
     public String showRequest(@PathVariable(value = "id") Long id, Model model, Authentication authentication) throws UserRequestNotFoundException, UserNotFoundException {
 
         UserRequest userRequest = userRequestService.findUserRequestByID(id);
+        User user = userService.findUserByUsername(authentication.getName());
+        List<Message> messages = messageService.findMessagesByUserRequest(userRequest);
 
         model.addAttribute("userRequest", userRequestFactory.convertToUserRequestDTO(userRequest));
-        model.addAttribute("userID", userService.findUserByUsername(authentication.getName()).getId());
-        model.addAttribute("messages", messageFactory.convertToMessageDTO(messageService.findMessagesByUserRequest(userRequest)));
+        model.addAttribute("user", userFactory.convertToUserDTO(user));
+        model.addAttribute("messages", messageFactory.convertToMessageDTO(messages));
 
         return "request";
     }

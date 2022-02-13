@@ -41,6 +41,14 @@ public class UserRequestService {
         return userRequestRepository.findAllByOperator(null);
     }
 
+    /**
+     * Метод приявязки запроса к оператору и изменения его статуса
+     * @param id уникальный индификатор запроса
+     * @param operator пользователь системы
+     * @throws UserRequestNotFoundException возникает при ненахождении оператора
+     * @throws UserRequestAlreadyHaveOperatorException возникает при установки оператора к запросу уже имеющий оператора
+     * @throws UserRequestClosedException возникает когда запрос уже закрыл
+     */
     public void acceptRequest(Long id, User operator) throws UserRequestNotFoundException, UserRequestAlreadyHaveOperatorException, UserRequestClosedException {
         UserRequest userRequest = userRequestRepository.findById(id).orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"));
 
@@ -49,6 +57,7 @@ public class UserRequestService {
 
         if(userRequest.getOperator() == null) {
             userRequest.setOperator(operator);
+            userRequest.setStatus(RequestStatus.IN_PROCESS);
         } else {
             throw new UserRequestAlreadyHaveOperatorException("Данный запрос уже имеет оператора");
         }
@@ -98,15 +107,16 @@ public class UserRequestService {
     }
 
     /**
-     * Метод изменяет статус запроса пользователя на "закрыто" из базы данных
+     * Метод изменяет статус запроса пользователя на выбранный
      * @param id уникальный индификатор запроса пользователя
+     * @param status статус запроса пользователя
      * @throws UserRequestNotFoundException возникает при ненахождении запроса пользователя в базе данных
      */
     @Transactional
-    public void closeUserRequestByID(Long id) throws UserRequestNotFoundException {
+    public void setStatusUserRequestByID(Long id, RequestStatus status) throws UserRequestNotFoundException {
         userRequestRepository
                 .findById(id)
                 .orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"))
-                .setStatus(RequestStatus.CLOSED);
+                .setStatus(status);
     }
 }

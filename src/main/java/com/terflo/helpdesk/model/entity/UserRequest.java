@@ -21,7 +21,7 @@ import java.util.Date;
 @Transactional
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "users_requests")
+@Table(name = "requests")
 public class UserRequest {
 
     /**
