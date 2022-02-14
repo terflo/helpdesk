@@ -2,25 +2,68 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
     <head>
         <meta charset="UTF-8" content="text/html">
+        <link th:href="@{css/bootstrap.css}" rel="stylesheet" type="text/css"/>
+        <link th:href="@{css/index.css}" rel="stylesheet" type="text/css"/>
+        <script th:src="@{js/bootstrap.js}" rel="script" type="text/javascript"></script>
         <title>Главная</title>
-
-
     </head>
     <body>
-        <nav th:insert="blocks/navigation"></nav>
+        <div th:insert="blocks/navigation"></div>
+        <section class="py-5 text-center container">
+            <div class="row py-lg-5">
+                <div class="col-lg-6 col-md-8 mx-auto">
+                    <h1 class="font-weight-light">Help Desk</h1>
+                    <p class="lead text-muted">Служба технической поддержки и помощи пользователям</p>
+                    <p>
+                        <a th:href="@{/requests/add}" class="btn btn-primary my-2">Задать вопрос</a>
+                    </p>
+                </div>
+            </div>
+        </section>
 
-        <a th:href="@{/login}">Авторизация</a>
-        <br>
-        <a th:href="@{/registration}">Регистрация</a>
-        <br>
-        <a th:href="@{/admin}">Админ-панель</a>
-        <br>
-        <a th:href="@{/requests}">Ваши обращения</a>
-        <br>
-        <a th:href="@{/requests/free}">Список свободных обращений</a>
-        <br>
-        <a th:href="@{/requests/supervised}">Курируемые обращения</a>
-        <br>
-        <a th:href="@{/logout}">Покинуть сессию</a>
+        <div class="accordion" id="accordionExample">
+            <h4 class="h4">Часто задаваемые вопросы:</h4>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                        Пропали значки и интерфейс с рабочего стола Windows 10
+                    </button>
+                </h2>
+                <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        Для того, чтобы снова запустить explorer.exe (кстати, он может перезапуститься автоматически), нажмите клавиши Ctrl + Shift + Esc, должен будет открыться диспетчер задач. В главном меню диспетчера задач выберите «Файл» — «Новая задача» (Или «Запустить новую задачу» в последних версиях Windows) и введите explorer.exe, после чего нажмите «Ок». Рабочий стол Windows, проводник и все его элементы снова загрузятся.
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingTwo">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                        Вопрос #2
+                    </button>
+                </h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        Ответ на вопрос #2
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingThree">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        Вопрос #3
+                    </button>
+                </h2>
+                <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        Ответ на вопрос #3
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div th:insert="blocks/footer"></div>
     </body>
 </html>

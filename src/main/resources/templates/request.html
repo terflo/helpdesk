@@ -4,9 +4,11 @@
         <meta charset="UTF-8">
         <title>Запрос</title>
 
+        <link th:href="@{../css/bootstrap.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{../css/requests.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{../css/chat.css}" rel="stylesheet" type="text/css"/>
 
+        <script th:src="@{../js/bootstrap.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{../js/sockjs.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{../js/jQuery.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{../js/dateformat.js}" rel="script" type="text/javascript"></script>
@@ -14,6 +16,7 @@
         <script th:src="@{../js/chat.js}" rel="script" type="text/javascript"></script>
     </head>
     <body>
+        <div th:insert="blocks/navigation"></div>
         <ul class="form-style-1">
             <li>
                 <label th:text="'Обращение №' + ${userRequest.id}"></label>
@@ -67,7 +70,7 @@
             </div>
         </div>
     </body>
-
+    <div th:insert="blocks/footer"></div>
     <!-- Инициализация переменных и работа с элементами страницы -->
     <script th:inline="javascript">
         const messageContainer = document.getElementById('message-container');

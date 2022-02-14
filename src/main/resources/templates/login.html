@@ -1,46 +1,46 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 
-<head>
-    <meta charset="UTF-8" content="text/html">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
-    <title>Авторизация</title>
-    <link th:href="@{css/login.css}" rel="stylesheet" type="text/css"/>
-    <link th:href="@{css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
+    <head>
+        <meta charset="UTF-8" content="text/html">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+        <title>Авторизация</title>
+        <link th:href="@{css/login.css}" rel="stylesheet" type="text/css"/>
+        <link th:href="@{css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
 
-</head>
+    </head>
 
-<main class="login-form">
-    <section class="login-clean">
-        <form th:action="@{/login}" method="post">
+    <main class="login-form">
+        <section class="login-clean">
+            <form th:action="@{/login}" method="post">
 
-            <div th:if="${param.error}" class="alert alert-danger" role="alert">
-                <span>Неверный логин или пароль</span>
-            </div>
+                <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                    <span>Неверный логин или пароль</span>
+                </div>
 
-            <div th:if="${param.logout}" class="alert alert-danger" role="alert">
-                <span>Вы покинули сессию</span>
-            </div>
+                <div th:if="${param.logout}" class="alert alert-danger" role="alert">
+                    <span>Вы покинули сессию</span>
+                </div>
 
-            <h2 class="visually-hidden">Авторизация</h2>
-            <div class="illustration">
-                <img class="img-thumbnail" th:src="@{img/login.png}">
-            </div>
+                <h2 class="visually-hidden">Авторизация</h2>
+                <div class="illustration">
+                    <img class="img-thumbnail" th:src="@{img/login.png}">
+                </div>
 
-            <div class="mb-3">
-                <input class="form-control" type="text" id="username" name="username" placeholder="Имя пользователя" required/>
-            </div>
+                <div class="mb-3">
+                    <input class="form-control" type="text" id="username" name="username" placeholder="Имя пользователя" required/>
+                </div>
 
-            <div class="mb-3">
-                <input class="form-control" type="password" id="password" name="password" placeholder="Пароль" required/>
-            </div>
+                <div class="mb-3">
+                    <input class="form-control" type="password" id="password" name="password" placeholder="Пароль" required/>
+                </div>
 
-            <div class="mb-3">
-                <button class="btn btn-primary d-block w-100" type="submit">Войти</button>
-            </div>
+                <div class="mb-3">
+                    <button class="btn btn-primary d-block w-100" type="submit">Войти</button>
+                </div>
 
-            <a class="registration" th:href="@{/registration}">Регистрация</a>
-        </form>
-    </section>
-</main>
+                <a class="registration" th:href="@{/registration}">Регистрация</a>
+            </form>
+        </section>
+    </main>
 </html>

@@ -6,6 +6,7 @@
     <link th:href="@{../css/requests.css}" rel="stylesheet" type="text/css"/>
 </head>
 <body>
+<div th:insert="blocks/navigation"></div>
 <h1 th:text="'Курируемые обращения пользователем ' + ${name}"></h1>
 
 <a th:href="@{/requests/add}">Добавить обращение</a>
@@ -37,6 +38,6 @@
     </tr>
     </tbody>
 </table>
-
+<div th:insert="blocks/footer"></div>
 </body>
 </html>

@@ -1,10 +1,46 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 
-
-    <div th:fragment="navigation">
-
+    <div class="navigation" th:fragment="navigation">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <div class="container-fluid">
+                <img class="img-fluid" th:src="@{~/img/help.png}" style="max-height: 2vw; margin-right: 1vw">
+                <span class="navbar-brand mb-0 h1">Help Desk</span>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarText">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" th:href="@{~/}">На главную</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{~/requests}">Ваши обращения</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{~/requests/free}">Свободеные обращения</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{~/requests/supervised}">Курируемые обращения</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{~/admin}">Панель управления</a>
+                        </li>
+                    </ul>
+                    <div class="dropdown">
+                        <button class="nav-item btn btn-bd-light dropdown-toggle" id="navbarDropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="d-none d-lg-inline text-white">Мой аккаунт</span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <li><a class="dropdown-item" href="#">Профиль</a></li>
+                            <li><a class="dropdown-item" href="#">Настройки</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{~/logout}">Выйти</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
     </div>
-
 
 </html>
