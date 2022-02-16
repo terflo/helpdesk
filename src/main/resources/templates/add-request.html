@@ -3,86 +3,47 @@
     <head>
         <meta charset="UTF-8">
         <title>Создать запрос</title>
-        <link th:href="@{../css/add-form.css}" rel="stylesheet" type="text/css"/>
-        <link th:href="@{../css/bootstrap.css}" rel="stylesheet" type="text/css"/>
+        <link th:href="@{~/css/add-form.css}" rel="stylesheet" type="text/css"/>
+        <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
+        <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
     </head>
     <body>
 
-    <div th:insert="blocks/navigation"></div>
+        <div th:insert="blocks/navigation"></div>
 
-    <main class="login-form">
-        <section class="login-clean">
-            <form th:action="@{/requests/add}" method="post" style="max-width: 40em">
-                <h4 class="h4 text-center">Создание обращения</h4>
-                <div class="illustration">
-                    <img class="img-fluid" th:src="@{../img/request.png}" style="max-width: 20vw; max-height: 15vw">
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <label for="name">Название обращения</label>
-                        <input th:value="${userRequest?.name}" class="form-control" type="text" id="name" name="name" placeholder="Название обращения" required/>
+        <main class="login-form">
+            <section class="login-clean">
+                <form th:action="@{/requests/add}" method="post" style="max-width: 40em">
+                    <h4 class="h4 text-center">Создание обращения</h4>
+                    <div class="illustration">
+                        <img class="img-fluid" th:src="@{~/img/request.png}" style="max-width: 20vw; max-height: 15vw">
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <label for="name">Название обращения</label>
+                            <input th:value="${userRequest?.name}" class="form-control" type="text" id="name" name="name" placeholder="Название обращения" required/>
+                        </div>
+
+                        <div class="col">
+                            <label for="priority">Приоритет</label>
+                            <select id="priority" name="priority" class="field-select form-select" required style="padding-bottom: 10px">
+                                <option value="LOW">Низкий</option>
+                                <option value="NORMAL">Нормальный</option>
+                                <option value="MAX">Высокий</option>
+                            </select>
+                        </div>
+                        <br><br>
+                        <div class="row" style="padding-top: 1em">
+                            <label class="form-label" for="description">Описание проблемы</label>
+                            <textarea th:value="${userRequest?.description}" name="description" id="description" class="form-control" style="resize: none; margin-left: 10px; height: auto" rows="5"></textarea>
+                        </div>
                     </div>
 
-                    <div class="col">
-                        <label for="priority">Приоритет</label>
-                        <select id="priority" name="priority" class="field-select form-select" required style="padding-bottom: 10px">
-                            <option value="LOW">Низкий</option>
-                            <option value="NORMAL">Нормальный</option>
-                            <option value="MAX">Высокий</option>
-                        </select>
+                    <div class="mb-3">
+                        <button class="btn btn-primary d-block w-100" type="submit">Отправить</button>
                     </div>
-                    <br><br>
-                    <div class="row" style="padding-top: 1em">
-                        <label class="form-label" for="description">Описание проблемы</label>
-                        <textarea th:value="${userRequest?.description}" name="description" id="description" class="form-control" style="resize: none; margin-left: 10px; height: auto" rows="5"></textarea>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <button class="btn btn-primary d-block w-100" type="submit">Отправить</button>
-                </div>
-            </form>
-        </section>
-    </main>
-
-
-
-
-
-
-        <!--
-        <form th:action="@{/requests/add}" method="post">
-            <ul class="form-style-1">
-                <li>
-                    <label>Название проблемы <span class="required">*</span></label>
-                    <input th:value="${userRequest?.name}" type="text" name="name" class="field-long" />
-                </li>
-                <li>
-                    <label>Приоритет</label>
-                    <label>
-                        <select name="priority" class="field-select">
-                            <option value="LOW">Низкий</option>
-                            <option value="NORMAL">Нормальный</option>
-                            <option value="MAX">Высокий</option>
-                        </select>
-                    </label>
-                </li>
-                <li>
-                    <label>Описание проблемы <span class="required">*</span></label>
-                    <label for="description"></label><textarea th:value="${userRequest?.description}" name="description" id="description" class="field-long field-textarea"></textarea>
-                </li>
-                <li>
-                    <input type="submit" value="Отправить" />
-                </li>
-            </ul>
-        </form>
-
-        <section th:if="not ${errors.empty}" th:each="error : ${errors}">
-            <div class="mb-3 alert alert-danger hidden" role="alert">
-                <span th:text="${error}"></span>
-            </div>
-        </section>
-        -->
-
+                </form>
+            </section>
+        </main>
     </body>
 </html>

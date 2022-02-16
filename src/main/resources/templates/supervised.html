@@ -1,43 +1,42 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Запросы</title>
-    <link th:href="@{../css/requests.css}" rel="stylesheet" type="text/css"/>
-</head>
-<body>
-<div th:insert="blocks/navigation"></div>
-<h1 th:text="'Курируемые обращения пользователем ' + ${name}"></h1>
-
-<a th:href="@{/requests/add}">Добавить обращение</a>
-
-<br>
-<br>
-
-<table class="table">
-    <thead>
-    <tr>
-        <th>Номер</th>
-        <th>Наименование</th>
-        <th>Статус</th>
-        <th>Приоритет</th>
-        <th>Оператор</th>
-        <th></th>
-        <th></th>
-    </tr>
-    </thead>
-    <tbody th:if="not ${requests.empty}" th:each="request : ${requests}">
-    <tr>
-        <td th:text="${request?.id}"></td>
-        <td th:text="${request?.name}"></td>
-        <td th:text="${request?.status}"></td>
-        <td th:text="${request?.priority}"></td>
-        <td th:text="${request?.operator?.username}"></td>
-        <td><a th:href="@{/requests/} + ${request.id}">Просмотреть</a></td>
-        <td><a th:href="@{/requests/close/} + ${request.id}">Завершить</a></td>
-    </tr>
-    </tbody>
-</table>
-<div th:insert="blocks/footer"></div>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title>Запросы</title>
+        <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
+        <link th:href="@{../css/requests.css}" rel="stylesheet" type="text/css"/>
+        <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
+        <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
+    </head>
+    <body>
+        <div th:insert="blocks/navigation"></div>
+        <main style="min-height: 38vw">
+            <h1 th:text="'Курируемые обращения пользователем ' + ${name}"></h1>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Номер</th>
+                        <th>Наименование</th>
+                        <th>Статус</th>
+                        <th>Приоритет</th>
+                        <th>Оператор</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody th:if="not ${#lists.isEmpty(requests)}" th:each="request : ${requests}">
+                    <tr>
+                        <td th:text="${request?.id}"></td>
+                        <td th:text="${request?.name}"></td>
+                        <td th:text="${request?.status}"></td>
+                        <td th:text="${request?.priority}"></td>
+                        <td th:text="${request?.operator?.username}"></td>
+                        <td><a th:href="@{/requests/} + ${request.id}">Просмотреть</a></td>
+                        <td><a th:href="@{/requests/close/} + ${request.id}">Завершить</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+        <div th:insert="blocks/footer"></div>
+    </body>
 </html>

@@ -18,7 +18,7 @@ window.onload = function connect() {
     let socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
     stompClient.reconnect_delay = 1000;
-    stompClient.connect({}, function(frame) {
+    stompClient.connect({}, function() {
         stompClient.subscribe('/requestMessages/' + request.id + '/queue/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
@@ -39,7 +39,7 @@ function sendMessage() {
     if(textField.val().trim() !== "") {
         stompClient.send("/app/chat", {},
             JSON.stringify({
-                'sender': user.id,
+                'sender': user,
                 'message': textField.val().trim(),
                 'userRequest': request.id
             }));
@@ -50,20 +50,27 @@ function sendMessage() {
 /* Функция отображения полученого сообщения */
 function showMessageOutput(messageOutput) {
     let message = getMessage(messageOutput['messageID']);
-
     let element;
-    if(message['sender'] !== user.id) {
-        element = $('<div class="container">')
-            .append('<img src="../img/support.png" alt="Avatar" style="width:100%;">')
-            .append('<p style="text-align: right">' + message['message'] + '</p>')
-            .append('<span class="time-right">' + $.format.date(new Date(message['date']), "dd.MM.yyyy HH:mm") + '</span>');
+    if(message.sender.username === user.username) {
+        element = $('<li class="chat-right">')
+            .append('<div class="chat-hour">' + $.format.date(new Date(message['date']), "HH:mm") + '<span class="fa fa-check-circle"></span></div>')
+            .append('<div class="chat-text">' + message['message'] + '</div>')
+            .append('<div class="chat-avatar">\n' +
+                '                                <img src="../img/support.png" alt="Avatar">\n' +
+                '                                <div class="chat-name">' + message.sender.username + '</div>\n' +
+                '                            </div>')
     } else {
-        element = $('<div class="container darker">')
-            .append('<img src="../img/support.png" class="right" alt="Avatar" style="width:100%;">')
-            .append('<p>' + message['message'] + '</p>')
-            .append('<span class="time-left">' + $.format.date(new Date(message['date']), "dd.MM.yyyy HH:mm") + '</span>');
+        element = $('<li class="chat-left">')
+            .append('<div class="chat-avatar">\n' +
+                '                                <img src="../img/support.png" alt="Avatar">\n' +
+                '                                <div class="chat-name">' + message.sender.username + '</div>\n' +
+                '                            </div>')
+            .append('<div class="chat-text">' + message['message'] + '</div>')
+            .append('<div class="chat-hour">' + $.format.date(new Date(message['date']), "HH:mm") + '<span class="fa fa-check-circle"></span></div>')
+
+
     }
-    $("#message-container").append(element);
+    $("#chat-box").append(element);
     messageContainer.scrollTop = messageContainer.scrollHeight;
 }
 

@@ -180,7 +180,7 @@ public class UserRequestsController {
                         message.getId(),
                         message.getUserRequest().getId(),
                         message.getSender().getId()));
-        return "redirect:/requests";
+        return "redirect:/supervised";
     }
 
     /**

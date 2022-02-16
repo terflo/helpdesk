@@ -14,66 +14,89 @@
         <script th:src="@{../js/dateformat.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{../js/stomp.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{../js/chat.js}" rel="script" type="text/javascript"></script>
+
+        <style>
+            .row {
+                margin-left: 0;
+            }
+        </style>
+
     </head>
     <body>
+
         <div th:insert="blocks/navigation"></div>
-        <ul class="form-style-1">
-            <li>
-                <label th:text="'Обращение №' + ${userRequest.id}"></label>
-            </li>
-            <li>
-                <label for="name">Наименование проблемы</label>
-                <input th:value="${userRequest.name}" type="text" id="name" name="name" class="field-long" readonly/>
-            </li>
-            <li>
-                <label for="priority">Приоритет</label>
-                <input th:value="${userRequest.priority}" type="text" id="priority" name="priority" class="field-long" readonly/>
-            </li>
-            <li>
-                <label for="status">Статус</label>
-                <input th:value="${userRequest.status}" type="text" id="status" name="priority" class="field-long" readonly/>
-            </li>
-            <li>
-                <label>Описание проблемы</label>
-                <label for="description"></label><textarea th:text="${userRequest.description}" name="description" id="description" class="field-long field-textarea" readonly></textarea>
-            </li>
-        </ul>
 
-        <h2>Чат с оператором технической поддержки:</h2>
-
-
-
-        <div class="chat-container" id="chat-container">
-            <div class="message-container" id="message-container">
-                <div class="" th:each="message : ${messages}">
-                    <div th:switch="${message?.sender}">
-                        <div th:case="${user.id}" class="darker container">
-                            <img th:src="@{../img/support.png}" class="right" alt="Avatar" style="width:100%;">
-                            <p th:text="${message?.message}"></p>
-                            <span th:text="${#dates.format(message?.date, 'dd.MM.yyyy HH:mm')}" class="time-left"></span>
-                        </div>
-                        <div th:case="*" class="container">
-                            <img th:src="@{../img/support.png}" alt="Avatar" style="width:100%;">
-                            <p style="text-align: right" th:text="${message?.message}"></p>
-                            <span th:text="${#dates.format(message?.date, 'dd.MM.yyyy HH:mm')}" class="time-right"></span>
+        <main class="w-50 mx-auto">
+            <div class="container col-md-12 col-lg-12">
+            <h2 class="h2 mb-3" th:text="'Обращение #' + ${userRequest.id}" style="margin-left: 10px"></h2>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="row form-label" for="requestName">Наименование проблемы</label>
+                        <input class="row form-control" id="requestName" name="requestName" readonly th:value="${userRequest.name}" type="text">
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="row form-label">Приоритет</label>
+                        <div th:switch="${userRequest.priority}">
+                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).LOW}" value="Низкий" type="text" name="priority" class="row form-control" readonly/>
+                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).NORMAL}" value="Средний" type="text" name="priority" class="row form-control" readonly/>
+                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).MAX}" value="Высокий" type="text" name="priority" class="row form-control" readonly/>
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <label class="row form-label">Статус</label>
+                        <div th:switch="${userRequest.status}">
+                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}" class="row form-control" name="requestName" readonly th:value="IN_PROCESS" type="text">
+                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}" class="row form-control" name="requestName" readonly th:value="Начато" type="text">
+                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}" class="row form-control" name="requestName" readonly th:value="Закрыто" type="text">
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <label class="row form-label" for="requestDate">Дата создания</label>
+                        <input th:value="${#dates.format(userRequest.date, 'dd.MM.yyyy HH:mm')}" type="text" id="requestDate" name="priority" class="row form-control" readonly/>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="requestDescription" class="form-label">Описание проблемы</label>
+                        <textarea readonly rows="6" class="form-control" id="requestDescription" style="resize: none; overflow-y: scroll;" th:text="${userRequest.description}"></textarea>
+                    </div>
+                </div>
+
+
+
+
 
             <br>
-
-            <div class="message-field-container">
-                <label for="message">Сообщение: </label>
-                <input class="message-field" id="message" name="message" type="text" required>
-                <button id="send-button" name="send-button" onclick="sendMessage()">Отправить</button>
+            <h5 class="h5">Чат с оператором тех-поддержки:</h5>
+            <div class="container-fluid chat-container">
+                    <ul id="chat-box" class="chat-box chatContainerScroll" style="min-height: 40vw; max-height: 40vw">
+                        <li class="chat-right" th:each="message : ${messages}" th:attr="class=${message.sender.username == user.username ? 'chat-right' : 'chat-left'}">
+                            <div th:unless="${message?.sender.username != user.username}" class="chat-hour" th:text="${#dates.format(message?.date, 'HH:mm')}"> <span class="fa fa-check-circle"></span></div>
+                            <div th:if="${message?.sender.username != user.username}" class="chat-avatar">
+                                <img th:src="@{~/img/support.png}" alt="Avatar">
+                                <div class="chat-name" th:text="${message?.sender.username}"></div>
+                            </div>
+                            <div class="chat-text" th:text="${message?.message}"></div>
+                            <div th:unless="${message?.sender.username != user.username}" class="chat-avatar">
+                                <img th:src="@{~/img/support.png}" alt="Avatar">
+                                <div class="chat-name" th:text="${message?.sender.username}"></div>
+                            </div>
+                            <div th:if="${message?.sender.username != user.username}" class="chat-hour" th:text="${#dates.format(message?.date, 'HH:mm')}"> <span class="fa fa-check-circle"></span></div>
+                        </li>
+                    </ul>
+                <div class="row">
+                <textarea id="message" style="resize: none" class="col-sm-4 form-control" rows="3" placeholder="Введите ваше сообщение..."></textarea>
+                    <button id="send-button" class="col-sm-2 form-control" onclick="sendMessage()">Отправить</button>
+                </div>
+                </div>
             </div>
-        </div>
+        </main>
+        <div th:insert="blocks/footer"></div>
     </body>
-    <div th:insert="blocks/footer"></div>
     <!-- Инициализация переменных и работа с элементами страницы -->
     <script th:inline="javascript">
-        const messageContainer = document.getElementById('message-container');
+        const messageContainer = document.getElementById('chat-box');
         const request = [[${userRequest}]];
         const user = [[${user}]];
         messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -82,21 +105,27 @@
             $('#message').prop('disabled', true);
         }
     </script>
-
 </html>
 
 
 
 <!--
-                <div class="container">
-                    <img th:src="@{../img/support.png}" alt="Avatar" style="width:100%;">
-                    <p>Hello. How are you today?</p>
-                    <span class="time-right">11:00</span>
-                </div>
-
-                <div class="container darker">
-                    <img th:src="@{../img/support.png}" alt="Avatar" class="right" style="width:100%;">
-                    <p>Hey! I'm fine. Thanks for asking!</p>
-                    <span class="time-left">11:01</span>
-                </div>
+                <li class="chat-left">
+                    <div class="chat-avatar">
+                        <img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin">
+                        <div class="chat-name">Russell</div>
+                    </div>
+                    <div class="chat-text">Hello, I'm Russell.
+                        <br>How can I help you today?</div>
+                    <div class="chat-hour">08:55 <span class="fa fa-check-circle"></span></div>
+                </li>
+                <li class="chat-right">
+                    <div class="chat-hour">08:56 <span class="fa fa-check-circle"></span></div>
+                    <div class="chat-text">Hi, Russell
+                        <br> I need more information about Developer Plan.</div>
+                    <div class="chat-avatar">
+                        <img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin">
+                        <div class="chat-name">Sam</div>
+                    </div>
+                </li>
 -->

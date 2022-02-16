@@ -3,47 +3,60 @@
     <head>
         <meta charset="UTF-8">
         <title>Ваши обращения</title>
+        <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
         <link th:href="@{~/css/requests.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
-        <script th:src="@{~/css/bootstrap.js}" rel="script" type="text/javascript"></script>
+        <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
     </head>
     <body>
 
-    <div th:insert="blocks/navigation"></div>
+        <div th:insert="blocks/navigation"></div>
 
-    <h1 th:text="'Обращения пользователя ' + ${user.username}"></h1>
+        <main style="min-height: 38vw">
 
-    <br>
-    <br>
+            <div class="row" style="margin-right: 0">
+                <h1 class="h1 col-md-9" th:text="'Обращения пользователя ' + ${user.username}"></h1>
+                <input value="Создать обращение" type="button" class="col-md-2 btn-primary" onclick="window.location.href = '/requests/add'" style="margin: 1vw 1vw 1vw 7vw;">
+            </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Номер</th>
-                <th>Наименование</th>
-                <th>Статус</th>
-                <th>Приоритет</th>
-                <th>Оператор</th>
-                <th></th>
-                <th th:if="${#sets.contains(user.roles, 'ROLE_OPERATOR')}"></th>
-            </tr>
-        </thead>
-        <tbody th:if="not ${requests.empty}" th:each="request : ${requests}">
-            <tr>
-                <td th:text="${request?.id}"></td>
-                <td th:text="${request?.name}"></td>
-                <td th:text="${request?.status}"></td>
-                <td th:text="${request?.priority}"></td>
-                <td th:text="${request?.operator?.username}"></td>
-                <td>
-                    <a th:href="'/requests/' + ${request?.id}">Просмотреть</a>
-                </td>
-                <td th:if="${#sets.contains(user.roles, 'ROLE_OPERATOR')}">
-                    <a th:href="'/requests/close/' + ${request?.id}">Завершить</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <div th:insert="blocks/footer"></div>
+            <table class="table table-responsive">
+                <caption th:text="'Всего записей: ' + ${requests.size()}"></caption>
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Наименование</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col">Приоритет</th>
+                        <th scope="col">Оператор</th>
+                        <th scope="col"></th>
+                        <th th:if="${#sets.contains(user.roles, 'ROLE_OPERATOR')}"></th>
+                    </tr>
+                </thead>
+                <tbody th:if="not ${#lists.isEmpty(requests)}" th:each="request : ${requests}" style="overflow-y: scroll">
+                    <tr>
+                        <td th:text="${request?.id}"></td>
+                        <td th:text="${request?.name}"></td>
+                        <td th:switch="${request?.status}">
+                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}">В работе</label>
+                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>
+                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}">Начато</label>
+                        </td>
+                        <td th:switch="${request?.priority}">
+                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).LOW}">Низкий</label>
+                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).NORMAL}">Средний</label>
+                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).MAX}">Высокий</label>
+                        </td>
+                        <td th:text="${request?.operator?.username}"></td>
+                        <td>
+                            <a th:href="'/requests/' + ${request?.id}">Просмотреть</a>
+                        </td>
+                        <td th:if="${#sets.contains(user.roles, 'ROLE_OPERATOR')}">
+                            <a th:href="'/requests/close/' + ${request?.id}">Завершить</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+        <div th:insert="blocks/footer"></div>
     </body>
 </html>

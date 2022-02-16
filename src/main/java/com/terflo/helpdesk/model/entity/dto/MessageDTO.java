@@ -20,9 +20,9 @@ import java.util.Date;
 public class MessageDTO implements Serializable {
 
     /**
-     * ID Отправителя сообщения
+     * UserDTO объект отправителя сообщения
      */
-    public Long sender;
+    public UserDTO sender;
 
     /**
      * ID Запроса пользователя, к которому относится сообщение

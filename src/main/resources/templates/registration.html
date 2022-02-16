@@ -4,6 +4,8 @@
     <head>
         <meta charset="UTF-8" content="text/html">
         <title>Регистрация</title>
+        <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
+
         <link th:href="@{css/toast.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{css/registration.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
@@ -55,7 +57,7 @@
                         <span>Пароль слишком короткий</span>
                     </div>
 
-                    <section th:if="not ${errors.empty}" th:each="error : ${errors}">
+                    <section th:if="not ${#lists.isEmpty(errors)}" th:each="error : ${errors}">
                         <div class="mb-3 alert alert-danger hidden" role="alert">
                             <span th:text="${error}"></span>
                         </div>
