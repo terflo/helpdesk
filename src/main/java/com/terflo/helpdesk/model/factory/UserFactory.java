@@ -3,10 +3,9 @@ package com.terflo.helpdesk.model.factory;
 import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.dto.UserDTO;
-import com.terflo.helpdesk.model.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -27,6 +26,18 @@ public class UserFactory {
                         .map((Role::getName))
                         .collect(Collectors.toSet())
         );
+    }
+
+    /**
+     * Метод преобразует список из User в список из UserDTO
+     * @param users список пользователей
+     * @return список конвертированных пользователей
+     */
+    public List<UserDTO> convertToUserDTO(List<User> users) {
+        return users
+                .stream()
+                .map(this::convertToUserDTO)
+                .collect(Collectors.toList());
     }
 
 }

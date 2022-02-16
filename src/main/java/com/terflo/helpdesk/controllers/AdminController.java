@@ -1,12 +1,19 @@
 package com.terflo.helpdesk.controllers;
 
+import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
+import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
+import com.terflo.helpdesk.model.factory.UserFactory;
+import com.terflo.helpdesk.model.factory.UserRequestFactory;
+import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+
+import java.util.List;
 
 /**
  * @author Danil Krivoschiokov
@@ -18,8 +25,14 @@ public class AdminController {
 
     private final UserService userService;
 
-    public AdminController(UserService userService) {
+    private final UserRequestService userRequestService;
+
+    private final UserRequestFactory userRequestFactory;
+
+    public AdminController(UserService userService, UserRequestService userRequestService, UserRequestFactory userRequestFactory) {
         this.userService = userService;
+        this.userRequestService = userRequestService;
+        this.userRequestFactory = userRequestFactory;
     }
 
     /**
@@ -33,6 +46,35 @@ public class AdminController {
     }
 
     /**
+     * Mapping для вывода страницы с запросами пользователей
+     * @param model переменные для отрисовки страницы
+     * @return страница
+     */
+    @GetMapping("/admin/requests")
+    public String requests(Model model) {
+        List<UserRequest> requests = userRequestService.findAll();
+        model.addAttribute("requests", userRequestFactory.convertToUserRequestDTO(requests));
+        return "admin-requests";
+    }
+
+    /**
+     * POST запрос на удаление обращения пользователя
+     * @param id уникальный индификатор обращения
+     * @param model переменные для отрисовки страницы
+     * @return страница с обращениями
+     */
+    @PostMapping("/admin/deleteRequest/{id}")
+    public String deleteRequest(@PathVariable(value = "id") Long id, Model model) {
+        try {
+            userRequestService.deleteByID(id);
+        } catch (UserRequestNotFoundException e) {
+            model.addAttribute("messageIsExist", true);
+            model.addAttribute("message", e.getMessage());
+        }
+        return "redirect:/admin/requests";
+    }
+
+    /**
      * Mapping для вывода списка всех пользователей
      * @param model переменные для отрисовки страницы
      * @return страница с списком пользователей
@@ -40,7 +82,7 @@ public class AdminController {
     @GetMapping("/admin/users")
     public String getUsers(Model model) {
         model.addAttribute("users", userService.getAllUsers());
-        return "users";
+        return "admin-users";
     }
 
     /**
@@ -70,6 +112,17 @@ public class AdminController {
     public String deleteUser(@PathVariable(value = "id") Long id, Model model) {
         try {
             userService.deleteUserById(id);
+        } catch (UserNotFoundException e) {
+            model.addAttribute("messageIsExist", true);
+            model.addAttribute("message", e.getMessage());
+        }
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/admin/switchLockUser/{id}")
+    public String switchLockUser(@PathVariable(value = "id") Long id, Model model) {
+        try {
+            userService.switchLockUserById(id);
         } catch (UserNotFoundException e) {
             model.addAttribute("messageIsExist", true);
             model.addAttribute("message", e.getMessage());

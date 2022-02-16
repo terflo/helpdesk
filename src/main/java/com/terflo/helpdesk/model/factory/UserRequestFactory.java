@@ -3,10 +3,8 @@ package com.terflo.helpdesk.model.factory;
 import java.util.List;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.UserRequestDTO;
-import com.terflo.helpdesk.model.repositories.UserRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -17,26 +15,10 @@ import java.util.stream.Collectors;
 @Component
 public class UserRequestFactory {
 
-    private final UserRepository userRepository;
-
     private final UserFactory userFactory;
 
-    public UserRequestFactory(UserRepository userRepository, UserFactory userFactory) {
-        this.userRepository = userRepository;
+    public UserRequestFactory(UserFactory userFactory) {
         this.userFactory = userFactory;
-    }
-
-    public UserRequest convertToUserRequest(UserRequestDTO userRequestDTO) {
-            return new UserRequest(
-                    userRequestDTO.id,
-                    userRepository.findById(userRequestDTO.operator.id).orElse(null),
-                    userRepository.findById(userRequestDTO.user.id).orElse(null),
-                    userRequestDTO.status,
-                    userRequestDTO.priority,
-                    userRequestDTO.name,
-                    userRequestDTO.description,
-                    userRequestDTO.date
-            );
     }
 
     public UserRequestDTO convertToUserRequestDTO(UserRequest userRequest) {

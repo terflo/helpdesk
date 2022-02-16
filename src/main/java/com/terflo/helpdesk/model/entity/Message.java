@@ -39,7 +39,7 @@ public class Message {
     /**
      * Запрос пользователя, к которому относится сообщение
      */
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     private UserRequest userRequest;
 
     /**

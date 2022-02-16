@@ -3,6 +3,7 @@ package com.terflo.helpdesk.model.services;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
+import com.terflo.helpdesk.model.exceptions.UserRequestAlreadyClosed;
 import com.terflo.helpdesk.model.exceptions.UserRequestAlreadyHaveOperatorException;
 import com.terflo.helpdesk.model.exceptions.UserRequestClosedException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
@@ -21,8 +22,11 @@ import java.util.List;
 @Service
 public class UserRequestService {
 
-    @Autowired
-    UserRequestRepository userRequestRepository;
+    private final UserRequestRepository userRequestRepository;
+
+    public UserRequestService(UserRequestRepository userRequestRepository) {
+        this.userRequestRepository = userRequestRepository;
+    }
 
     /**
      * Метод поиска всех запросов созданным пользователем
@@ -76,14 +80,9 @@ public class UserRequestService {
     /**
      * Метод поиска всех запросов пользователей
      * @return список всех запросов
-     * @throws UserRequestNotFoundException возникает при ненахождении запросов
      */
-    public List<UserRequest> findAll() throws UserRequestNotFoundException {
-        List<UserRequest> userRequests = (List<UserRequest>) userRequestRepository.findAll();
-        if(userRequests.isEmpty())
-            throw new UserRequestNotFoundException("Список запросов пуст");
-        else
-            return userRequests;
+    public List<UserRequest> findAll() {
+        return (List<UserRequest>) userRequestRepository.findAll();
     }
 
     /**
@@ -113,10 +112,25 @@ public class UserRequestService {
      * @throws UserRequestNotFoundException возникает при ненахождении запроса пользователя в базе данных
      */
     @Transactional
-    public void setStatusUserRequestByID(Long id, RequestStatus status) throws UserRequestNotFoundException {
-        userRequestRepository
-                .findById(id)
-                .orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"))
-                .setStatus(status);
+    public void setStatusUserRequestByID(Long id, RequestStatus status) throws UserRequestNotFoundException, UserRequestAlreadyClosed {
+
+        UserRequest userRequest = userRequestRepository.
+                findById(id).
+                orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"));
+
+        if(userRequest.getStatus() == RequestStatus.CLOSED) throw new UserRequestAlreadyClosed("Обращение пользователя уже закрыто");
+
+            userRequestRepository
+                    .findById(id)
+                    .orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"))
+                    .setStatus(status);
+    }
+
+    @Transactional
+    public void deleteByID(Long id) throws UserRequestNotFoundException {
+        if(userRequestRepository.findById(id).isPresent())
+            userRequestRepository.deleteById(id);
+        else
+            throw new UserRequestNotFoundException("Обращение пользователя не найдено");
     }
 }

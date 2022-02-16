@@ -165,8 +165,8 @@ public class UserRequestsController {
      * @param id уникальный индификатор запроса
      * @return страница с запросами
      */
-    @GetMapping("/requests/close/{id}")
-    public String closeRequest(@PathVariable(value = "id") Long id, Authentication authentication) throws UserRequestNotFoundException, UserNotFoundException {
+    @PostMapping("/requests/close/{id}")
+    public String closeRequest(@PathVariable(value = "id") Long id, Authentication authentication) throws UserRequestNotFoundException, UserNotFoundException, UserRequestAlreadyClosed {
 
         userRequestService.setStatusUserRequestByID(id, RequestStatus.CLOSED);
 
@@ -180,7 +180,7 @@ public class UserRequestsController {
                         message.getId(),
                         message.getUserRequest().getId(),
                         message.getSender().getId()));
-        return "redirect:/supervised";
+        return "redirect:/";    //TODO:Грамотно решить вопрос с обновлением страницы
     }
 
     /**

@@ -1,11 +1,11 @@
 package com.terflo.helpdesk.model.services;
 
+import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.repositories.RoleRepository;
 import com.terflo.helpdesk.model.repositories.UserRepository;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -140,6 +140,19 @@ public class UserService implements UserDetailsService {
             throw new UserNotFoundException("Пользователь не найден");
         }
         userRepository.deleteById(id);
+    }
+
+    /**
+     * Метод переключает блокировку аккаунта пользователя (блокирован/разблокирован)
+     * @param id уникальный индификатор пользователя
+     * @throws UserNotFoundException возникает при ненахождении пользователя
+     */
+    public void switchLockUserById(Long id) throws UserNotFoundException {
+        User user = userRepository
+                .findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        user.switchLock();
+        userRepository.save(user);
     }
 
     /**

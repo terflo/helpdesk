@@ -2,6 +2,7 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
+import com.terflo.helpdesk.model.repositories.RoleRepository;
 import com.terflo.helpdesk.model.requests.RegistrationRequest;
 import com.terflo.helpdesk.model.responses.RegistrationResponse;
 import com.terflo.helpdesk.model.services.UserService;
@@ -13,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * @author Danil Krivoschiokov
@@ -32,7 +34,7 @@ public class RegistrationController {
      */
     private final UserService userService;
 
-    public RegistrationController(RegexUtil regexUtil, UserService userService) {
+    public RegistrationController(RegexUtil regexUtil, UserService userService, RoleRepository roleRepository) {
         this.regexUtil = regexUtil;
         this.userService = userService;
     }
@@ -77,6 +79,7 @@ public class RegistrationController {
             user.setUsername(request.getUsername());
             user.setPassword(request.getPassword());
             user.setEmail(request.getEmail());
+            user.setDate(new Date());
 
             try {
                 userService.saveUser(user);

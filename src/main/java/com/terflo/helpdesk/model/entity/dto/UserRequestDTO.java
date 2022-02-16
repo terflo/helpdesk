@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Danil Krivoschiokov
@@ -59,5 +60,4 @@ public class UserRequestDTO implements Serializable {
      * Дата создания запроса
      */
     public Date date;
-
 }

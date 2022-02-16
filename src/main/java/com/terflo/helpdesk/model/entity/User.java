@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Danil Krivoschiokov
@@ -51,6 +53,12 @@ public class User implements UserDetails {
     private String email;
 
     /**
+     * Дата регистрации
+     */
+    @Column(name = "date")
+    private Date date;
+
+    /**
      * Множество ролей пользователя
      */
     @ManyToMany(fetch = FetchType.EAGER)
@@ -79,6 +87,17 @@ public class User implements UserDetails {
      */
     @Column(name = "enabled")
     private boolean enabled;
+
+    public void switchLock() {
+        this.locked = !this.locked;
+    }
+
+    public Set<String> getRoleNames() {
+        return this.roles
+                .stream()
+                .map(Role::getName)
+                .collect(Collectors.toSet());
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

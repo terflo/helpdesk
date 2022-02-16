@@ -5,11 +5,11 @@ import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Danil Krivoschiokov
@@ -35,43 +35,51 @@ public class UserRequest {
     /**
      * Оператор тех-поддержки, прикрепленный к обращению
      */
-    @ManyToOne(optional = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "operator_id")
+    @ManyToOne(optional = true, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private User operator;
 
     /**
      * Владелец обращения
      */
-    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private User user;
 
     /**
      * Статус обработки обращения
      */
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private RequestStatus status;
 
     /**
      * Приоритет задачи
      */
-    @Column(name = "priority")
+    @Column(name = "priority", nullable = false)
     private PriorityStatus priority;
 
     /**
      * Название проблемы
      */
-    @Column(name= "name")
+    @Column(name= "name", nullable = false)
     private String name;
 
     /**
      * Описание проблемы
      */
-    @Column(name="description")
+    @Column(name="description", nullable = true)
     private String description;
 
     /**
      * Дата создания запроса
      */
-    @Column(name="date")
+    @Column(name="date", nullable = false)
     private Date date;
 
+    /**
+     * Сообщения в обращении
+     */
+    @JoinColumn(name = "user_request_id")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Message> messages;
 }
