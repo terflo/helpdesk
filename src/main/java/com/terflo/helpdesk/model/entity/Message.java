@@ -45,19 +45,19 @@ public class Message {
     /**
      * Содержание сообщения
      */
-    @Column(name="message")
+    @Column(name="message", nullable = false)
     private String message;
 
     /**
      * Время отправки сообщения
      */
-    @Column(name = "date")
+    @Column(name = "date", nullable = false)
     private Date date;
 
     /**
      * Статус доставки сообщения (доставлено/отправляется)
      */
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private MessageStatus status;
 
 }

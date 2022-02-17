@@ -30,7 +30,7 @@ public class Role implements GrantedAuthority {
     /**
      * Имя роли
      */
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
     /**

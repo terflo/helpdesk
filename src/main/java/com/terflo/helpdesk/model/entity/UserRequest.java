@@ -35,14 +35,14 @@ public class UserRequest {
     /**
      * Оператор тех-поддержки, прикрепленный к обращению
      */
-    @JoinColumn(name = "operator_id")
+    @JoinColumn(name = "operator_id", nullable = true)
     @ManyToOne(optional = true, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private User operator;
 
     /**
      * Владелец обращения
      */
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private User user;
 

@@ -37,7 +37,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">
+                            <a class="nav-link" th:href="@{~/admin/decisions}">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-layers" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
                                 Частые вопросы
                             </a>
@@ -75,6 +75,7 @@
                             <th>Email</th>
                             <th>Роли</th>
                             <th>Дата регистрации</th>
+                            <th>Онлайн</th>
                             <th>Блокировка</th>
                             <th>Профиль</th>
                             <th>Удалить</th>
@@ -87,6 +88,8 @@
                             <td th:text="${user?.email}"></td>
                             <td th:text="${user?.getRoleNames()}"></td>
                             <td th:text="${#dates.format(user?.date, 'dd.MM.yyyy HH:mm')}"></td>
+                            <td style="text-align: center" th:if="${#lists.contains(activeUsers, user?.username)}"><img style="width: 1.5vw" th:src="@{~/img/online.png}"></td>
+                            <td style="text-align: center" th:unless="${#lists.contains(activeUsers, user?.username)}"><img style="width: 1.5vw" th:src="@{~/img/offline.png}"></td>
                             <td th:if="${user?.locked == true}"><form th:action="'switchLockUser/' + ${user?.id}" th:method="post"><input type="image" th:src="@{~/img/on.png}" style="height: 3vw" alt="switch-on"></form></td>
                             <td th:unless="${user?.locked == true}"><form th:action="'switchLockUser/' + ${user?.id}" th:method="post"><input type="image" th:src="@{~/img/off.png}" style="height: 3vw" alt="switch-off"></form></td>
                             <td><a th:href="'/admin/users/' + ${user?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a></td>

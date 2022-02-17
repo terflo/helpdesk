@@ -1,18 +1,24 @@
 package com.terflo.helpdesk.controllers;
 
+import com.terflo.helpdesk.model.entity.Decision;
 import com.terflo.helpdesk.model.entity.UserRequest;
+import com.terflo.helpdesk.model.entity.dto.DecisionDTO;
+import com.terflo.helpdesk.model.exceptions.DecisionNameAlreadyExistsException;
+import com.terflo.helpdesk.model.exceptions.DecisionNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
-import com.terflo.helpdesk.model.factory.UserFactory;
+import com.terflo.helpdesk.model.factory.DecisionFactory;
 import com.terflo.helpdesk.model.factory.UserRequestFactory;
+import com.terflo.helpdesk.model.services.DecisionService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,12 +31,18 @@ public class AdminController {
 
     private final UserService userService;
 
+    private final DecisionService decisionService;
+
+    private final DecisionFactory decisionFactory;
+
     private final UserRequestService userRequestService;
 
     private final UserRequestFactory userRequestFactory;
 
-    public AdminController(UserService userService, UserRequestService userRequestService, UserRequestFactory userRequestFactory) {
+    public AdminController(UserService userService, DecisionService decisionService, DecisionFactory decisionFactory, UserRequestService userRequestService, UserRequestFactory userRequestFactory) {
         this.userService = userService;
+        this.decisionService = decisionService;
+        this.decisionFactory = decisionFactory;
         this.userRequestService = userRequestService;
         this.userRequestFactory = userRequestFactory;
     }
@@ -43,6 +55,48 @@ public class AdminController {
     @GetMapping("/admin")
     public String admin(Model model) {
         return "admin";
+    }
+
+    @GetMapping("/admin/decisions")
+    public String decisions(Model model) {
+        model.addAttribute("decisions", decisionFactory.convertToDecisionDTO(decisionService.findAllDecisions()));
+        return "admin-decisions";
+    }
+
+    @PostMapping("/admin/decisions/add")
+    public @ResponseBody ResponseEntity<String> addDecision(@RequestBody Decision decision, Authentication authentication) {
+        if(decision.getName().isEmpty() || decision.getAnswer().isEmpty()) {
+            return ResponseEntity.ok("Поля не могут быть пустые");
+        } else {
+            decision.setDate(new Date());
+            try {
+                decision.setAuthor(userService.findUserByUsername(authentication.getName()));
+                decisionService.saveDecision(decision);
+            } catch (DecisionNameAlreadyExistsException | UserNotFoundException e) {
+                return ResponseEntity.ok(e.getMessage());
+            }
+        }
+        return ResponseEntity.ok("\"OK\"");
+    }
+
+    @PostMapping("/admin/decisions/delete/{id}")
+    public ResponseEntity<String> deleteDecision(@PathVariable(name = "id") Long id) {
+        try {
+            decisionService.deleteDecision(id);
+        } catch (DecisionNotFoundException e) {
+            return ResponseEntity.ok(e.getMessage());
+        }
+        return ResponseEntity.ok("OK");
+    }
+
+    @PostMapping("/admin/decisions/update")
+    public @ResponseBody ResponseEntity<String> updateDecision(@RequestBody DecisionDTO decision) {
+        try {
+            decisionService.updateDecision(decision);
+        } catch (DecisionNotFoundException e) {
+            return ResponseEntity.ok(e.getMessage());
+        }
+        return ResponseEntity.ok("\"OK\"");
     }
 
     /**
@@ -82,6 +136,7 @@ public class AdminController {
     @GetMapping("/admin/users")
     public String getUsers(Model model) {
         model.addAttribute("users", userService.getAllUsers());
+        model.addAttribute("activeUsers", userService.getActiveUsernamesFromSessionRegistry());
         return "admin-users";
     }
 

@@ -1,11 +1,12 @@
 package com.terflo.helpdesk.model.services;
 
-import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.repositories.RoleRepository;
 import com.terflo.helpdesk.model.repositories.UserRepository;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
+import org.apache.tomcat.util.json.JSONParser;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -41,10 +42,16 @@ public class UserService implements UserDetailsService {
      */
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder) {
+    /**
+     * Класс управляющий пользователями и их сеансами
+     */
+    private final SessionRegistry sessionRegistry;
+
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder, SessionRegistry sessionRegistry) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.sessionRegistry = sessionRegistry;
     }
 
     /**
@@ -177,5 +184,18 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         return userRepository.findByUsername(s).orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+    }
+
+    /**
+     * Метод поиска не истёкших сессий пользователей
+     * @return список имен активных пользователей
+     */
+    public List<String> getActiveUsernamesFromSessionRegistry() {
+        return sessionRegistry
+                .getAllPrincipals()
+                .stream()
+                .filter(u -> !sessionRegistry.getAllSessions(u, false).isEmpty())
+                .map(o -> ((User) o).getUsername())
+                .collect(Collectors.toList());
     }
 }

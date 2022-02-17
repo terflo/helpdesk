@@ -8,8 +8,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,25 +40,25 @@ public class User implements UserDetails {
     /**
      * Имя пользователя
      */
-    @Column(name = "username")
+    @Column(name = "username", nullable = false)
     private String username;
 
     /**
      * Пароль пользователя (преобразуется в хэш)
      */
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String password;
 
     /**
      * Почта пользователя
      */
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
     /**
      * Дата регистрации
      */
-    @Column(name = "date")
+    @Column(name = "date", nullable = false)
     private Date date;
 
     /**
