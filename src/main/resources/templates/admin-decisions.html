@@ -14,7 +14,6 @@
 
     <body>
         <div th:insert="blocks/navigation"></div>
-        <main>
             <div class="container-fluid">
                 <div class="row">
                     <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" style="min-height: 95vh;">
@@ -87,7 +86,7 @@
                         <div class="table-responsive">
                             <table class="table table-striped table-sm">
                                 <thead>
-                                    <tr>
+                                    <tr style="text-align: center">
                                         <th>#</th>
                                         <th>Наименование</th>
                                         <th>Ответ</th>
@@ -97,22 +96,22 @@
                                         <th>Удалить</th>
                                     </tr>
                                 </thead>
-                                <tbody style="overflow-y: scroll;">
-                                    <tr th:each="decision : ${decisions}" th:id="'decision_row_' + ${decision?.id}">
+                                <tbody id="tbody_decisions" style="overflow-y: scroll;">
+                                    <tr th:each="decision : ${decisions}" th:id="'decision_row_' + ${decision?.id}" style="text-align: center; vertical-align: middle;">
                                         <th th:text="${decision?.id}"></th>
                                         <th>
                                             <input class="form-control" th:value="${decision?.name}" type="text" readonly th:id="'decision_name_' + ${decision?.id}">
                                         </th>
                                         <th>
-                                            <textarea class="form-control" rows="2" th:text="${decision?.answer}" style="resize: none" readonly th:id="'decision_answer_' + ${decision?.id}"></textarea>
+                                            <textarea class="form-control" rows="2" th:text="${decision?.answer}" style="resize: none;" readonly th:id="'decision_answer_' + ${decision?.id}"></textarea>
                                         </th>
                                         <th th:text="${decision?.author.username}"></th>
                                         <th th:text="${#dates.format(decision?.date, 'dd.MM.yyyy HH:mm')}"></th>
                                         <th>
-                                            <input th:onclick="'editDecision(' + ${decision?.id} + ');'" type="image" th:id="'decision_edit_' + ${decision?.id}" th:src="@{~/img/edit.png}" style="width: 3vw">
+                                            <input th:onclick="'editDecision(' + ${decision?.id} + ');'" type="image" th:id="'decision_edit_' + ${decision?.id}" th:src="@{~/img/edit.png}" style="width: 2vw">
                                         </th>
                                         <th>
-                                            <input th:onclick="'deleteDecision(' + ${decision?.id} + ');'" type="image" th:id="'decision_delete_' + ${decision?.id}" th:src="@{~/img/trash.png}" style="width: 3vw">
+                                            <input th:onclick="'deleteDecision(' + ${decision?.id} + ');'" type="image" th:id="'decision_delete_' + ${decision?.id}" th:src="@{~/img/trash.png}" style="width: 2vw">
                                         </th>
                                     </tr>
                                 </tbody>
@@ -121,7 +120,6 @@
                     </main>
                 </div>
             </div>
-        </main>
         <div th:insert="blocks/footer"></div>
     </body>
 </html>

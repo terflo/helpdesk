@@ -69,7 +69,7 @@
                 <div class="table-responsive">
                     <table class="table table-striped table-sm">
                         <thead>
-                            <tr>
+                            <tr style="text-align: center;">
                                 <th>#</th>
                                 <th>Наименование</th>
                                 <th>Статус</th>
@@ -83,7 +83,7 @@
                             </tr>
                         </thead>
                         <tbody style="overflow-y: scroll">
-                            <tr th:each="request : ${requests}">
+                            <tr th:each="request : ${requests}" style="text-align: center; vertical-align: middle;">
                                 <td th:text="${request?.id}"></td>
                                 <td th:text="${request?.name}"></td>
                                 <td th:switch="${request?.status}">

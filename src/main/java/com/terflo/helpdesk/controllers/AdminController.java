@@ -66,14 +66,14 @@ public class AdminController {
     @PostMapping("/admin/decisions/add")
     public @ResponseBody ResponseEntity<String> addDecision(@RequestBody Decision decision, Authentication authentication) {
         if(decision.getName().isEmpty() || decision.getAnswer().isEmpty()) {
-            return ResponseEntity.ok("Поля не могут быть пустые");
+            return ResponseEntity.ok("\"Поля не могут быть пустые\"");
         } else {
             decision.setDate(new Date());
             try {
                 decision.setAuthor(userService.findUserByUsername(authentication.getName()));
                 decisionService.saveDecision(decision);
             } catch (DecisionNameAlreadyExistsException | UserNotFoundException e) {
-                return ResponseEntity.ok(e.getMessage());
+                return ResponseEntity.ok("\"" + e.getMessage() + "\"");
             }
         }
         return ResponseEntity.ok("\"OK\"");
