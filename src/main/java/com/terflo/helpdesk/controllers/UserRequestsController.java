@@ -12,6 +12,7 @@ import com.terflo.helpdesk.model.factory.UserRequestFactory;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -20,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -89,11 +91,16 @@ public class UserRequestsController {
      * @return результат запроса
      */
     @PostMapping("/requests/accept/{id}")
-    public String acceptRequest(@PathVariable(value = "id") Long id, Authentication authentication) throws UserRequestAlreadyHaveOperatorException, UserRequestNotFoundException, UserNotFoundException, UserRequestClosedException {
+    public ResponseEntity<String> acceptRequest(@PathVariable(value = "id") Long id, Authentication authentication) {
 
-        User operator = userService.findUserByUsername(authentication.getName());
-        userRequestService.acceptRequest(id, operator);
-        return("redirect:/requests/free");
+        try {
+            User operator = userService.findUserByUsername(authentication.getName());
+            userRequestService.acceptRequest(id, operator);
+        } catch (UserRequestNotFoundException | UserRequestClosedException | UserRequestAlreadyHaveOperatorException | UserNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
+        return ResponseEntity.ok("OK");
     }
 
     /**
@@ -126,11 +133,10 @@ public class UserRequestsController {
      * Контроллер POST-запроса для создания запроса пользователя
      * @param authentication информация о пользователе
      * @param userRequest тело запроса пользователя (название, описание, приоритет и т.п.)
-     * @param model переменные для отрисовки страницы
      * @return страница с запросами
      */
     @PostMapping("/requests/add")
-    public String addRequest(Authentication authentication, UserRequest userRequest, Model model) {
+    public ResponseEntity<String> addRequest(Authentication authentication, @RequestBody UserRequest userRequest) {
 
         //Список ошибок
         ArrayList<String> errors = new ArrayList<>();
@@ -146,17 +152,15 @@ public class UserRequestsController {
             userRequest.setStatus(RequestStatus.BEGINNING); //устанавливаем статус что обращение принято в систему
             userRequest.setUser(userService.findUserByUsername(authentication.getName()));  //устанавливаем создателя обращения
         } catch (UserNotFoundException e) { //в случае если пользователь не был найден
-            errors.add(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
 
         if(errors.isEmpty()) {
             userRequest.setDate(new Date());
             userRequestService.saveUserRequest(userRequest);
-            return "redirect:/requests";
+            return ResponseEntity.ok("\"OK\"");
         } else {
-            model.addAttribute("errors", errors);
-            model.addAttribute("userRequest", userRequest); //возвращаем пользователю ту же страницу с введенными данными
-            return "add-request";
+            return ResponseEntity.badRequest().body(errors.toString());
         }
     }
 
@@ -166,21 +170,24 @@ public class UserRequestsController {
      * @return страница с запросами
      */
     @PostMapping("/requests/close/{id}")
-    public String closeRequest(@PathVariable(value = "id") Long id, Authentication authentication) throws UserRequestNotFoundException, UserNotFoundException, UserRequestAlreadyClosed {
+    public ResponseEntity<String> closeRequest(@PathVariable(value = "id") Long id, Authentication authentication) {
 
-        userRequestService.setStatusUserRequestByID(id, RequestStatus.CLOSED);
+        try {
+            userRequestService.setStatusUserRequestByID(id, RequestStatus.CLOSED);
+            User operator = userService.findUserByUsername(authentication.getName());
+            Message message = messageFactory.getCloseRequestMessage(operator, id);
+            messageService.saveMessage(message);
+            messagingTemplate.convertAndSendToUser(
+                    String.valueOf(id),"/queue/messages",
+                    new Notification(
+                            message.getId(),
+                            message.getUserRequest().getId(),
+                            message.getSender().getId()));
+        } catch (UserNotFoundException | UserRequestNotFoundException | UserRequestAlreadyClosed e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
-        User operator = userService.findUserByUsername(authentication.getName());
-        Message message = messageFactory.getCloseRequestMessage(operator, id);
-        messageService.saveMessage(message);
-
-        messagingTemplate.convertAndSendToUser(
-                String.valueOf(id),"/queue/messages",
-                new Notification(
-                        message.getId(),
-                        message.getUserRequest().getId(),
-                        message.getSender().getId()));
-        return "redirect:/";    //TODO:Грамотно решить вопрос с обновлением страницы
+        return ResponseEntity.ok("OK");
     }
 
     /**

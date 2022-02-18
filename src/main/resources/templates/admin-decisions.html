@@ -100,18 +100,22 @@
                                     <tr th:each="decision : ${decisions}" th:id="'decision_row_' + ${decision?.id}" style="text-align: center; vertical-align: middle;">
                                         <th th:text="${decision?.id}"></th>
                                         <th>
-                                            <input class="form-control" th:value="${decision?.name}" type="text" readonly th:id="'decision_name_' + ${decision?.id}">
+                                            <label>
+                                                <input class="form-control" th:value="${decision?.name}" type="text" readonly th:id="'decision_name_' + ${decision?.id}">
+                                            </label>
                                         </th>
                                         <th>
-                                            <textarea class="form-control" rows="2" th:text="${decision?.answer}" style="resize: none;" readonly th:id="'decision_answer_' + ${decision?.id}"></textarea>
+                                            <label>
+                                                <textarea class="form-control" rows="2" th:text="${decision?.answer}" style="resize: none;" readonly th:id="'decision_answer_' + ${decision?.id}"></textarea>
+                                            </label>
                                         </th>
                                         <th th:text="${decision?.author.username}"></th>
                                         <th th:text="${#dates.format(decision?.date, 'dd.MM.yyyy HH:mm')}"></th>
                                         <th>
-                                            <input th:onclick="'editDecision(' + ${decision?.id} + ');'" type="image" th:id="'decision_edit_' + ${decision?.id}" th:src="@{~/img/edit.png}" style="width: 2vw">
+                                            <input th:onclick="'editDecision(' + ${decision?.id} + ');'" type="image" th:id="'decision_edit_' + ${decision?.id}" th:src="@{~/img/edit.png}" style="width: 2vw" alt="edit">
                                         </th>
                                         <th>
-                                            <input th:onclick="'deleteDecision(' + ${decision?.id} + ');'" type="image" th:id="'decision_delete_' + ${decision?.id}" th:src="@{~/img/trash.png}" style="width: 2vw">
+                                            <input th:onclick="'deleteDecision(' + ${decision?.id} + ');'" type="image" th:id="'decision_delete_' + ${decision?.id}" th:src="@{~/img/trash.png}" style="width: 2vw" alt="delete">
                                         </th>
                                     </tr>
                                 </tbody>

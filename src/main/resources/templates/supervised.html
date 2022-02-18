@@ -11,8 +11,8 @@
     <body>
         <div th:insert="blocks/navigation"></div>
         <main style="min-height: 38vw">
-            <h1 th:text="'Курируемые обращения пользователем ' + ${name}"></h1>
-            <table class="table">
+            <h1 th:text="'Обращения курируемые пользователем ' + ${name}"></h1>
+            <table class="table" style="text-align: center; vertical-align: middle;">
                 <thead>
                     <tr>
                         <th>Номер</th>
@@ -20,19 +20,31 @@
                         <th>Статус</th>
                         <th>Приоритет</th>
                         <th>Оператор</th>
-                        <th></th>
-                        <th></th>
+                        <th>Просмотреть</th>
+                        <th>Закрыть</th>
                     </tr>
                 </thead>
                 <tbody th:if="not ${#lists.isEmpty(requests)}" th:each="request : ${requests}">
                     <tr>
                         <td th:text="${request?.id}"></td>
                         <td th:text="${request?.name}"></td>
-                        <td th:text="${request?.status}"></td>
+                        <td  th:switch="${request?.status}">
+                            <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}">В работе</label>
+                            <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>
+                            <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}">Начато</label>
+                        </td>
                         <td th:text="${request?.priority}"></td>
                         <td th:text="${request?.operator?.username}"></td>
-                        <td><a th:href="@{/requests/} + ${request.id}">Просмотреть</a></td>
-                        <td><a th:href="@{/requests/close/} + ${request.id}">Завершить</a></td>
+                        <td>
+                            <a th:href="'/requests/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a>
+                        </td>
+                        <td th:if="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">
+                            <input disabled type="image" th:src="@{~/img/close.png}" style="height: 2vw">
+                        </td>
+                        <td th:id="'close_button_' + ${request?.id}" th:unless="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">
+                            <input th:onclick="'closeRequest(' + ${request?.id} + ');'" type="image" th:src="@{~/img/close.png}" style="height: 2vw">
+                        </td>
+
                     </tr>
                 </tbody>
             </table>

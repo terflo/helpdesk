@@ -57,12 +57,23 @@ public class AdminController {
         return "admin";
     }
 
+    /**
+     * Mapping для вывода страницы с частыми вопросами
+     * @param model переменные для отрисовки страницы
+     * @return страница с частыми вопросами
+     */
     @GetMapping("/admin/decisions")
     public String decisions(Model model) {
         model.addAttribute("decisions", decisionFactory.convertToDecisionDTO(decisionService.findAllDecisions()));
         return "admin-decisions";
     }
 
+    /**
+     * Mapping для добавление частого вопроса
+     * @param decision часто задаваемый вопрос
+     * @param authentication авторизация клиента
+     * @return HTTP ответ
+     */
     @PostMapping("/admin/decisions/add")
     public @ResponseBody ResponseEntity<String> addDecision(@RequestBody Decision decision, Authentication authentication) {
         if(decision.getName().isEmpty() || decision.getAnswer().isEmpty()) {
@@ -79,16 +90,26 @@ public class AdminController {
         return ResponseEntity.ok("\"OK\"");
     }
 
-    @PostMapping("/admin/decisions/delete/{id}")
-    public ResponseEntity<String> deleteDecision(@PathVariable(name = "id") Long id) {
+    /**
+     * Mapping для удаления часто задаваемого вопроса
+     * @param id уникальный индификато удаляемого элемента
+     * @return HTTP ответ
+     */
+    @DeleteMapping("/admin/decisions/delete/{id}")
+    public @ResponseBody ResponseEntity<String> deleteDecision(@PathVariable(name = "id") Long id) {
         try {
             decisionService.deleteDecision(id);
         } catch (DecisionNotFoundException e) {
-            return ResponseEntity.ok(e.getMessage());
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok("OK");
     }
 
+    /**
+     * Метод для обновление данных о часто задаваемом вопросе
+     * @param decision новые данные
+     * @return HTTP ответ
+     */
     @PostMapping("/admin/decisions/update")
     public @ResponseBody ResponseEntity<String> updateDecision(@RequestBody DecisionDTO decision) {
         try {
@@ -114,18 +135,16 @@ public class AdminController {
     /**
      * POST запрос на удаление обращения пользователя
      * @param id уникальный индификатор обращения
-     * @param model переменные для отрисовки страницы
      * @return страница с обращениями
      */
-    @PostMapping("/admin/deleteRequest/{id}")
-    public String deleteRequest(@PathVariable(value = "id") Long id, Model model) {
+    @DeleteMapping("/admin/requests/delete/{id}")
+    public ResponseEntity<String> deleteRequest(@PathVariable(value = "id") Long id) {
         try {
             userRequestService.deleteByID(id);
         } catch (UserRequestNotFoundException e) {
-            model.addAttribute("messageIsExist", true);
-            model.addAttribute("message", e.getMessage());
+            ResponseEntity.notFound().build();
         }
-        return "redirect:/admin/requests";
+        return ResponseEntity.ok("OK");
     }
 
     /**
@@ -147,7 +166,7 @@ public class AdminController {
      * @return страница с информацией по конкретному пользователю
      */
     @GetMapping("/admin/users/{id}")
-    public String getUserDetail(@PathVariable(value = "id") Long id, Model model) {
+    public String getUserDetail(@PathVariable(value = "id") Long id, Model model){
         try {
             model.addAttribute("user", userService.findUserById(id));
         } catch (UserNotFoundException e) {
@@ -163,25 +182,28 @@ public class AdminController {
      * @param model переменные для отрисовки страницы
      * @return возврат на страницу с списком пользователей
      */
-    @PostMapping("/admin/deleteUser/{id}")
-    public String deleteUser(@PathVariable(value = "id") Long id, Model model) {
+    @DeleteMapping("/admin/users/delete/{id}")
+    public @ResponseBody ResponseEntity<String> deleteUser(@PathVariable(value = "id") Long id, Model model) {
         try {
             userService.deleteUserById(id);
         } catch (UserNotFoundException e) {
-            model.addAttribute("messageIsExist", true);
-            model.addAttribute("message", e.getMessage());
+            return ResponseEntity.notFound().build();
         }
-        return "redirect:/admin/users";
+        return ResponseEntity.ok("OK");
     }
 
-    @PostMapping("/admin/switchLockUser/{id}")
-    public String switchLockUser(@PathVariable(value = "id") Long id, Model model) {
+    /**
+     * Mapping post запроса для переключения блокировки пользователя
+     * @param id уникальный индификатор пользователя
+     * @return HTTP ответ
+     */
+    @PostMapping("/admin/users/switchLock/{id}")
+    public ResponseEntity<String> switchLockUser(@PathVariable(value = "id") Long id) {
         try {
             userService.switchLockUserById(id);
         } catch (UserNotFoundException e) {
-            model.addAttribute("messageIsExist", true);
-            model.addAttribute("message", e.getMessage());
+            return ResponseEntity.notFound().build();
         }
-        return "redirect:/admin/users";
+        return ResponseEntity.ok("OK");
     }
 }

@@ -10,7 +10,7 @@ function addDecision() {
         }),
         dataType: "json",
         contentType: "application/json",
-        async: false,
+        async: true,
         success: function (data) {
             if(data === "OK")
                 window.location.reload();
@@ -22,7 +22,7 @@ function addDecision() {
 
 function deleteDecision(id) {
     $.ajax({
-        type: "POST",
+        type: "DELETE",
         url: "/admin/decisions/delete/" + id,
         cache: false,
         timeout: 600000,
@@ -47,7 +47,7 @@ function updateDecision(id) {
     $.ajax({
         type: "POST",
         url: "/admin/decisions/update",
-        cache: false,
+        cache: true,
         timeout: 600000,
         data: JSON.stringify({
             id: id,

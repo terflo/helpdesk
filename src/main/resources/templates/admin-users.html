@@ -5,8 +5,9 @@
     <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
     <meta charset="UTF-8" content="text/html">
     <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
-    <link th:href="@{~/css/index.css}" rel="stylesheet" type="text/css"/>
     <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
+    <script th:src="@{~/js/jQuery.js}" rel="script" type="text/javascript"></script>
+    <script th:src="@{~/js/users.js}" rel="script" type="text/javascript"></script>
     <title>Панель управления</title>
 </head>
 
@@ -82,7 +83,7 @@
                         </tr>
                         </thead>
                         <tbody style="overflow-y: scroll">
-                        <tr th:each="user : ${users}" style="text-align: center; vertical-align: middle;">
+                        <tr th:each="user : ${users}" style="text-align: center; vertical-align: middle;" th:id="'user_row_' + ${user?.id}">
                             <td th:text="${user?.id}"></td>
                             <td th:text="${user?.username}"></td>
                             <td th:text="${user?.email}"></td>
@@ -90,10 +91,10 @@
                             <td th:text="${#dates.format(user?.date, 'dd.MM.yyyy HH:mm')}"></td>
                             <td style="text-align: center" th:if="${#lists.contains(activeUsers, user?.username)}"><img style="width: 1.5vw" th:src="@{~/img/online.png}"></td>
                             <td style="text-align: center" th:unless="${#lists.contains(activeUsers, user?.username)}"><img style="width: 1.5vw" th:src="@{~/img/offline.png}"></td>
-                            <td th:if="${user?.locked == true}"><form th:action="'switchLockUser/' + ${user?.id}" th:method="post"><input type="image" th:src="@{~/img/on.png}" style="height: 3vw" alt="switch-on"></form></td>
-                            <td th:unless="${user?.locked == true}"><form th:action="'switchLockUser/' + ${user?.id}" th:method="post"><input type="image" th:src="@{~/img/off.png}" style="height: 3vw" alt="switch-off"></form></td>
+                            <td th:if="${user?.locked == true}"><input th:name="'switch_lock_' + ${user?.id}" th:onclick="'switchUserLock(' + ${user?.id} +');'" type="image" th:src="@{~/img/on.png}" style="height: 3vw" alt="switch-on"></td>
+                            <td th:unless="${user?.locked == true}"><input th:name="'switch_lock_' + ${user?.id}" th:onclick="'switchUserLock(' + ${user?.id} +');'" type="image" th:src="@{~/img/off.png}" style="height: 3vw" alt="switch-off"></td>
                             <td><a th:href="'/admin/users/' + ${user?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a></td>
-                            <td><form th:action="'deleteUser/' + ${user?.id}" th:method="post"><input type="image" th:src="@{~/img/trash.png}" style="height: 2vw"></form></td>
+                            <td><input type="image" th:src="@{~/img/trash.png}" style="height: 2vw" th:onclick="'deleteUser(' + ${user?.id} +');'" alt="delete user"></td>
                         </tr>
                         </tbody>
                     </table>

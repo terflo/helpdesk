@@ -5,8 +5,9 @@
     <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
     <meta charset="UTF-8" content="text/html">
     <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
-    <link th:href="@{~/css/index.css}" rel="stylesheet" type="text/css"/>
     <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
+    <script th:src="@{~/js/jQuery.js}" rel="script" type="text/javascript"></script>
+    <script th:src="@{~/js/admin-requests.js}" rel="script" type="text/javascript"></script>
     <title>Панель управления</title>
 </head>
 
@@ -83,13 +84,13 @@
                             </tr>
                         </thead>
                         <tbody style="overflow-y: scroll">
-                            <tr th:each="request : ${requests}" style="text-align: center; vertical-align: middle;">
+                            <tr th:each="request : ${requests}" style="text-align: center; vertical-align: middle;" th:id="'request_row_' + ${request?.id}" >
                                 <td th:text="${request?.id}"></td>
                                 <td th:text="${request?.name}"></td>
-                                <td th:switch="${request?.status}">
-                                    <label th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}">В работе</label>
-                                    <label th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>
-                                    <label th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}">Начато</label>
+                                <td  th:switch="${request?.status}">
+                                    <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}">В работе</label>
+                                    <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>
+                                    <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}">Начато</label>
                                 </td>
                                 <td th:switch="${request?.priority}">
                                     <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).LOW}">Низкий</label>
@@ -99,10 +100,10 @@
                                 <td th:text="${request?.operator?.username}"></td>
                                 <td th:text="${request?.user?.username}"></td>
                                 <td th:text="${#dates.format(request?.date, 'dd.MM.yyyy HH:mm')}"></td>
-                                <td><a th:href="'/admin/users/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a></td>
-                                <td th:if="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}"><form th:action="'/requests/close/' + ${request?.id}" th:method="post"><input disabled type="image" th:src="@{~/img/close.png}" style="height: 2vw"></form></td>
-                                <td th:unless="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}"><form th:action="'/requests/close/' + ${request?.id}" th:method="post"><input type="image" th:src="@{~/img/close.png}" style="height: 2vw"></form></td>
-                                <td><form th:action="'deleteRequest/' + ${request?.id}" th:method="post"><input type="image" th:src="@{~/img/trash.png}" style="height: 2vw"></form></td>
+                                <td><a th:href="'/requests/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a></td>
+                                <td th:if="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}"><input disabled type="image" th:src="@{~/img/close.png}" style="height: 2vw"></td>
+                                <td th:id="'close_button_' + ${request?.id}" th:unless="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}"><input th:onclick="'closeRequest(' + ${request?.id} + ');'" type="image" th:src="@{~/img/close.png}" style="height: 2vw"></td>
+                                <td><input th:onclick="'deleteRequest(' + ${request?.id} + ');'" type="image" th:src="@{~/img/trash.png}" style="height: 2vw" alt="delete request"></td>
                             </tr>
                         </tbody>
                     </table>

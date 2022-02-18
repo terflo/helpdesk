@@ -19,7 +19,7 @@
                 <input value="Создать обращение" type="button" class="col-md-2 btn-primary" onclick="window.location.href = '/requests/add'" style="margin: 1vw 1vw 1vw 7vw;">
             </div>
 
-            <table class="table table-responsive">
+            <table class="table table-responsive" style="text-align: center; vertical-align: middle;">
                 <caption th:text="'Всего записей: ' + ${requests.size()}"></caption>
                 <thead>
                     <tr>
@@ -28,8 +28,7 @@
                         <th scope="col">Статус</th>
                         <th scope="col">Приоритет</th>
                         <th scope="col">Оператор</th>
-                        <th scope="col"></th>
-                        <th th:if="${#sets.contains(user.roles, 'ROLE_OPERATOR')}"></th>
+                        <th scope="col">Просмотреть</th>
                     </tr>
                 </thead>
                 <tbody th:if="not ${#lists.isEmpty(requests)}" th:each="request : ${requests}" style="overflow-y: scroll">
@@ -37,9 +36,9 @@
                         <td th:text="${request?.id}"></td>
                         <td th:text="${request?.name}"></td>
                         <td th:switch="${request?.status}">
-                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}">В работе</label>
-                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>
-                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}">Начато</label>
+                            <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}">В работе</label>
+                            <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>
+                            <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}">Начато</label>
                         </td>
                         <td th:switch="${request?.priority}">
                             <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).LOW}">Низкий</label>
@@ -48,10 +47,7 @@
                         </td>
                         <td th:text="${request?.operator?.username}"></td>
                         <td>
-                            <a th:href="'/requests/' + ${request?.id}">Просмотреть</a>
-                        </td>
-                        <td th:if="${#sets.contains(user.roles, 'ROLE_OPERATOR')}">
-                            <a th:href="'/requests/close/' + ${request?.id}">Завершить</a>
+                            <a th:href="'/requests/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a>
                         </td>
                     </tr>
                 </tbody>
