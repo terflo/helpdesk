@@ -26,16 +26,14 @@ function editProfile() {
     descriptionField.removeAttr("readonly")
 
     editProfileButton.html("Отправить")
-    editProfileButton.attr("onclick", "updateProfile()")
+    editProfileButton.attr("onclick", "updateProfile(" + profileID +")")
 }
 
-function updateProfile() {
-
-    //console.log(usernameField.val())
+function updateProfile(id) {
 
     $.ajax({
         type: "POST",
-        url: "/user/" + id + "/updateAvatar",
+        url: "/user/" + id + "/update",
         cache: true,
         timeout: 600000,
         data: JSON.stringify({
@@ -44,15 +42,25 @@ function updateProfile() {
             description: descriptionField.val()
         }),
         dataType: "json",
-        contentType: false,
-        processData: false,
+        contentType: "application/json",
+        processData: true,
         async: true,
         success: function (data) {
-            if(data !== "OK") {
-                console.log(data)
-            } else {
-                setAvatar(id)
-            }
+            usernameField.attr('readonly', true);
+            emailField.attr('readonly', true);
+            descriptionField.attr('readonly', true);
+            editProfileButton.html("Изменить информацию")
+            editProfileButton.attr("onclick", "editProfile()")
+
+            let descriptionProfileLabel = $("p[name='description-profile']")[0];
+            if(descriptionField.val() !== "")
+                descriptionProfileLabel.innerText = descriptionField.val()
+            else
+                descriptionProfileLabel.innerText = "Пока тут пусто :("
+            showToast("Успешно")
+        },
+        error: function (error) {
+            showToast(error.responseText)
         }
     });
 }

@@ -61,7 +61,7 @@ public class User implements UserDetails {
     /**
      * Описание пользователя
      */
-    @Column(name = "description")
+    @Column(name = "description", length = 2048)
     private String description;
 
     /**

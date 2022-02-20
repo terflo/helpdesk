@@ -1,7 +1,6 @@
 package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.Image;
-import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.UserDTO;
@@ -12,6 +11,7 @@ import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
 import com.terflo.helpdesk.model.services.ImageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
+import com.terflo.helpdesk.utils.RegexUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +35,8 @@ public class UserController {
 
     private final static List<String> allowedContent = Arrays.asList("image/png", "image/jpeg", "image/jpg");
 
+    private final RegexUtil regexUtil;
+
     private final UserService userService;
 
     private final UserDTOFactory userDTOFactory;
@@ -46,7 +47,8 @@ public class UserController {
 
     private final UserRequestDTOFactory userRequestDTOFactory;
 
-    public UserController(UserService userService, UserDTOFactory userDTOFactory, ImageService imageService, UserRequestService userRequestService, UserRequestDTOFactory userRequestDTOFactory) {
+    public UserController(RegexUtil regexUtil, UserService userService, UserDTOFactory userDTOFactory, ImageService imageService, UserRequestService userRequestService, UserRequestDTOFactory userRequestDTOFactory) {
+        this.regexUtil = regexUtil;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.imageService = imageService;
@@ -131,12 +133,43 @@ public class UserController {
         }
     }
 
+    /**
+     * POST запрос на обновлении информации о пользователе
+     * @param id уникальный индификатор пользователя
+     * @param userDTO новая информация о пользователе
+     * @return HTTP ответ
+     */
     @PostMapping("/user/{id}/update")
     public ResponseEntity<String> updateUser(@PathVariable(name = "id") Long id, @RequestBody UserDTO userDTO) {
 
         try {
             User user = userService.findUserById(id);
 
+            //Проверка username на изменения
+            if(!userDTO.username.equals(user.getUsername())) {
+                //Проверка username на уникальность
+                if (userService.userIsExistByUsername(userDTO.username))
+                    return ResponseEntity.badRequest().body("\"" + "Такое имя уже занято" + "\"");
+                //Проверка username на корректность (Regex)
+                if (!regexUtil.checkUsername(userDTO.username))
+                    return ResponseEntity.badRequest().body("Некорректное имя пользователя");
+            }
+
+            //Проверка email на изменения
+            if(!userDTO.email.equals(user.getEmail())) {
+                //Проверка email на уникальность
+                if (userService.userIsExistByEmail(userDTO.email))
+                    return ResponseEntity.badRequest().body("\"" + "Такой email уже занят" + "\"");
+                //Проверка email на корректность (Regex)
+                if (!regexUtil.checkEmail(userDTO.email))
+                    return ResponseEntity.badRequest().body("Некорректный email");
+            }
+
+            //Проверка description на изменения
+            if(!userDTO.description.equals(user.getDescription()))
+                user.setDescription(userDTO.description);
+
+            userService.updateUser(user);
 
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
