@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <head>
         <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
         <meta charset="UTF-8" content="text/html">
         <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{~/css/profile.css}" rel="stylesheet" type="text/css"/>
         <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
+        <script th:src="@{~/js/toast.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{~/js/jQuery.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{~/js/profile.js}" rel="script" type="text/javascript"></script>
         <title>Профиль</title>
@@ -26,6 +27,10 @@
                                                  id="user-avatar">
                                         </div>
                                         <h5 id="username-profile" th:text="${user?.username}" class="user-name">Username</h5><h6 id="email-profile" th:text="${user?.email}" class="user-email">Email</h6>
+                                        <br>
+                                        <button style="margin: 5px" class="btn btn-danger" th:if="${#lists.contains(user?.roles, 'ROLE_ADMIN')}">Администратор</button>
+                                        <button style="margin: 5px" class="btn btn-primary" th:if="${#lists.contains(user?.roles, 'ROLE_OPERATOR')}">Оператор</button>
+                                        <button style="margin: 5px" class="btn btn-success" th:if="${#lists.contains(user?.roles, 'ROLE_USER')}">Пользователь</button>
                                     </div>
                                     <div class="about"><h5>Обо мне</h5>
                                         <p id="description-profile" th:if="${not #strings.isEmpty(user?.description)}" th:text="${user?.description}"></p>
@@ -38,7 +43,7 @@
                     <div class="col-xl-9 col-lg-9 col-md-12 col-sm-12 col-12">
                         <div class="card h-100">
                             <div class="card-body">
-                                <div class="row gutters">
+                                <div th:if="${user?.username} == ${clientUsername} OR ${isAdmin} == true" class="row gutters">
                                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"><h6 class="mb-2 text-primary">
                                         Личная информация</h6></div>
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
@@ -62,7 +67,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row gutters">
+                                <div th:if="${user?.username} == ${clientUsername} OR ${isAdmin} == true" class="row gutters">
                                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"><h6
                                             class="mt-3 mb-2 text-primary">Общая информация</h6></div>
                                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
@@ -78,13 +83,55 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row gutters">
+                                <div th:if="${user?.username} == ${clientUsername} OR ${isAdmin} == true" class="row gutters">
                                     <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                                         <div class="text-right">
-                                            <button onclick="editProfile();" type="button" id="submit_edit" name="submit" class="btn btn-primary">Изменить</button>
-                                            <button th:onclick="'uploadAvatar(' + ${user?.id} + ');'" type="button" id="avatar_edit" name="submit" class="btn btn-primary">Изменить изображение</button>
+                                            <button onclick="editProfile();" type="button" id="submit_edit" name="submit" class="btn btn-primary">Изменить информацию</button>
+                                            <button th:onclick="'uploadAvatar(' + ${user?.id} + ');'" type="button" id="avatar_edit" name="submit" class="btn btn-primary">Изменить аватар</button>
                                             <br><br>
-                                            <input class="form-control" type="file" id="avatar-file">
+                                            <input class="form-control" type="file" id="avatar-file" accept=".jpg,.jpeg,.png">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row gutters">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                            <h6 class="mt-3 mb-2 text-primary">Обращения пользователя</h6>
+                                        </div>
+                                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                            <table class="table table-responsive" style="text-align: center; vertical-align: middle;">
+                                                <caption th:text="'Всего записей: ' + ${requests.size()}"></caption>
+                                                <thead>
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th scope="col">Наименование</th>
+                                                    <th scope="col">Статус</th>
+                                                    <th scope="col">Приоритет</th>
+                                                    <th scope="col">Оператор</th>
+                                                    <th scope="col">Просмотреть</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody th:if="not ${#lists.isEmpty(requests)}" th:each="request : ${requests}" style="overflow-y: scroll">
+                                                <tr>
+                                                    <td th:text="${request?.id}"></td>
+                                                    <td th:text="${request?.name}"></td>
+                                                    <td th:switch="${request?.status}">
+                                                        <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}">В работе</label>
+                                                        <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>
+                                                        <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}">Начато</label>
+                                                    </td>
+                                                    <td th:switch="${request?.priority}">
+                                                        <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).LOW}">Низкий</label>
+                                                        <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).NORMAL}">Средний</label>
+                                                        <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).MAX}">Высокий</label>
+                                                    </td>
+                                                    <td th:text="${request?.operator?.username}"></td>
+                                                    <td>
+                                                        <a th:href="'/requests/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>

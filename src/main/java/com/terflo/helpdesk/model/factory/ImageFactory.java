@@ -10,6 +10,6 @@ import java.io.IOException;
 public class ImageFactory {
 
     public Image getImage(MultipartFile file) throws IOException {
-        return new Image(null, file.getBytes());
+        return new Image(null, file.getBytes(), file.getContentType());
     }
 }

@@ -1,28 +1,40 @@
 package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.Image;
+import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
+import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.UserDTO;
 import com.terflo.helpdesk.model.exceptions.ImageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.factory.UserDTOFactory;
+import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
 import com.terflo.helpdesk.model.services.ImageService;
+import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Контроллер для работы с пользователями
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.1
  */
 @Controller
 public class UserController {
+
+    private final static List<String> allowedContent = Arrays.asList("image/png", "image/jpeg", "image/jpg");
 
     private final UserService userService;
 
@@ -30,10 +42,16 @@ public class UserController {
 
     private final ImageService imageService;
 
-    public UserController(UserService userService, UserDTOFactory userDTOFactory, ImageService imageService) {
+    private final UserRequestService userRequestService;
+
+    private final UserRequestDTOFactory userRequestDTOFactory;
+
+    public UserController(UserService userService, UserDTOFactory userDTOFactory, ImageService imageService, UserRequestService userRequestService, UserRequestDTOFactory userRequestDTOFactory) {
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.imageService = imageService;
+        this.userRequestService = userRequestService;
+        this.userRequestDTOFactory = userRequestDTOFactory;
     }
 
     /**
@@ -44,9 +62,21 @@ public class UserController {
      * @throws UserNotFoundException возникает в случае ненахождении пользователя в базе данных
      */
     @GetMapping("/user/{username}")
-    public String userProfile(@PathVariable String username, Model model) throws UserNotFoundException {
+    public String userProfile(@PathVariable String username, Model model, Authentication authentication) throws UserNotFoundException {
+
+        boolean clientIsContainsAdminRole = authentication
+                .getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()).contains("ROLE_ADMIN");
+
+        model.addAttribute("clientUsername", authentication.getName());
+        model.addAttribute("isAdmin", clientIsContainsAdminRole);
 
         User user = userService.findUserByUsername(username);
+        List<UserRequest> requests = userRequestService.findAllUserRequestsByUser(user);
+        model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
+
         try {
             model.addAttribute("avatar", imageService.getImage(user.getAvatar_id()));
         } catch (ImageNotFoundException e) {
@@ -65,6 +95,9 @@ public class UserController {
      */
     @PostMapping("/user/{id}/updateAvatar")
     public ResponseEntity<String> updateUserAvatar(@PathVariable(name = "id") Long id, @RequestParam MultipartFile file) {
+
+        if(!allowedContent.contains(file.getContentType()))
+            return ResponseEntity.badRequest().body("\"Не поддерживаемый тип изображения\"");
 
         try {
             User user = userService.findUserById(id);
@@ -92,18 +125,18 @@ public class UserController {
         try {
             User user = userService.findUserById(id);
             Image image = imageService.getImage(user.getAvatar_id());
-            return ResponseEntity.ok("\"data:image/png;base64," + image.getBase64Image() + "\"");
+            return ResponseEntity.ok("\"data:" + image.getType() + ";base64," + image.getBase64Image() + "\"");
         } catch (UserNotFoundException | ImageNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PostMapping("/user/update")
-    public ResponseEntity<String> updateUser(UserDTO userDTO) {
+    @PostMapping("/user/{id}/update")
+    public ResponseEntity<String> updateUser(@PathVariable(name = "id") Long id, @RequestBody UserDTO userDTO) {
 
         try {
-            //TODO: Дописать
-            User user = userService.findUserByUsername(userDTO.username);
+            User user = userService.findUserById(id);
+
 
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -111,7 +144,6 @@ public class UserController {
 
         return ResponseEntity.ok("\"OK\"");
     }
-
 
     /**
      * Mapping для вывода списка всех пользователей

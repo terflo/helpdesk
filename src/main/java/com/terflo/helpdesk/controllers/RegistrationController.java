@@ -105,7 +105,7 @@ public class RegistrationController {
      * @param request запрос пользователя
      * @return результат верфикации данных
      */
-    @RequestMapping(method = RequestMethod.POST, value = "/api/checkRegistrationData")
+    @RequestMapping(method = RequestMethod.POST, value = "/registration/checkUserData")
     @ResponseBody
     public ResponseEntity<RegistrationResponse> checkRegistrationData(@RequestBody RegistrationRequest request) {
 

@@ -11,7 +11,7 @@ function showToast(text) {
 function checkRegistrationData() {
     $.ajax({
         type: "POST",
-        url: "/api/checkRegistrationData",
+        url: "/registration/checkUserData",
         data: JSON.stringify({
             username: $("#username").val(),
             email: $("#email").val(),

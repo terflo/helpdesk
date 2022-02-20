@@ -21,6 +21,9 @@ public class Image {
     @Column(name = "bytes")
     private byte[] bytes;
 
+    @Column(name = "type", nullable = false)
+    private String type;
+
     public String getBase64Image() {
         return Base64.getEncoder().encodeToString(this.bytes);
     }

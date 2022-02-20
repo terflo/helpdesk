@@ -25,12 +25,36 @@ function editProfile() {
     emailField.removeAttr("readonly")
     descriptionField.removeAttr("readonly")
 
-    editProfileButton.attr("value", "Обновить")
+    editProfileButton.html("Отправить")
     editProfileButton.attr("onclick", "updateProfile()")
 }
 
 function updateProfile() {
 
+    //console.log(usernameField.val())
+
+    $.ajax({
+        type: "POST",
+        url: "/user/" + id + "/updateAvatar",
+        cache: true,
+        timeout: 600000,
+        data: JSON.stringify({
+            username: usernameField.val(),
+            email: emailField.val(),
+            description: descriptionField.val()
+        }),
+        dataType: "json",
+        contentType: false,
+        processData: false,
+        async: true,
+        success: function (data) {
+            if(data !== "OK") {
+                console.log(data)
+            } else {
+                setAvatar(id)
+            }
+        }
+    });
 }
 
 function uploadAvatar(id) {
@@ -75,4 +99,14 @@ function setAvatar(id) {
             $("#user-avatar").attr('src', data)
         }
     });
+}
+
+function showToast(text) {
+    new Toast({
+        title: false,
+        text: text,
+        theme: 'light',
+        autohide: true,
+        interval: 5000
+    })
 }
