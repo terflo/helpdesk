@@ -8,12 +8,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class DecisionFactory {
+public class DecisionDTOFactory {
 
-    private final UserFactory userFactory;
+    private final UserDTOFactory userDTOFactory;
 
-    public DecisionFactory(UserFactory userFactory) {
-        this.userFactory = userFactory;
+    public DecisionDTOFactory(UserDTOFactory userDTOFactory) {
+        this.userDTOFactory = userDTOFactory;
     }
 
     public DecisionDTO convertToDecisionDTO(Decision decision) {
@@ -22,7 +22,7 @@ public class DecisionFactory {
                 decision.getName(),
                 decision.getAnswer(),
                 decision.getDate(),
-                userFactory.convertToUserDTO(decision.getAuthor())
+                userDTOFactory.convertToUserDTO(decision.getAuthor())
         );
     }
 

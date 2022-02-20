@@ -38,4 +38,9 @@ public class UserDTO implements Serializable {
      */
     public Set<String> roles;
 
+    /**
+     * Описание пользователя
+     */
+    public String description;
+
 }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class UserFactory {
+public class UserDTOFactory {
 
     /**
      * Метод преобразует объект User в UserDTO
@@ -24,7 +24,8 @@ public class UserFactory {
                 user.getRoles()
                         .stream()
                         .map((Role::getName))
-                        .collect(Collectors.toSet())
+                        .collect(Collectors.toSet()),
+                user.getDescription()
         );
     }
 

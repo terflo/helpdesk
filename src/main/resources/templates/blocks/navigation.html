@@ -39,10 +39,10 @@
                     </div>
                     <div sec:authorize="isAuthenticated()" class="dropdown">
                         <button class="nav-item btn btn-bd-light dropdown-toggle" id="navbarDropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="d-none d-lg-inline text-white">Мой аккаунт</span>
+                            <span class="text-white">Пользователь </span><span id="account_name" class="d-none d-lg-inline text-white" sec:authentication="name">Мой аккаунт</span>
                         </button>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                            <li><a class="dropdown-item" href="#">Профиль</a></li>
+                            <li><a id="profile_link" class="dropdown-item">Профиль</a></li>
                             <li><a class="dropdown-item" href="#">Настройки</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" th:href="@{~/logout}">Выйти</a></li>
@@ -51,6 +51,9 @@
                 </div>
             </div>
         </nav>
+        <script>
+            document.getElementById("profile_link").setAttribute("href", "/user/" + document.getElementById("account_name").innerText);
+        </script>
     </div>
 
 </html>

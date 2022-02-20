@@ -8,11 +8,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
-import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,14 +30,14 @@ public class User implements UserDetails {
      * Индификатор пользователя
      */
     @Id
-    @Column(name = "id")
+    @Column(name = "id", unique = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
      * Имя пользователя
      */
-    @Column(name = "username", nullable = false)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     /**
@@ -52,7 +49,7 @@ public class User implements UserDetails {
     /**
      * Почта пользователя
      */
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     /**
@@ -60,6 +57,18 @@ public class User implements UserDetails {
      */
     @Column(name = "date", nullable = false)
     private Date date;
+
+    /**
+     * Описание пользователя
+     */
+    @Column(name = "description")
+    private String description;
+
+    /**
+     * Аватар пользователя (base64)
+     */
+    @Column(name = "avatar_id")
+    private Long avatar_id;
 
     /**
      * Множество ролей пользователя

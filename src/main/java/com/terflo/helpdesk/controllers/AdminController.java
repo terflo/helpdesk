@@ -7,8 +7,8 @@ import com.terflo.helpdesk.model.exceptions.DecisionNameAlreadyExistsException;
 import com.terflo.helpdesk.model.exceptions.DecisionNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
-import com.terflo.helpdesk.model.factory.DecisionFactory;
-import com.terflo.helpdesk.model.factory.UserRequestFactory;
+import com.terflo.helpdesk.model.factory.DecisionDTOFactory;
+import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
 import com.terflo.helpdesk.model.services.DecisionService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
@@ -23,7 +23,7 @@ import java.util.List;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.5
  * Контроллер админ-панели для управления системой
  */
 @Controller
@@ -33,18 +33,18 @@ public class AdminController {
 
     private final DecisionService decisionService;
 
-    private final DecisionFactory decisionFactory;
+    private final DecisionDTOFactory decisionDTOFactory;
 
     private final UserRequestService userRequestService;
 
-    private final UserRequestFactory userRequestFactory;
+    private final UserRequestDTOFactory userRequestDTOFactory;
 
-    public AdminController(UserService userService, DecisionService decisionService, DecisionFactory decisionFactory, UserRequestService userRequestService, UserRequestFactory userRequestFactory) {
+    public AdminController(UserService userService, DecisionService decisionService, DecisionDTOFactory decisionDTOFactory, UserRequestService userRequestService, UserRequestDTOFactory userRequestDTOFactory) {
         this.userService = userService;
         this.decisionService = decisionService;
-        this.decisionFactory = decisionFactory;
+        this.decisionDTOFactory = decisionDTOFactory;
         this.userRequestService = userRequestService;
-        this.userRequestFactory = userRequestFactory;
+        this.userRequestDTOFactory = userRequestDTOFactory;
     }
 
     /**
@@ -64,7 +64,7 @@ public class AdminController {
      */
     @GetMapping("/admin/decisions")
     public String decisions(Model model) {
-        model.addAttribute("decisions", decisionFactory.convertToDecisionDTO(decisionService.findAllDecisions()));
+        model.addAttribute("decisions", decisionDTOFactory.convertToDecisionDTO(decisionService.findAllDecisions()));
         return "admin-decisions";
     }
 
@@ -128,7 +128,7 @@ public class AdminController {
     @GetMapping("/admin/requests")
     public String requests(Model model) {
         List<UserRequest> requests = userRequestService.findAll();
-        model.addAttribute("requests", userRequestFactory.convertToUserRequestDTO(requests));
+        model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
         return "admin-requests";
     }
 
@@ -143,66 +143,6 @@ public class AdminController {
             userRequestService.deleteByID(id);
         } catch (UserRequestNotFoundException e) {
             ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok("OK");
-    }
-
-    /**
-     * Mapping для вывода списка всех пользователей
-     * @param model переменные для отрисовки страницы
-     * @return страница с списком пользователей
-     */
-    @GetMapping("/admin/users")
-    public String getUsers(Model model) {
-        model.addAttribute("users", userService.getAllUsers());
-        model.addAttribute("activeUsers", userService.getActiveUsernamesFromSessionRegistry());
-        return "admin-users";
-    }
-
-    /**
-     * Mapping для вывода конкретной информации по пользователю
-     * @param id уникальный индификатор пользователя
-     * @param model переменные для отрисовки страницы
-     * @return страница с информацией по конкретному пользователю
-     */
-    @GetMapping("/admin/users/{id}")
-    public String getUserDetail(@PathVariable(value = "id") Long id, Model model){
-        try {
-            model.addAttribute("user", userService.findUserById(id));
-        } catch (UserNotFoundException e) {
-            model.addAttribute("messageIsExist", true);
-            model.addAttribute("message", e.getMessage());
-        }
-        return "userDetail";
-    }
-
-    /**
-     * Mapping для удаления пользователя из базы методом post
-     * @param id уникальный индификатор пользователя
-     * @param model переменные для отрисовки страницы
-     * @return возврат на страницу с списком пользователей
-     */
-    @DeleteMapping("/admin/users/delete/{id}")
-    public @ResponseBody ResponseEntity<String> deleteUser(@PathVariable(value = "id") Long id, Model model) {
-        try {
-            userService.deleteUserById(id);
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok("OK");
-    }
-
-    /**
-     * Mapping post запроса для переключения блокировки пользователя
-     * @param id уникальный индификатор пользователя
-     * @return HTTP ответ
-     */
-    @PostMapping("/admin/users/switchLock/{id}")
-    public ResponseEntity<String> switchLockUser(@PathVariable(value = "id") Long id) {
-        try {
-            userService.switchLockUserById(id);
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok("OK");
     }

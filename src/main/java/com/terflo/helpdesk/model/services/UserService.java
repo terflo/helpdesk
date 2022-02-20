@@ -1,6 +1,7 @@
 package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.User;
+import com.terflo.helpdesk.model.entity.dto.UserDTO;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.repositories.RoleRepository;
 import com.terflo.helpdesk.model.repositories.UserRepository;

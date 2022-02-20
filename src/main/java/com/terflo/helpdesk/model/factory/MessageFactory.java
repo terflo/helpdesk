@@ -26,12 +26,12 @@ public class MessageFactory {
 
     private final UserRequestService userRequestService;
 
-    private final UserFactory userFactory;
+    private final UserDTOFactory userDTOFactory;
 
-    public MessageFactory(UserService userService, UserRequestService userRequestService, UserFactory userFactory) {
+    public MessageFactory(UserService userService, UserRequestService userRequestService, UserDTOFactory userDTOFactory) {
         this.userService = userService;
         this.userRequestService = userRequestService;
-        this.userFactory = userFactory;
+        this.userDTOFactory = userDTOFactory;
     }
 
     public Message convertToMessage(MessageDTO messageDTO) throws UserNotFoundException, UserRequestNotFoundException {
@@ -46,7 +46,7 @@ public class MessageFactory {
 
     public MessageDTO convertToMessageDTO(Message message) {
         return new MessageDTO(
-                userFactory.convertToUserDTO(message.getSender()),
+                userDTOFactory.convertToUserDTO(message.getSender()),
                 message.getUserRequest().getId(),
                 message.getMessage(),
                 message.getDate(),

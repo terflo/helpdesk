@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
+        <meta charset="UTF-8" content="text/html">
+        <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
+        <link th:href="@{~/css/profile.css}" rel="stylesheet" type="text/css"/>
+        <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
+        <script th:src="@{~/js/jQuery.js}" rel="script" type="text/javascript"></script>
+        <script th:src="@{~/js/profile.js}" rel="script" type="text/javascript"></script>
+        <title>Профиль</title>
+    </head>
+    <body>
+        <div th:insert="blocks/navigation"></div>
+        <main>
+            <div class="container">
+                <div class="row gutters">
+                    <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="account-settings">
+                                    <div class="user-profile">
+                                        <div class="user-avatar">
+                                            <img th:src="${avatar == null} ? @{~/img/user.png} : 'data:image/png;base64,' + ${avatar.getBase64Image()}"
+                                                 alt="User avatar"
+                                                 id="user-avatar">
+                                        </div>
+                                        <h5 id="username-profile" th:text="${user?.username}" class="user-name">Username</h5><h6 id="email-profile" th:text="${user?.email}" class="user-email">Email</h6>
+                                    </div>
+                                    <div class="about"><h5>Обо мне</h5>
+                                        <p id="description-profile" th:if="${not #strings.isEmpty(user?.description)}" th:text="${user?.description}"></p>
+                                        <p id="description-profile-empty" th:unless="${not #strings.isEmpty(user?.description)}">Пока тут пусто :(</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-9 col-lg-9 col-md-12 col-sm-12 col-12">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <div class="row gutters">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"><h6 class="mb-2 text-primary">
+                                        Личная информация</h6></div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                        <div class="form-group"><label for="username">Имя пользователя</label>
+                                            <input
+                                                    th:value="${user?.username}"
+                                                    type="text"
+                                                   class="form-control"
+                                                   id="username"
+                                                   readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                        <div class="form-group"><label for="eMail">Email</label>
+                                            <input
+                                                    th:value="${user?.email}"
+                                                    type="email"
+                                                   class="form-control"
+                                                   id="eMail"
+                                                   readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row gutters">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12"><h6
+                                            class="mt-3 mb-2 text-primary">Общая информация</h6></div>
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div class="form-group"><label for="description">Описание</label>
+                                            <textarea type="name"
+                                                   class="form-control"
+                                                   id="description"
+                                                   placeholder="Enter Street"
+                                                    style="resize: none;"
+                                                    rows="6"
+                                                    readonly>
+                                            </textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row gutters">
+                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                        <div class="text-right">
+                                            <button onclick="editProfile();" type="button" id="submit_edit" name="submit" class="btn btn-primary">Изменить</button>
+                                            <button th:onclick="'uploadAvatar(' + ${user?.id} + ');'" type="button" id="avatar_edit" name="submit" class="btn btn-primary">Изменить изображение</button>
+                                            <br><br>
+                                            <input class="form-control" type="file" id="avatar-file">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <div th:insert="blocks/footer"></div>
+    </body>
+    <script>
+        init();
+    </script>
+</html>

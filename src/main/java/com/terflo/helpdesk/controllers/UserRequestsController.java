@@ -7,8 +7,8 @@ import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import com.terflo.helpdesk.model.exceptions.*;
 import com.terflo.helpdesk.model.factory.MessageFactory;
-import com.terflo.helpdesk.model.factory.UserFactory;
-import com.terflo.helpdesk.model.factory.UserRequestFactory;
+import com.terflo.helpdesk.model.factory.UserDTOFactory;
+import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
@@ -41,22 +41,22 @@ public class UserRequestsController {
 
     private final MessageService messageService;
 
-    private final UserRequestFactory userRequestFactory;
+    private final UserRequestDTOFactory userRequestDTOFactory;
 
     private final SimpMessagingTemplate messagingTemplate;
 
     private final MessageFactory messageFactory;
 
-    private final UserFactory userFactory;
+    private final UserDTOFactory userDTOFactory;
 
-    public UserRequestsController(UserService userService, UserRequestService userRequestService, MessageService messageService, UserRequestFactory userRequestFactory, SimpMessagingTemplate messagingTemplate, MessageFactory messageFactory, UserFactory userFactory) {
+    public UserRequestsController(UserService userService, UserRequestService userRequestService, MessageService messageService, UserRequestDTOFactory userRequestDTOFactory, SimpMessagingTemplate messagingTemplate, MessageFactory messageFactory, UserDTOFactory userDTOFactory) {
         this.userService = userService;
         this.userRequestService = userRequestService;
         this.messageService = messageService;
-        this.userRequestFactory = userRequestFactory;
+        this.userRequestDTOFactory = userRequestDTOFactory;
         this.messagingTemplate = messagingTemplate;
         this.messageFactory = messageFactory;
-        this.userFactory = userFactory;
+        this.userDTOFactory = userDTOFactory;
     }
 
     /**
@@ -70,8 +70,8 @@ public class UserRequestsController {
     public String requests(Authentication authentication, Model model) throws UserNotFoundException {
         User user = userService.findUserByUsername(authentication.getName());
         List<UserRequest> userRequests = userRequestService.findAllUserRequestsByUser(user);
-        model.addAttribute("user", userFactory.convertToUserDTO(user));
-        model.addAttribute("requests", userRequestFactory.convertToUserRequestDTO(userRequests));
+        model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
+        model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(userRequests));
         return "requests";
     }
 
@@ -204,8 +204,8 @@ public class UserRequestsController {
         User user = userService.findUserByUsername(authentication.getName());
         List<Message> messages = messageService.findMessagesByUserRequest(userRequest);
 
-        model.addAttribute("userRequest", userRequestFactory.convertToUserRequestDTO(userRequest));
-        model.addAttribute("user", userFactory.convertToUserDTO(user));
+        model.addAttribute("userRequest", userRequestDTOFactory.convertToUserRequestDTO(userRequest));
+        model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
         model.addAttribute("messages", messageFactory.convertToMessageDTO(messages));
 
         return "request";

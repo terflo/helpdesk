@@ -13,19 +13,19 @@ import java.util.stream.Collectors;
  * @version 1.3
  */
 @Component
-public class UserRequestFactory {
+public class UserRequestDTOFactory {
 
-    private final UserFactory userFactory;
+    private final UserDTOFactory userDTOFactory;
 
-    public UserRequestFactory(UserFactory userFactory) {
-        this.userFactory = userFactory;
+    public UserRequestDTOFactory(UserDTOFactory userDTOFactory) {
+        this.userDTOFactory = userDTOFactory;
     }
 
     public UserRequestDTO convertToUserRequestDTO(UserRequest userRequest) {
             return new UserRequestDTO(
                     userRequest.getId(),
-                    userRequest.getOperator() != null ? userFactory.convertToUserDTO(userRequest.getOperator()) : null,
-                    userRequest.getUser() != null ? userFactory.convertToUserDTO(userRequest.getUser()) : null,
+                    userRequest.getOperator() != null ? userDTOFactory.convertToUserDTO(userRequest.getOperator()) : null,
+                    userRequest.getUser() != null ? userDTOFactory.convertToUserDTO(userRequest.getUser()) : null,
                     userRequest.getStatus(),
                     userRequest.getPriority(),
                     userRequest.getName(),

@@ -1,6 +1,6 @@
 package com.terflo.helpdesk.controllers;
 
-import com.terflo.helpdesk.model.factory.DecisionFactory;
+import com.terflo.helpdesk.model.factory.DecisionDTOFactory;
 import com.terflo.helpdesk.model.services.DecisionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,11 +16,11 @@ public class MainController {
 
     private final DecisionService decisionService;
 
-    private final DecisionFactory decisionFactory;
+    private final DecisionDTOFactory decisionDTOFactory;
 
-    public MainController(DecisionService decisionService, DecisionFactory decisionFactory) {
+    public MainController(DecisionService decisionService, DecisionDTOFactory decisionDTOFactory) {
         this.decisionService = decisionService;
-        this.decisionFactory = decisionFactory;
+        this.decisionDTOFactory = decisionDTOFactory;
     }
 
     /**
@@ -30,7 +30,7 @@ public class MainController {
      */
     @GetMapping("/")
     public String main(Model model) {
-        model.addAttribute("decisions", decisionFactory.convertToDecisionDTO(decisionService.findAllDecisions()));
+        model.addAttribute("decisions", decisionDTOFactory.convertToDecisionDTO(decisionService.findAllDecisions()));
         return "index";
     }
 }
