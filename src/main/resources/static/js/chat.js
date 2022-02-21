@@ -50,13 +50,14 @@ function sendMessage() {
 /* Функция отображения полученого сообщения */
 function showMessageOutput(messageOutput) {
     let message = getMessage(messageOutput['messageID']);
+    let avatar = getAvatar(message.sender.id)
     let element;
     if(message.sender.username === user.username) {
         element = $('<li class="chat-right">')
             .append('<div class="chat-hour">' + $.format.date(new Date(message['date']), "HH:mm") + '<span class="fa fa-check-circle"></span></div>')
             .append('<div class="chat-text">' + message['message'] + '</div>')
             .append('<div class="chat-avatar">\n' +
-                '                                <img src="../img/support.png" alt="Avatar">\n' +
+                '                                <img src="' + avatar + '" alt="Avatar">\n' +
                 '                                <div class="chat-name">' + message.sender.username + '</div>\n' +
                 '                            </div>')
     } else {
@@ -76,7 +77,7 @@ function showMessageOutput(messageOutput) {
 
 /* Получение данных сообщения с сервера */
 function getMessage(messageID) {
-    let returnResult;
+    let returnResult
     $.ajax({
         type: "GET",
         url: "/messages/" + messageID,
@@ -84,8 +85,29 @@ function getMessage(messageID) {
         async: false,
         timeout: 600000,
         success: function (data) {
-            returnResult = data;
+            returnResult = data
         }
     });
-    return returnResult;
+    return returnResult
+}
+
+function getAvatar(id) {
+    let base64avatar
+    $.ajax({
+        type: "POST",
+        url: "/user/" + id + "/getAvatar",
+        cache: true,
+        timeout: 600000,
+        dataType: "json",
+        contentType: false,
+        processData: false,
+        async: false,
+        success: function (data) {
+            base64avatar = data
+        },
+        error: function (data) {
+            alert(data.responseText)
+        }
+    });
+    return base64avatar
 }

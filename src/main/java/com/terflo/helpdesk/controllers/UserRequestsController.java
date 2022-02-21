@@ -1,14 +1,12 @@
 package com.terflo.helpdesk.controllers;
 
-import com.terflo.helpdesk.model.entity.Message;
-import com.terflo.helpdesk.model.entity.Notification;
-import com.terflo.helpdesk.model.entity.User;
-import com.terflo.helpdesk.model.entity.UserRequest;
+import com.terflo.helpdesk.model.entity.*;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import com.terflo.helpdesk.model.exceptions.*;
 import com.terflo.helpdesk.model.factory.MessageFactory;
 import com.terflo.helpdesk.model.factory.UserDTOFactory;
 import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
+import com.terflo.helpdesk.model.services.ImageService;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
@@ -18,14 +16,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Danil Krivoschiokov
@@ -41,6 +34,8 @@ public class UserRequestsController {
 
     private final MessageService messageService;
 
+    private final ImageService imageService;
+
     private final UserRequestDTOFactory userRequestDTOFactory;
 
     private final SimpMessagingTemplate messagingTemplate;
@@ -49,10 +44,11 @@ public class UserRequestsController {
 
     private final UserDTOFactory userDTOFactory;
 
-    public UserRequestsController(UserService userService, UserRequestService userRequestService, MessageService messageService, UserRequestDTOFactory userRequestDTOFactory, SimpMessagingTemplate messagingTemplate, MessageFactory messageFactory, UserDTOFactory userDTOFactory) {
+    public UserRequestsController(UserService userService, UserRequestService userRequestService, MessageService messageService, ImageService imageService, UserRequestDTOFactory userRequestDTOFactory, SimpMessagingTemplate messagingTemplate, MessageFactory messageFactory, UserDTOFactory userDTOFactory) {
         this.userService = userService;
         this.userRequestService = userRequestService;
         this.messageService = messageService;
+        this.imageService = imageService;
         this.userRequestDTOFactory = userRequestDTOFactory;
         this.messagingTemplate = messagingTemplate;
         this.messageFactory = messageFactory;
@@ -81,7 +77,7 @@ public class UserRequestsController {
      */
     @GetMapping("/requests/add")
     public String requests_add() {
-        return "add-request";
+        return "request-add";
     }
 
     /**
@@ -110,8 +106,9 @@ public class UserRequestsController {
      */
     @GetMapping("/requests/free")
     public String freeRequests(Model model) {
-        model.addAttribute("requests", userRequestService.findAllNonOperatorRequests());
-        return "free-requests";
+        List<UserRequest> requests = userRequestService.findAllNonOperatorRequests();
+        model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
+        return "requests-free";
     }
 
     /**
@@ -126,7 +123,7 @@ public class UserRequestsController {
         User operator = userService.findUserByUsername(authentication.getName());
         model.addAttribute("requests", userRequestService.findUserRequestsByOperator(operator));
         model.addAttribute("name", operator.getUsername());
-        return "supervised";
+        return "requests-supervised";
     }
 
     /**
@@ -158,7 +155,7 @@ public class UserRequestsController {
         if(errors.isEmpty()) {
             userRequest.setDate(new Date());
             userRequestService.saveUserRequest(userRequest);
-            return ResponseEntity.ok("\"OK\"");
+            return ResponseEntity.ok().body("\"\"");
         } else {
             return ResponseEntity.badRequest().body(errors.toString());
         }
@@ -187,7 +184,22 @@ public class UserRequestsController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok().body("\"\"");
+    }
+
+    /**
+     * POST запрос на удаление обращения пользователя
+     * @param id уникальный индификатор обращения
+     * @return страница с обращениями
+     */
+    @DeleteMapping("/admin/requests/delete/{id}")
+    public ResponseEntity<String> deleteRequest(@PathVariable(value = "id") Long id) {
+        try {
+            userRequestService.deleteByID(id);
+        } catch (UserRequestNotFoundException e) {
+            ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -203,10 +215,22 @@ public class UserRequestsController {
         UserRequest userRequest = userRequestService.findUserRequestByID(id);
         User user = userService.findUserByUsername(authentication.getName());
         List<Message> messages = messageService.findMessagesByUserRequest(userRequest);
+        HashMap<Long, String> avatarsBase64 = new HashMap<>();
+
+        for (Message message : messages) {
+            Long senderID = message.getSender().getId();
+            try {
+                Image image = imageService.getImage(message.getSender().getAvatar_id());
+                avatarsBase64.put(senderID, "data:" + image.getType() + ";base64," + image.getBase64Image());
+            } catch (ImageNotFoundException e) {
+                avatarsBase64.put(senderID, null);
+            }
+        }
 
         model.addAttribute("userRequest", userRequestDTOFactory.convertToUserRequestDTO(userRequest));
         model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
         model.addAttribute("messages", messageFactory.convertToMessageDTO(messages));
+        model.addAttribute("avatars", avatarsBase64);
 
         return "request";
     }

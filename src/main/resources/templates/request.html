@@ -5,7 +5,6 @@
         <title>Запрос</title>
 
         <link th:href="@{../css/bootstrap.css}" rel="stylesheet" type="text/css"/>
-        <link th:href="@{../css/requests.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{../css/chat.css}" rel="stylesheet" type="text/css"/>
 
         <script th:src="@{../js/bootstrap.js}" rel="script" type="text/javascript"></script>
@@ -27,7 +26,7 @@
         <div th:insert="blocks/navigation"></div>
 
         <main class="w-50 mx-auto">
-            <div class="container col-md-12 col-lg-12">
+            <div class="container container-request col-md-12 col-lg-12">
             <h2 class="h2 mb-3" th:text="'Обращение #' + ${userRequest.id}" style="margin-left: 10px"></h2>
                 <div class="row g-3">
                     <div class="col-sm-6">
@@ -47,9 +46,9 @@
                     <div class="col-sm-6">
                         <label class="row form-label">Статус</label>
                         <div th:switch="${userRequest.status}">
-                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}" class="row form-control" name="requestName" readonly th:value="IN_PROCESS" type="text">
-                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}" class="row form-control" name="requestName" readonly th:value="Начато" type="text">
-                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}" class="row form-control" name="requestName" readonly th:value="Закрыто" type="text">
+                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}" class="row form-control" name="requestName" readonly th:value="'В процессе'" type="text">
+                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}" class="row form-control" name="requestName" readonly th:value="'Начато'" type="text">
+                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}" class="row form-control" name="requestName" readonly th:value="'Закрыто'" type="text">
                         </div>
                     </div>
                     <div class="col-sm-6">
@@ -74,19 +73,21 @@
                         <li class="chat-right" th:each="message : ${messages}" th:attr="class=${message.sender.username == user.username ? 'chat-right' : 'chat-left'}">
                             <div th:unless="${message?.sender.username != user.username}" class="chat-hour" th:text="${#dates.format(message?.date, 'HH:mm')}"> <span class="fa fa-check-circle"></span></div>
                             <div th:if="${message?.sender.username != user.username}" class="chat-avatar">
-                                <img th:src="@{~/img/support.png}" alt="Avatar">
+                                <img th:if="${avatars.get(message?.sender.id)} != null" th:src="${avatars.get(message?.sender.id)}" alt="Avatar">
+                                <img th:unless="${avatars.get(message?.sender.id)} != null" th:src="@{~/img/user.png}" alt="Avatar">
                                 <div class="chat-name" th:text="${message?.sender.username}"></div>
                             </div>
                             <div class="chat-text" th:text="${message?.message}"></div>
                             <div th:unless="${message?.sender.username != user.username}" class="chat-avatar">
-                                <img th:src="@{~/img/support.png}" alt="Avatar">
+                                <img th:if="${avatars.get(message?.sender.id)} != null" th:src="${avatars.get(message?.sender.id)}" alt="Avatar">
+                                <img th:unless="${avatars.get(message?.sender.id)} != null" th:src="@{~/img/user.png}" alt="Avatar">
                                 <div class="chat-name" th:text="${message?.sender.username}"></div>
                             </div>
                             <div th:if="${message?.sender.username != user.username}" class="chat-hour" th:text="${#dates.format(message?.date, 'HH:mm')}"> <span class="fa fa-check-circle"></span></div>
                         </li>
                     </ul>
                 <div class="row">
-                <textarea id="message" style="resize: none" class="col-sm-4 form-control" rows="3" placeholder="Введите ваше сообщение..."></textarea>
+                    <textarea id="message" style="resize: none" class="col-sm-4 form-control" rows="3" placeholder="Введите ваше сообщение..."></textarea>
                     <button id="send-button" class="col-sm-2 form-control" onclick="sendMessage()">Отправить</button>
                 </div>
                 </div>
@@ -106,26 +107,3 @@
         }
     </script>
 </html>
-
-
-
-<!--
-                <li class="chat-left">
-                    <div class="chat-avatar">
-                        <img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin">
-                        <div class="chat-name">Russell</div>
-                    </div>
-                    <div class="chat-text">Hello, I'm Russell.
-                        <br>How can I help you today?</div>
-                    <div class="chat-hour">08:55 <span class="fa fa-check-circle"></span></div>
-                </li>
-                <li class="chat-right">
-                    <div class="chat-hour">08:56 <span class="fa fa-check-circle"></span></div>
-                    <div class="chat-text">Hi, Russell
-                        <br> I need more information about Developer Plan.</div>
-                    <div class="chat-avatar">
-                        <img src="https://www.bootdey.com/img/Content/avatar/avatar3.png" alt="Retail Admin">
-                        <div class="chat-name">Sam</div>
-                    </div>
-                </li>
--->

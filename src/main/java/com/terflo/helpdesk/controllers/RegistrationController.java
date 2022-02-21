@@ -2,7 +2,6 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
-import com.terflo.helpdesk.model.repositories.RoleRepository;
 import com.terflo.helpdesk.model.requests.RegistrationRequest;
 import com.terflo.helpdesk.model.responses.RegistrationResponse;
 import com.terflo.helpdesk.model.services.UserService;
@@ -34,7 +33,7 @@ public class RegistrationController {
      */
     private final UserService userService;
 
-    public RegistrationController(RegexUtil regexUtil, UserService userService, RoleRepository roleRepository) {
+    public RegistrationController(RegexUtil regexUtil, UserService userService) {
         this.regexUtil = regexUtil;
         this.userService = userService;
     }

@@ -45,7 +45,7 @@ function updateProfile(id) {
         contentType: "application/json",
         processData: true,
         async: true,
-        success: function (data) {
+        success: function () {
             usernameField.attr('readonly', true);
             emailField.attr('readonly', true);
             descriptionField.attr('readonly', true);
@@ -59,8 +59,8 @@ function updateProfile(id) {
                 descriptionProfileLabel.innerText = "Пока тут пусто :("
             showToast("Успешно")
         },
-        error: function (error) {
-            showToast(error.responseText)
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }
@@ -79,16 +79,14 @@ function uploadAvatar(id) {
         cache: true,
         timeout: 600000,
         data: formData,
-        dataType: "json",
         contentType: false,
         processData: false,
         async: true,
-        success: function (data) {
-            if(data !== "OK") {
-                console.log(data)
-            } else {
-                setAvatar(id)
-            }
+        success: function () {
+            setAvatar(id)
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }
@@ -105,6 +103,9 @@ function setAvatar(id) {
         async: true,
         success: function (data) {
             $("#user-avatar").attr('src', data)
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }

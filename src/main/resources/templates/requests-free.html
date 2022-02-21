@@ -21,6 +21,7 @@
                     <th>Наименование</th>
                     <th>Статус</th>
                     <th>Приоритет</th>
+                    <th>Отправитель</th>
                     <th>Просмотреть</th>
                     <th>Принять</th>
                 </tr>
@@ -38,6 +39,9 @@
                         <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).LOW}">Низкий</label>
                         <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).NORMAL}">Средний</label>
                         <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).MAX}">Высокий</label>
+                    </td>
+                    <td>
+                        <a th:href="'/user/' + ${request?.user?.username}" th:text="${request?.user?.username}"></a>
                     </td>
                     <td>
                         <a th:href="'/requests/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a>

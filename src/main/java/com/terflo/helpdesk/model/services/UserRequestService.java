@@ -74,7 +74,7 @@ public class UserRequestService {
      * @return список всех запросов связанные с указанным оператором
      */
     public List<UserRequest> findUserRequestsByOperator(User operator) {
-        return userRequestRepository.findAllByOperator(operator);
+        return userRequestRepository.findAllByOperatorOrderByStatus(operator);
     }
 
     /**

@@ -12,4 +12,6 @@ public interface UserRequestRepository extends CrudRepository<UserRequest, Long>
 
     List<UserRequest> findAllByOperator(User Operator);
 
+    List<UserRequest> findAllByOperatorOrderByStatus(User operator);
+
 }

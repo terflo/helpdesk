@@ -1,12 +1,11 @@
 package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.User;
-import com.terflo.helpdesk.model.entity.dto.UserDTO;
+import com.terflo.helpdesk.model.exceptions.ImageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.repositories.RoleRepository;
 import com.terflo.helpdesk.model.repositories.UserRepository;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
-import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -48,11 +48,18 @@ public class UserService implements UserDetailsService {
      */
     private final SessionRegistry sessionRegistry;
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder, SessionRegistry sessionRegistry) {
+    /**
+     * Сервис аватаров пользователей
+     */
+    private final ImageService imageService;
+
+
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder, SessionRegistry sessionRegistry, ImageService imageService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.sessionRegistry = sessionRegistry;
+        this.imageService = imageService;
     }
 
     /**
@@ -138,19 +145,6 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Метод удаляет пользователя из базы данных
-     * @param id уникальный индификатор пользователя
-     * @throws UserNotFoundException возникает при ненахождении пользователя в базе данных
-     */
-    @Transactional
-    public void deleteUserById(Long id) throws UserNotFoundException {
-        if (!userRepository.findById(id).isPresent()) {
-            throw new UserNotFoundException("Пользователь не найден");
-        }
-        userRepository.deleteById(id);
-    }
-
-    /**
      * Метод переключает блокировку аккаунта пользователя (блокирован/разблокирован)
      * @param id уникальный индификатор пользователя
      * @throws UserNotFoundException возникает при ненахождении пользователя
@@ -165,15 +159,34 @@ public class UserService implements UserDetailsService {
 
     /**
      * Метод удаляет пользователя из базы данных
+     * @param id уникальный индификатор пользователя
+     * @throws UserNotFoundException возникает при ненахождении пользователя в базе данных
+     */
+    @Transactional
+    public void deleteUserById(Long id) throws UserNotFoundException, ImageNotFoundException {
+        Optional<User> user = userRepository.findById(id);
+        if (!user.isPresent()) {
+            throw new UserNotFoundException("Пользователь не найден");
+        } else {
+            imageService.deleteImage(user.get().getAvatar_id());
+            userRepository.deleteById(id);
+        }
+    }
+
+    /**
+     * Метод удаляет пользователя из базы данных
      * @param username имя пользователя
      * @throws UserNotFoundException возникает при ненахождении пользователя в базе данных
      */
     @Transactional
-    public void deleteUserByUsername(String username) throws UserNotFoundException {
-        if (!userRepository.findByUsername(username).isPresent()) {
+    public void deleteUserByUsername(String username) throws UserNotFoundException, ImageNotFoundException {
+        Optional<User> user = userRepository.findByUsername(username);
+        if (!user.isPresent()) {
             throw new UserNotFoundException("Пользователь не найден");
+        } else {
+            imageService.deleteImage(user.get().getAvatar_id());
+            userRepository.deleteUserByUsername(username);
         }
-        userRepository.deleteUserByUsername(username);
     }
 
     /**

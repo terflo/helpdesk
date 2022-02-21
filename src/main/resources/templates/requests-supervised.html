@@ -19,7 +19,7 @@
                         <th>Наименование</th>
                         <th>Статус</th>
                         <th>Приоритет</th>
-                        <th>Оператор</th>
+                        <th>Отправитель</th>
                         <th>Просмотреть</th>
                         <th>Закрыть</th>
                     </tr>
@@ -33,8 +33,14 @@
                             <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>
                             <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}">Начато</label>
                         </td>
-                        <td th:text="${request?.priority}"></td>
-                        <td th:text="${request?.operator?.username}"></td>
+                        <td th:switch="${request?.priority}">
+                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).LOW}" th:text="'Низкий'"></label>
+                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).NORMAL}" th:text="'Средний'"></label>
+                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).MAX}" th:text="'Высокий'"></label>
+                        </td>
+                        <td>
+                            <a th:href="'/user/' + ${request?.user?.username}" th:text="${request?.user?.username}"></a>
+                        </td>
                         <td>
                             <a th:href="'/requests/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a>
                         </td>

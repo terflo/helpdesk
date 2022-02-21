@@ -11,12 +11,12 @@ function addRequest() {
         contentType: "application/json",
         cache: false,
         timeout: 600000,
-        success: function (data) {
-            if(data === "OK")
+        success: function () {
                 window.location.replace("/requests")
-            else
-                console.log(data)
-
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
+
     });
 }

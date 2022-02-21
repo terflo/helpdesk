@@ -66,12 +66,16 @@ public class UserController {
     @GetMapping("/user/{username}")
     public String userProfile(@PathVariable String username, Model model, Authentication authentication) throws UserNotFoundException {
 
+
         boolean clientIsContainsAdminRole = authentication
                 .getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList()).contains("ROLE_ADMIN");
 
+        List<String> clientRoles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
+
+        model.addAttribute("clientRoles", clientRoles);
         model.addAttribute("clientUsername", authentication.getName());
         model.addAttribute("isAdmin", clientIsContainsAdminRole);
 
@@ -95,11 +99,12 @@ public class UserController {
      * @param file файл с аватаркой
      * @return HTTP ответ
      */
+    @ResponseBody
     @PostMapping("/user/{id}/updateAvatar")
     public ResponseEntity<String> updateUserAvatar(@PathVariable(name = "id") Long id, @RequestParam MultipartFile file) {
 
         if(!allowedContent.contains(file.getContentType()))
-            return ResponseEntity.badRequest().body("\"Не поддерживаемый тип изображения\"");
+            return ResponseEntity.badRequest().body("Не поддерживаемый тип изображения");
 
         try {
             User user = userService.findUserById(id);
@@ -111,9 +116,9 @@ public class UserController {
             }
             userService.updateUser(user);
         } catch (UserNotFoundException | IOException | ImageNotFoundException e) {
-            return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.ok("\"OK\"");
+        return ResponseEntity.ok().body("\"\"");
     }
 
     /**
@@ -121,6 +126,7 @@ public class UserController {
      * @param id уникальный индификатор пользователя
      * @return изображение в Base64 кодировке
      */
+    @ResponseBody
     @PostMapping("/user/{id}/getAvatar")
     public ResponseEntity<String> getAvatar(@PathVariable(name = "id") Long id) {
 
@@ -139,6 +145,7 @@ public class UserController {
      * @param userDTO новая информация о пользователе
      * @return HTTP ответ
      */
+    @ResponseBody
     @PostMapping("/user/{id}/update")
     public ResponseEntity<String> updateUser(@PathVariable(name = "id") Long id, @RequestBody UserDTO userDTO) {
 
@@ -149,7 +156,7 @@ public class UserController {
             if(!userDTO.username.equals(user.getUsername())) {
                 //Проверка username на уникальность
                 if (userService.userIsExistByUsername(userDTO.username))
-                    return ResponseEntity.badRequest().body("\"" + "Такое имя уже занято" + "\"");
+                    return ResponseEntity.badRequest().body("Такое имя уже занято");
                 //Проверка username на корректность (Regex)
                 if (!regexUtil.checkUsername(userDTO.username))
                     return ResponseEntity.badRequest().body("Некорректное имя пользователя");
@@ -159,7 +166,7 @@ public class UserController {
             if(!userDTO.email.equals(user.getEmail())) {
                 //Проверка email на уникальность
                 if (userService.userIsExistByEmail(userDTO.email))
-                    return ResponseEntity.badRequest().body("\"" + "Такой email уже занят" + "\"");
+                    return ResponseEntity.badRequest().body("Такой email уже занят");
                 //Проверка email на корректность (Regex)
                 if (!regexUtil.checkEmail(userDTO.email))
                     return ResponseEntity.badRequest().body("Некорректный email");
@@ -175,7 +182,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
-        return ResponseEntity.ok("\"OK\"");
+        return ResponseEntity.ok().body("\"\"");
     }
 
     /**
@@ -193,18 +200,17 @@ public class UserController {
     /**
      * Mapping для удаления пользователя из базы методом post
      * @param id уникальный индификатор пользователя
-     * @param model переменные для отрисовки страницы
      * @return возврат на страницу с списком пользователей
      */
+    @ResponseBody
     @DeleteMapping("/admin/users/delete/{id}")
-    public @ResponseBody
-    ResponseEntity<String> deleteUser(@PathVariable(value = "id") Long id, Model model) {
+    public ResponseEntity<String> deleteUser(@PathVariable(value = "id") Long id) {
         try {
             userService.deleteUserById(id);
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.notFound().build();
+        } catch (UserNotFoundException | ImageNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -217,8 +223,8 @@ public class UserController {
         try {
             userService.switchLockUserById(id);
         } catch (UserNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok().body("\"\"");
     }
 }

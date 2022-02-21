@@ -25,7 +25,7 @@ public class ImageService {
 
 
     public Image getImage(Long id) throws ImageNotFoundException {
-        if(id == null) return null;
+        if(id == null) throw new ImageNotFoundException("Изображение не найдено");
         return imageRepository
                 .findById(id)
                 .orElseThrow(() -> new ImageNotFoundException("Изображение не найдено"));
@@ -41,5 +41,25 @@ public class ImageService {
         Image image = imageRepository.findById(id).orElseThrow(() -> new ImageNotFoundException("Изображение не найдено"));
         image.setBytes(file.getBytes());
         imageRepository.save(image);
+    }
+
+    @Transactional
+    public void deleteImage(Long id) throws ImageNotFoundException {
+        if(id == null)
+            return;
+        if(!imageRepository.findById(id).isPresent())
+            throw new ImageNotFoundException("Изображение не найдено");
+        else
+            imageRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteImage(Image image) throws ImageNotFoundException {
+        if(image == null)
+            return;
+        if(!imageRepository.findById(image.getId()).isPresent())
+            throw new ImageNotFoundException("Изображение не найдено");
+        else
+            imageRepository.delete(image);
     }
 }

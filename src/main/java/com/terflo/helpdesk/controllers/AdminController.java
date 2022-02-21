@@ -87,7 +87,7 @@ public class AdminController {
                 return ResponseEntity.ok("\"" + e.getMessage() + "\"");
             }
         }
-        return ResponseEntity.ok("\"OK\"");
+        return ResponseEntity.ok().body("\"\"");
     }
 
     /**
@@ -102,7 +102,7 @@ public class AdminController {
         } catch (DecisionNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -117,7 +117,7 @@ public class AdminController {
         } catch (DecisionNotFoundException e) {
             return ResponseEntity.ok(e.getMessage());
         }
-        return ResponseEntity.ok("\"OK\"");
+        return ResponseEntity.ok().body("\"\"");
     }
 
     /**
@@ -130,20 +130,5 @@ public class AdminController {
         List<UserRequest> requests = userRequestService.findAll();
         model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
         return "admin-requests";
-    }
-
-    /**
-     * POST запрос на удаление обращения пользователя
-     * @param id уникальный индификатор обращения
-     * @return страница с обращениями
-     */
-    @DeleteMapping("/admin/requests/delete/{id}")
-    public ResponseEntity<String> deleteRequest(@PathVariable(value = "id") Long id) {
-        try {
-            userRequestService.deleteByID(id);
-        } catch (UserRequestNotFoundException e) {
-            ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok("OK");
     }
 }

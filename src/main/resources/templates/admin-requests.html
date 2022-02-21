@@ -53,19 +53,9 @@
                 </div>
             </nav>
 
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div>
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="min-height: 75vh">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2">Обращения</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                            This week
-                        </button>
-                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-striped table-sm">
@@ -97,13 +87,25 @@
                                     <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).NORMAL}">Средний</label>
                                     <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).MAX}">Высокий</label>
                                 </td>
-                                <td th:text="${request?.operator?.username}"></td>
-                                <td th:text="${request?.user?.username}"></td>
+                                <td>
+                                    <a th:href="'/user/' + ${request?.operator?.username}" th:text="${request?.operator?.username}"></a>
+                                </td>
+                                <td>
+                                    <a th:href="'/user/' + ${request?.user?.username}" th:text="${request?.user?.username}"></a>
+                                </td>
                                 <td th:text="${#dates.format(request?.date, 'dd.MM.yyyy HH:mm')}"></td>
-                                <td><a th:href="'/requests/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a></td>
-                                <td th:if="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}"><input disabled type="image" th:src="@{~/img/close.png}" style="height: 2vw"></td>
-                                <td th:id="'close_button_' + ${request?.id}" th:unless="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}"><input th:onclick="'closeRequest(' + ${request?.id} + ');'" type="image" th:src="@{~/img/close.png}" style="height: 2vw"></td>
-                                <td><input th:onclick="'deleteRequest(' + ${request?.id} + ');'" type="image" th:src="@{~/img/trash.png}" style="height: 2vw" alt="delete request"></td>
+                                <td>
+                                    <a th:href="'/requests/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a>
+                                </td>
+                                <td th:if="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">
+                                    <input disabled type="image" th:src="@{~/img/close.png}" style="height: 2vw" alt="close request">
+                                </td>
+                                <td th:id="'close_button_' + ${request?.id}" th:unless="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">
+                                    <input th:onclick="'closeRequest(' + ${request?.id} + ');'" type="image" th:src="@{~/img/close.png}" style="height: 2vw" alt="close request">
+                                </td>
+                                <td>
+                                    <input th:onclick="'deleteRequest(' + ${request?.id} + ');'" type="image" th:src="@{~/img/trash.png}" style="height: 2vw" alt="delete request">
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -112,5 +114,6 @@
         </div>
     </div>
 </main>
+<div th:insert="blocks/footer"></div>
 </body>
 </html>

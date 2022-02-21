@@ -5,12 +5,12 @@ function closeRequest(id) {
         cache: false,
         timeout: 600000,
         async: true,
-        success: function (data) {
-            if(data === "OK") {
-                $("#close_button_" + id).prop("disabled", true);
-                $("#request_status_" + id).text("Закрыто");
-            } else
-                console.log(data)
+        success: function () {
+            $("#close_button_" + id).prop("disabled", true);
+            $("#request_status_" + id).text("Закрыто");
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }
@@ -22,11 +22,11 @@ function deleteRequest(id) {
         cache: false,
         timeout: 600000,
         async: true,
-        success: function (data) {
-            if(data === "OK") {
-                $("#request_row_" + id).remove()
-            } else
-                console.log(data)
+        success: function () {
+            $("#request_row_" + id).remove()
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }

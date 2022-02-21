@@ -35,8 +35,8 @@ public class UserRequest {
     /**
      * Оператор тех-поддержки, прикрепленный к обращению
      */
-    @JoinColumn(name = "operator_id", nullable = true)
-    @ManyToOne(optional = true, fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @JoinColumn(name = "operator_id")
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private User operator;
 
     /**
@@ -67,7 +67,7 @@ public class UserRequest {
     /**
      * Описание проблемы
      */
-    @Column(name="description", nullable = true)
+    @Column(name="description", length = 2048)
     private String description;
 
     /**

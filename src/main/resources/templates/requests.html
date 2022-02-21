@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.w3.org/1999/xhtml">
     <head>
         <meta charset="UTF-8">
         <title>Ваши обращения</title>
         <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
-        <link th:href="@{~/css/requests.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
         <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
+        <script sec:authorize="hasRole('ROLE_OPERATOR')" th:src="@{~/js/jQuery.js}" rel="script" type="text/javascript"></script>
+        <script sec:authorize="hasRole('ROLE_OPERATOR')" th:src="@{~/js/requests.js}" rel="script" type="text/javascript"></script>
     </head>
     <body>
 
@@ -29,6 +31,7 @@
                         <th scope="col">Приоритет</th>
                         <th scope="col">Оператор</th>
                         <th scope="col">Просмотреть</th>
+                        <th sec:authorize="hasRole('ROLE_OPERATOR')" scope="col">Закрыть</th>
                     </tr>
                 </thead>
                 <tbody th:if="not ${#lists.isEmpty(requests)}" th:each="request : ${requests}" style="overflow-y: scroll">
@@ -45,9 +48,17 @@
                             <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).NORMAL}">Средний</label>
                             <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).MAX}">Высокий</label>
                         </td>
-                        <td th:text="${request?.operator?.username}"></td>
+                        <td>
+                            <a th:href="'/user/' + ${request?.operator?.username}" th:text="${request?.operator?.username}"></a>
+                        </td>
                         <td>
                             <a th:href="'/requests/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a>
+                        </td>
+                        <td th:if="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">
+                            <input disabled type="image" th:src="@{~/img/close.png}" style="height: 2vw">
+                        </td>
+                        <td th:id="'close_button_' + ${request?.id}" th:unless="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">
+                            <input th:onclick="'closeRequest(' + ${request?.id} + ');'" type="image" th:src="@{~/img/close.png}" style="height: 2vw">
                         </td>
                     </tr>
                 </tbody>

@@ -11,11 +11,11 @@ function addDecision() {
         dataType: "json",
         contentType: "application/json",
         async: true,
-        success: function (data) {
-            if(data === "OK")
+        success: function () {
                 window.location.reload();
-            else
-                console.log(data);
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }
@@ -27,11 +27,11 @@ function deleteDecision(id) {
         cache: false,
         timeout: 600000,
         async: true,
-        success: function (data) {
-            if(data === "OK")
-                $("#decision_row_" + id).remove();
-            else
-                console.log(data);
+        success: function () {
+            $("#decision_row_" + id).remove();
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }
@@ -57,14 +57,13 @@ function updateDecision(id) {
         dataType: "json",
         contentType: "application/json",
         async: true,
-        success: function (data) {
-            if(data === "OK") {
-                $("#decision_name_" + id).prop("readonly", true);
-                $("#decision_answer_" + id).prop("readonly", true);
-                $("#decision_edit_" + id).prop("src", "/img/edit.png");
-            } else {
-                console.log(data);
-            }
+        success: function () {
+            $("#decision_name_" + id).prop("readonly", true);
+            $("#decision_answer_" + id).prop("readonly", true);
+            $("#decision_edit_" + id).prop("src", "/img/edit.png");
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }

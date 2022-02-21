@@ -53,30 +53,38 @@ public class ChatController {
      * @throws UserRequestNotFoundException возникает при ненахождении запроса пользователля в базе данных
      */
     @MessageMapping("/chat")
-    public void processMessage(@Payload MessageDTO messageDTO) throws UserNotFoundException, UserRequestNotFoundException {
+    public ResponseEntity<String> processMessage(@Payload MessageDTO messageDTO) {
 
         //Если запрос закрыт, то игнорируем
-        if(userRequestService.findUserRequestByID(messageDTO.userRequest).getStatus() == RequestStatus.CLOSED)
-            return;
+        try {
+            if(userRequestService.findUserRequestByID(messageDTO.userRequest).getStatus() == RequestStatus.CLOSED)
+                return ResponseEntity.badRequest().body("Обращение закрыто");
+        } catch (UserRequestNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
         //Если сообщение пустое, то игнорируем
         if(messageDTO.message.trim().isEmpty())
-            return;
+            return ResponseEntity.ok().body("\"\"");
 
         messageDTO.date = new Date();
         messageDTO.status = MessageStatus.RECEIVED;
 
         //Конвертируем сообщение в нормальный вид из DTO вида,
         //сохраняем в базе данных и отправляем подписчикам уведомление о новом сообщении
-        Message message = messageFactory.convertToMessage(messageDTO);
-        messageService.saveMessage(message);
-        messagingTemplate.convertAndSendToUser(
-                String.valueOf(messageDTO.userRequest),"/queue/messages",
-                new Notification(
-                        message.getId(),
-                        message.getUserRequest().getId(),
-                        message.getSender().getId()));
-
+        try {
+            Message message = messageFactory.convertToMessage(messageDTO);
+            messageService.saveMessage(message);
+            messagingTemplate.convertAndSendToUser(
+                    String.valueOf(messageDTO.userRequest),"/queue/messages",
+                    new Notification(
+                            message.getId(),
+                            message.getUserRequest().getId(),
+                            message.getSender().getId()));
+        } catch (UserNotFoundException | UserRequestNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return ResponseEntity.ok().body("\"\"");
     }
 
     /**

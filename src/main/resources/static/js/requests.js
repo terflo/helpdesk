@@ -5,12 +5,12 @@ function closeRequest(id) {
         cache: false,
         timeout: 600000,
         async: true,
-        success: function (data) {
-            if(data === "OK") {
-                $("#close_button_" + id).prop("disabled", true);
-                $("#request_status_" + id).text("Закрыто");
-            } else
-                console.log(data)
+        success: function () {
+            $("#close_button_" + id).prop("disabled", true);
+            $("#request_status_" + id).text("Закрыто");
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }
