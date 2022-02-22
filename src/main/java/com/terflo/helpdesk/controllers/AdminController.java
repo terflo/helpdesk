@@ -6,12 +6,12 @@ import com.terflo.helpdesk.model.entity.dto.DecisionDTO;
 import com.terflo.helpdesk.model.exceptions.DecisionNameAlreadyExistsException;
 import com.terflo.helpdesk.model.exceptions.DecisionNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
-import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.factory.DecisionDTOFactory;
 import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
 import com.terflo.helpdesk.model.services.DecisionService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -26,6 +26,7 @@ import java.util.List;
  * @version 1.5
  * Контроллер админ-панели для управления системой
  */
+@Log4j2
 @Controller
 public class AdminController {
 
@@ -84,9 +85,11 @@ public class AdminController {
                 decision.setAuthor(userService.findUserByUsername(authentication.getName()));
                 decisionService.saveDecision(decision);
             } catch (DecisionNameAlreadyExistsException | UserNotFoundException e) {
+                log.error(e.getMessage());
                 return ResponseEntity.ok("\"" + e.getMessage() + "\"");
             }
         }
+        log.info("Добавлен новый частый вопрос id: " + decision.getId());
         return ResponseEntity.ok().body("\"\"");
     }
 
@@ -100,8 +103,10 @@ public class AdminController {
         try {
             decisionService.deleteDecision(id);
         } catch (DecisionNotFoundException e) {
+            log.error(e.getMessage());
             return ResponseEntity.notFound().build();
         }
+        log.info("Удален частый вопрос id: " + id);
         return ResponseEntity.ok().build();
     }
 
@@ -115,8 +120,10 @@ public class AdminController {
         try {
             decisionService.updateDecision(decision);
         } catch (DecisionNotFoundException e) {
+            log.error(e.getMessage());
             return ResponseEntity.ok(e.getMessage());
         }
+        log.info("Обновлена информация частого вопроса id: ");
         return ResponseEntity.ok().body("\"\"");
     }
 

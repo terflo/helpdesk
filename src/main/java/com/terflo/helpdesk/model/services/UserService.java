@@ -6,6 +6,7 @@ import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.RoleRepository;
 import com.terflo.helpdesk.model.repositories.UserRepository;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

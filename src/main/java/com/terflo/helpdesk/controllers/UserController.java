@@ -64,10 +64,19 @@ public class UserController {
      * @param username уникальный ник пользователя
      * @param model переменные для отображения страницы
      * @return страница профиля пользователя
-     * @throws UserNotFoundException возникает в случае ненахождении пользователя в базе данных
      */
     @GetMapping("/user/{username}")
     public String userProfile(@PathVariable String username, Model model, Authentication authentication) throws UserNotFoundException {
+
+        User user = null;
+        user = userService.findUserByUsername(username);
+        /*try {
+            user = userService.findUserByUsername(username);
+        } catch (UserNotFoundException e) {
+            model.addAttribute("statusCode", "404 Не найдено");
+            model.addAttribute("exception", e);
+            return "error";
+        }*/
 
         boolean clientIsContainsAdminRole = authentication
                 .getAuthorities()
@@ -81,7 +90,6 @@ public class UserController {
         model.addAttribute("clientUsername", authentication.getName());
         model.addAttribute("isAdmin", clientIsContainsAdminRole);
 
-        User user = userService.findUserByUsername(username);
         List<UserRequest> requests = userRequestService.findAllUserRequestsByUser(user);
         model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
 

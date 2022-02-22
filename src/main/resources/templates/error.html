@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+  <html lang="ru" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
+    <meta charset="UTF-8" content="text/html">
+    <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
+    <link th:href="@{~/css/error.css}" rel="stylesheet" type="text/css"/>
+    <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
+    <title>Ошибка</title>
+  </head>
+  <body>
+    <div th:insert="blocks/navigation"></div>
+    <main style="min-height: 75vh">
+      <div class="container">
+          <div class="col-md-12">
+            <div class="error-template">
+              <h1 class="h1">Упс! Что-то пошло не так :(</h1>
+              <h2 class="h2" th:text="${status}"></h2>
+              <h3 th:if="${status} == 404"th:text="'Не найдено'" class="error-details"></h3>
+              <h3 th:unless="${status} == 404" th:text="${message}" class="error-details"></h3>
+              <div class="error-actions">
+                <a th:href="@{/index}" class="btn btn-primary btn-lg">Вернуться на главную </a>
+              </div>
+              <div th:unless="${#strings.isEmpty(trace)}" class="error-details" style="vertical-align: middle;">
+                <textarea readonly class="form-control" th:text="${trace}" rows="12" style="resize: none; min-width: 40vw"></textarea>
+              </div>
+              <div th:text="${errors}" class="error-details"></div>
+          </div>
+      </div>
+    </main>
+    <div th:insert="blocks/footer"></div>
+  </body>
+</html>

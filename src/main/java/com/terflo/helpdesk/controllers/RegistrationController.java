@@ -6,7 +6,6 @@ import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
 import com.terflo.helpdesk.model.factory.ImageFactory;
 import com.terflo.helpdesk.model.requests.RegistrationRequest;
 import com.terflo.helpdesk.model.responses.RegistrationResponse;
-import com.terflo.helpdesk.model.services.ImageService;
 import com.terflo.helpdesk.model.services.UserService;
 import com.terflo.helpdesk.utils.RegexUtil;
 import org.springframework.http.HttpStatus;
@@ -23,7 +22,7 @@ import java.util.Date;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.2
  * Контроллер страницы регистрации
  */
 @Controller
@@ -41,13 +40,10 @@ public class RegistrationController {
 
     private final ImageFactory imageFactory;
 
-    private final ImageService imageService;
-
-    public RegistrationController(RegexUtil regexUtil, UserService userService, ImageFactory imageFactory, ImageService imageService) {
+    public RegistrationController(RegexUtil regexUtil, UserService userService, ImageFactory imageFactory) {
         this.regexUtil = regexUtil;
         this.userService = userService;
         this.imageFactory = imageFactory;
-        this.imageService = imageService;
     }
 
     /**

@@ -11,6 +11,7 @@ import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.factory.MessageFactory;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -28,6 +29,7 @@ import java.util.Date;
  * Контроллер чата для общения пользователей в запросах
  * в том числе по STOMP поверх SockJS протоколу
  */
+@Log4j2
 @Controller
 public class ChatController {
 
@@ -55,9 +57,12 @@ public class ChatController {
 
         //Если запрос закрыт, то игнорируем
         try {
-            if(userRequestService.findUserRequestByID(messageDTO.userRequest).getStatus() == RequestStatus.CLOSED)
+            if(userRequestService.findUserRequestByID(messageDTO.userRequest).getStatus() == RequestStatus.CLOSED) {
+                log.error("Попытка отправить сообщение в закрытое обращение пользователем " + messageDTO.sender.username);
                 return ResponseEntity.badRequest().body("Обращение закрыто");
+            }
         } catch (UserRequestNotFoundException e) {
+            log.error(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
@@ -80,8 +85,10 @@ public class ChatController {
                             message.getUserRequest().getId(),
                             message.getSender().getId()));
         } catch (UserNotFoundException | UserRequestNotFoundException e) {
+            log.error(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+        log.info("Сообщение от пользователя " + messageDTO.sender.username + " успешно обработано");
         return ResponseEntity.ok().body("\"\"");
     }
 
@@ -96,6 +103,7 @@ public class ChatController {
         try {
             return ResponseEntity.ok(messageService.countNewMessages(userRequest));
         } catch (UserRequestNotFoundException e) {
+            log.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
@@ -113,6 +121,7 @@ public class ChatController {
             message.setStatus(MessageStatus.DELIVERED);
             return ResponseEntity.ok(messageFactory.convertToMessageDTO(message));
         } catch (MessageNotFoundException e) {
+            log.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
