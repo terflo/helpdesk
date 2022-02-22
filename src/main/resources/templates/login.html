@@ -8,6 +8,8 @@
         <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
         <link th:href="@{css/login.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
+        <script th:src="@{js/jQuery.js}" rel="script" type="text/javascript"></script>
+        <script th:src="@{js/login.js}" rel="script" type="text/javascript"></script>
 
     </head>
 
@@ -34,6 +36,7 @@
 
                 <div class="mb-3">
                     <input class="form-control" type="password" id="password" name="password" placeholder="Пароль" required/>
+                    <label class="form-label"><input id="password-checkbox" type="checkbox">Показать пароль</label>
                 </div>
 
                 <div class="mb-3">

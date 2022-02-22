@@ -45,23 +45,18 @@ function updateProfile(id) {
         contentType: "application/json",
         processData: true,
         async: true,
-        success: function (data) {
+        success: function () {
+            usernameField.attr('readonly', true);
+            emailField.attr('readonly', true);
+            descriptionField.attr('readonly', true);
+            editProfileButton.html("Изменить информацию")
+            editProfileButton.attr("onclick", "editProfile()")
 
-            if(data === "logout")
-                window.location.href = "/logout"
-            else {
-                usernameField.attr('readonly', true);
-                emailField.attr('readonly', true);
-                descriptionField.attr('readonly', true);
-                editProfileButton.html("Изменить информацию")
-                editProfileButton.attr("onclick", "editProfile()")
-
-                let descriptionProfileLabel = $("p[name='description-profile']")[0];
-                if (descriptionField.val() !== "")
-                    descriptionProfileLabel.innerText = descriptionField.val()
-                else
-                    descriptionProfileLabel.innerText = "Пока тут пусто :("
-            }
+            let descriptionProfileLabel = $("p[name='description-profile']")[0];
+            if (descriptionField.val() !== "")
+                descriptionProfileLabel.innerText = descriptionField.val()
+            else
+                descriptionProfileLabel.innerText = "Пока тут пусто :("
         },
         error: function (data) {
             alert(data.responseText)
