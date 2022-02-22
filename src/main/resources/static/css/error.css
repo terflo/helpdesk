@@ -11,3 +11,12 @@
 .error-actions .btn {
     margin-right: 10px;
 }
+
+.cat {
+    float: right;
+    position: absolute;
+    top: 7vh;
+    right: 15vw;
+    max-width: 40vw;
+    max-height: 40vh;
+}

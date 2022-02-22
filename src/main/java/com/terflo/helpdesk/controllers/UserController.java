@@ -12,6 +12,7 @@ import com.terflo.helpdesk.model.services.SessionService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
 import com.terflo.helpdesk.utils.RegexUtil;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
  * @author Danil Krivoschiokov
  * @version 1.1
  */
+@Log4j2
 @Controller
 public class UserController {
 
@@ -66,17 +68,17 @@ public class UserController {
      * @return страница профиля пользователя
      */
     @GetMapping("/user/{username}")
-    public String userProfile(@PathVariable String username, Model model, Authentication authentication) throws UserNotFoundException {
+    public String userProfile(@PathVariable String username, Model model, Authentication authentication) {
 
-        User user = null;
-        user = userService.findUserByUsername(username);
-        /*try {
+        User user;
+        try {
             user = userService.findUserByUsername(username);
         } catch (UserNotFoundException e) {
-            model.addAttribute("statusCode", "404 Не найдено");
-            model.addAttribute("exception", e);
+            log.error("Попытка получения профиля несуществующего пользователя " + username);
+            model.addAttribute("status", 404);
+            model.addAttribute("message", e.getMessage());
             return "error";
-        }*/
+        }
 
         boolean clientIsContainsAdminRole = authentication
                 .getAuthorities()

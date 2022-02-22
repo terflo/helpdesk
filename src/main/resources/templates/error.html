@@ -12,21 +12,22 @@
     <div th:insert="blocks/navigation"></div>
     <main style="min-height: 75vh">
       <div class="container">
-          <div class="col-md-12">
-            <div class="error-template">
+        <div class="col-md-12">
+          <div class="error-template">
               <h1 class="h1">Упс! Что-то пошло не так :(</h1>
               <h2 class="h2" th:text="${status}"></h2>
-              <h3 th:if="${status} == 404"th:text="'Не найдено'" class="error-details"></h3>
-              <h3 th:unless="${status} == 404" th:text="${message}" class="error-details"></h3>
+              <h3 th:if="${status} == 404 AND ${#strings.isEmpty(message)}" th:text="'Не найдено'" class="error-details"></h3>
+              <h3 th:text="${message}" class="error-details"></h3>
               <div class="error-actions">
                 <a th:href="@{/index}" class="btn btn-primary btn-lg">Вернуться на главную </a>
               </div>
               <div th:unless="${#strings.isEmpty(trace)}" class="error-details" style="vertical-align: middle;">
                 <textarea readonly class="form-control" th:text="${trace}" rows="12" style="resize: none; min-width: 40vw"></textarea>
               </div>
-              <div th:text="${errors}" class="error-details"></div>
           </div>
+        </div>
       </div>
+      <img class="img-fluid cat" th:src="@{~/img/cat.png}" alt="cat">
     </main>
     <div th:insert="blocks/footer"></div>
   </body>

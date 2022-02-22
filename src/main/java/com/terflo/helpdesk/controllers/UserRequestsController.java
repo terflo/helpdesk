@@ -6,13 +6,12 @@ import com.terflo.helpdesk.model.exceptions.*;
 import com.terflo.helpdesk.model.factory.MessageFactory;
 import com.terflo.helpdesk.model.factory.UserDTOFactory;
 import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
-import com.terflo.helpdesk.model.services.ImageService;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +24,7 @@ import java.util.*;
  * @version 1.0
  * Контроллер запросов пользователей на решение какой-либо проблемы
  */
+@Log4j2
 @Controller
 public class UserRequestsController {
 
@@ -34,8 +34,6 @@ public class UserRequestsController {
 
     private final MessageService messageService;
 
-    private final ImageService imageService;
-
     private final UserRequestDTOFactory userRequestDTOFactory;
 
     private final SimpMessagingTemplate messagingTemplate;
@@ -44,11 +42,10 @@ public class UserRequestsController {
 
     private final UserDTOFactory userDTOFactory;
 
-    public UserRequestsController(UserService userService, UserRequestService userRequestService, MessageService messageService, ImageService imageService, UserRequestDTOFactory userRequestDTOFactory, SimpMessagingTemplate messagingTemplate, MessageFactory messageFactory, UserDTOFactory userDTOFactory) {
+    public UserRequestsController(UserService userService, UserRequestService userRequestService, MessageService messageService, UserRequestDTOFactory userRequestDTOFactory, SimpMessagingTemplate messagingTemplate, MessageFactory messageFactory, UserDTOFactory userDTOFactory) {
         this.userService = userService;
         this.userRequestService = userRequestService;
         this.messageService = messageService;
-        this.imageService = imageService;
         this.userRequestDTOFactory = userRequestDTOFactory;
         this.messagingTemplate = messagingTemplate;
         this.messageFactory = messageFactory;
@@ -59,12 +56,20 @@ public class UserRequestsController {
      * Контроллер GET-запроса на вывод страницы
      * @param authentication информация о пользователе
      * @param model переменные для отрисовки страницы
-     * @throws AccessDeniedException возникает в случае ошибки обработки данных о пользователе
      * @return название страницы
      */
     @GetMapping("/requests")
-    public String requests(Authentication authentication, Model model) throws UserNotFoundException {
-        User user = userService.findUserByUsername(authentication.getName());
+    public String requests(Authentication authentication, Model model) {
+        User user;
+        try {
+            user = userService.findUserByUsername(authentication.getName());
+        } catch (UserNotFoundException e) {
+            log.error(e.getMessage());
+            model.addAttribute("status", 404);
+            model.addAttribute("message", e.getMessage());
+            model.addAttribute("trace", Arrays.toString(e.getStackTrace()));
+            return "error";
+        }
         List<UserRequest> userRequests = userRequestService.findAllUserRequestsByUser(user);
         model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
         model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(userRequests));
@@ -116,11 +121,19 @@ public class UserRequestsController {
      * @param model переменные для отображения страницы
      * @param authentication данные аунтификации пользователя
      * @return страница с списком курируемых запросов
-     * @throws UserNotFoundException возникает при ненахождении пользователя
      */
     @GetMapping("/requests/supervised")
-    public String supervisedRequests(Model model, Authentication authentication) throws UserNotFoundException {
-        User operator = userService.findUserByUsername(authentication.getName());
+    public String supervisedRequests(Model model, Authentication authentication) {
+        User operator;
+        try {
+            operator = userService.findUserByUsername(authentication.getName());
+        } catch (UserNotFoundException e) {
+            log.error(e.getMessage());
+            model.addAttribute("status", 404);
+            model.addAttribute("message", e.getMessage());
+            model.addAttribute("trace", Arrays.toString(e.getStackTrace()));
+            return "error";
+        }
         model.addAttribute("requests", userRequestService.findUserRequestsByOperator(operator));
         model.addAttribute("name", operator.getUsername());
         return "requests-supervised";
@@ -207,13 +220,23 @@ public class UserRequestsController {
      * @param id уникальный индификатор запроса
      * @param model переменные для отрисовки страницы
      * @return страница с запросом пользователя
-     * @throws UserRequestNotFoundException возникает при ненахождении запроса пользователя
      */
     @GetMapping("/requests/{id}")
-    public String showRequest(@PathVariable(value = "id") Long id, Model model, Authentication authentication) throws UserRequestNotFoundException, UserNotFoundException {
+    public String showRequest(@PathVariable(value = "id") Long id, Model model, Authentication authentication) {
 
-        UserRequest userRequest = userRequestService.findUserRequestByID(id);
-        User user = userService.findUserByUsername(authentication.getName());
+        UserRequest userRequest;
+        User user;
+        try {
+            userRequest = userRequestService.findUserRequestByID(id);
+            user = userService.findUserByUsername(authentication.getName());
+        } catch (UserRequestNotFoundException | UserNotFoundException e) {
+            log.error(e.getMessage());
+            model.addAttribute("status", 404);
+            model.addAttribute("message", e.getMessage());
+            model.addAttribute("trace", Arrays.toString(e.getStackTrace()));
+            return "error";
+        }
+
         List<Message> messages = messageService.findMessagesByUserRequest(userRequest);
         HashMap<Long, String> avatarsBase64 = new HashMap<>();
 
