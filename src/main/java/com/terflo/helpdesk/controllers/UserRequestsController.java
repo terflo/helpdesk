@@ -91,6 +91,7 @@ public class UserRequestsController {
      * @param authentication данные аунтефикации клиента
      * @return результат запроса
      */
+    @ResponseBody
     @PostMapping("/requests/accept/{id}")
     public ResponseEntity<String> acceptRequest(@PathVariable(value = "id") Long id, Authentication authentication) {
 
@@ -98,10 +99,11 @@ public class UserRequestsController {
             User operator = userService.findUserByUsername(authentication.getName());
             userRequestService.acceptRequest(id, operator);
         } catch (UserRequestNotFoundException | UserRequestClosedException | UserRequestAlreadyHaveOperatorException | UserNotFoundException e) {
+            log.error(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        return ResponseEntity.ok("OK");
+        log.info("Обращение " + id + " закрыто пользователем " + authentication.getName());
+        return ResponseEntity.ok("\"\"");
     }
 
     /**

@@ -5,11 +5,11 @@ function acceptRequest(id) {
         cache: false,
         timeout: 600000,
         async: true,
-        success: function (data) {
-            if(data === "OK") {
-                $("#request_row_" + id).remove()
-            } else
-                console.log(data)
+        success: function () {
+            $("#request_row_" + id).remove()
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }

@@ -2,12 +2,14 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.Image;
 import com.terflo.helpdesk.model.entity.User;
+import com.terflo.helpdesk.model.exceptions.RoleNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
 import com.terflo.helpdesk.model.factory.ImageFactory;
 import com.terflo.helpdesk.model.requests.RegistrationRequest;
 import com.terflo.helpdesk.model.responses.RegistrationResponse;
 import com.terflo.helpdesk.model.services.UserService;
 import com.terflo.helpdesk.utils.RegexUtil;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,6 +27,7 @@ import java.util.Date;
  * @version 1.2
  * Контроллер страницы регистрации
  */
+@Log4j2
 @Controller
 public class RegistrationController {
 
@@ -86,7 +89,6 @@ public class RegistrationController {
             user.setUsername(request.getUsername());
             user.setPassword(request.getPassword());
             user.setEmail(request.getEmail());
-            user.setDate(new Date());
 
             try {
                 Image image = imageFactory.getImage(new File(ResourceUtils.getFile("classpath:static/img/user.png").getPath()));
@@ -97,8 +99,8 @@ public class RegistrationController {
 
 
             try {
-                userService.saveUser(user);
-            } catch (UserAlreadyExistException userAlreadyExistsException) {
+                userService.saveNewUser(user);
+            } catch (UserAlreadyExistException | RoleNotFoundException userAlreadyExistsException) {
                 errors.add(userAlreadyExistsException.getMessage());
             }
 
@@ -106,9 +108,10 @@ public class RegistrationController {
             errors.add("Некорректное имя пользователя");
         }
 
-        if (errors.isEmpty())
+        if (errors.isEmpty()) {
+            log.info("Зарегестрирован новый пользователь " + request.getUsername());
             return "redirect:/login";
-        else {
+        } else {
             model.addAttribute("data", request);
             model.addAttribute("errors", errors);
             return "/registration";

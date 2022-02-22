@@ -36,7 +36,7 @@ public class Decision {
     /**
      * Ответ на часто задаваемый вопрос
      */
-    @Column(name = "answer", nullable = false)
+    @Column(name = "answer", nullable = false, length = 2048)
     private String answer;
 
     /**

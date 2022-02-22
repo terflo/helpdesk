@@ -1,6 +1,7 @@
 package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.User;
+import com.terflo.helpdesk.model.exceptions.RoleNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.RoleRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,7 +39,7 @@ public class UserService implements UserDetailsService {
     /**
      * Репозиторий ролей
      */
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
     /**
      * Кодировщик паролей
@@ -55,9 +57,9 @@ public class UserService implements UserDetailsService {
     private final UserRequestService userRequestService;
 
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder, SessionRegistry sessionRegistry, UserRequestService userRequestService) {
+    public UserService(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder passwordEncoder, SessionRegistry sessionRegistry, UserRequestService userRequestService) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
         this.sessionRegistry = sessionRegistry;
         this.userRequestService = userRequestService;
@@ -118,17 +120,24 @@ public class UserService implements UserDetailsService {
      *
      * @param user пользователь, которого нужно добавить
      */
-    public void saveUser(User user) throws UserAlreadyExistException {
+    public void saveNewUser(User user) throws UserAlreadyExistException, RoleNotFoundException {
 
         if (userRepository.findByUsername(user.getUsername()).isPresent())
             throw new UserAlreadyExistException("Такой пользователь уже существует");
 
-        user.setRoles(Collections.singleton(roleRepository.findByName("ROLE_USER")));
+        user.setDate(new Date());
+        user.setRoles(Collections.singleton(roleService.getRoleByName("ROLE_USER")));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setEnabled(true);
         user.setCredentials_expired(false);
         user.setExpired(false);
         user.setLocked(false);
+        userRepository.save(user);
+    }
+
+    public void saveUser(User user) throws UserAlreadyExistException {
+        if (userRepository.findByUsername(user.getUsername()).isPresent())
+            throw new UserAlreadyExistException("Такой пользователь уже существует");
         userRepository.save(user);
     }
 
