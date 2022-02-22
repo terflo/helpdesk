@@ -133,4 +133,12 @@ public class UserRequestService {
         else
             throw new UserRequestNotFoundException("Обращение пользователя не найдено");
     }
+
+    @Transactional
+    public void deleteAllByUser(User user) throws UserRequestNotFoundException {
+        if(userRequestRepository.findAllByUser(user).isEmpty())
+            throw new UserRequestNotFoundException("Обращения пользователя не найдено");
+        else
+            userRequestRepository.deleteAllByUser(user);
+    }
 }

@@ -1,26 +1,22 @@
 package com.terflo.helpdesk.model.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.4
  * Сущность пользователя системой (хранится в базе данных)
  */
-@Data
+@Getter
+@Setter
 @Entity
-@Transactional
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
@@ -65,10 +61,20 @@ public class User implements UserDetails {
     private String description;
 
     /**
-     * Аватар пользователя (base64)
+     * Уникальный инидификатор аватара пользователя
      */
-    @Column(name = "avatar_id")
-    private Long avatar_id;
+    @JoinColumn(name = "avatar_id", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private Image avatar;
+
+    /**
+     * Список обращений пользователя
+     */
+    @JoinColumn(name = "user_id")
+    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private List<UserRequest> requests;
 
     /**
      * Множество ролей пользователя
@@ -144,5 +150,41 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return this.enabled;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (expired != user.expired) return false;
+        if (locked != user.locked) return false;
+        if (credentials_expired != user.credentials_expired) return false;
+        if (enabled != user.enabled) return false;
+        if (!id.equals(user.id)) return false;
+        if (!username.equals(user.username)) return false;
+        if (!password.equals(user.password)) return false;
+        if (!email.equals(user.email)) return false;
+        if (!date.equals(user.date)) return false;
+        if (!Objects.equals(description, user.description)) return false;
+        return roles.equals(user.roles);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = 31 * result + username.hashCode();
+        result = 31 * result + password.hashCode();
+        result = 31 * result + email.hashCode();
+        result = 31 * result + date.hashCode();
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + roles.hashCode();
+        result = 31 * result + (expired ? 1 : 0);
+        result = 31 * result + (locked ? 1 : 0);
+        result = 31 * result + (credentials_expired ? 1 : 0);
+        result = 31 * result + (enabled ? 1 : 0);
+        return result;
     }
 }

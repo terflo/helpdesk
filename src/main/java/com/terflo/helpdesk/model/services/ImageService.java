@@ -31,9 +31,12 @@ public class ImageService {
                 .orElseThrow(() -> new ImageNotFoundException("Изображение не найдено"));
     }
 
-    @Transactional
     public Long saveImage(MultipartFile file) throws IOException {
         return imageRepository.save(imageFactory.getImage(file)).getId();
+    }
+
+    public Long saveImage(Image image) {
+        return imageRepository.save(image).getId();
     }
 
     @Transactional

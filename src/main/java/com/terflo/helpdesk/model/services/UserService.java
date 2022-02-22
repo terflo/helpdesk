@@ -1,8 +1,8 @@
 package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.User;
-import com.terflo.helpdesk.model.exceptions.ImageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
+import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.RoleRepository;
 import com.terflo.helpdesk.model.repositories.UserRepository;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
@@ -51,15 +51,15 @@ public class UserService implements UserDetailsService {
     /**
      * Сервис аватаров пользователей
      */
-    private final ImageService imageService;
+    private final UserRequestService userRequestService;
 
 
-    public UserService(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder, SessionRegistry sessionRegistry, ImageService imageService) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder passwordEncoder, SessionRegistry sessionRegistry, UserRequestService userRequestService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.sessionRegistry = sessionRegistry;
-        this.imageService = imageService;
+        this.userRequestService = userRequestService;
     }
 
     /**
@@ -163,12 +163,15 @@ public class UserService implements UserDetailsService {
      * @throws UserNotFoundException возникает при ненахождении пользователя в базе данных
      */
     @Transactional
-    public void deleteUserById(Long id) throws UserNotFoundException, ImageNotFoundException {
+    public void deleteUserById(Long id) throws UserNotFoundException {
         Optional<User> user = userRepository.findById(id);
         if (!user.isPresent()) {
             throw new UserNotFoundException("Пользователь не найден");
         } else {
-            imageService.deleteImage(user.get().getAvatar_id());
+            try {
+                userRequestService.deleteAllByUser(user.get());
+            } catch (UserRequestNotFoundException ignored) {}
+            //Если обращений не нашлось, то удалять и нечего
             userRepository.deleteById(id);
         }
     }
@@ -179,12 +182,15 @@ public class UserService implements UserDetailsService {
      * @throws UserNotFoundException возникает при ненахождении пользователя в базе данных
      */
     @Transactional
-    public void deleteUserByUsername(String username) throws UserNotFoundException, ImageNotFoundException {
+    public void deleteUserByUsername(String username) throws UserNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
         if (!user.isPresent()) {
             throw new UserNotFoundException("Пользователь не найден");
         } else {
-            imageService.deleteImage(user.get().getAvatar_id());
+            try {
+                userRequestService.deleteAllByUser(user.get());
+            } catch (UserRequestNotFoundException ignored) {}
+            //Если обращений не нашлось, то удалять и нечего
             userRepository.deleteUserByUsername(username);
         }
     }

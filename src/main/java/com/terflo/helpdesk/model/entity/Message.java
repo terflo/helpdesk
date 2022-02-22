@@ -33,12 +33,14 @@ public class Message {
     /**
      * Отправитель сообщения
      */
-    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sender_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     private User sender;
 
     /**
      * Запрос пользователя, к которому относится сообщение
      */
+    @JoinColumn(name = "request_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private UserRequest userRequest;
 

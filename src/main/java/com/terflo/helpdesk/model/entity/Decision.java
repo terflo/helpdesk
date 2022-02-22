@@ -49,6 +49,6 @@ public class Decision {
      * Автор ответа
      */
     @JoinColumn(name = "author_id", nullable = false)
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    @ManyToOne(fetch = FetchType.LAZY)
     private User author;
 }

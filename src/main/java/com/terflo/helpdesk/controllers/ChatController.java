@@ -49,8 +49,6 @@ public class ChatController {
     /**
      * Метод обработки входящего на сервер сообщения от пользователей
      * @param messageDTO сообщение от пользователей
-     * @throws UserNotFoundException возникает при ненахождении пользователя в базе данных
-     * @throws UserRequestNotFoundException возникает при ненахождении запроса пользователля в базе данных
      */
     @MessageMapping("/chat")
     public ResponseEntity<String> processMessage(@Payload MessageDTO messageDTO) {

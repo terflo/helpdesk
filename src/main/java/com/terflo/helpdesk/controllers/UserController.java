@@ -4,11 +4,11 @@ import com.terflo.helpdesk.model.entity.Image;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.UserDTO;
-import com.terflo.helpdesk.model.exceptions.ImageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
+import com.terflo.helpdesk.model.factory.ImageFactory;
 import com.terflo.helpdesk.model.factory.UserDTOFactory;
 import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
-import com.terflo.helpdesk.model.services.ImageService;
+import com.terflo.helpdesk.model.services.SessionService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
 import com.terflo.helpdesk.utils.RegexUtil;
@@ -37,21 +37,24 @@ public class UserController {
 
     private final RegexUtil regexUtil;
 
+    private final SessionService sessionService;
+
     private final UserService userService;
 
     private final UserDTOFactory userDTOFactory;
 
-    private final ImageService imageService;
+    private final ImageFactory imageFactory;
 
     private final UserRequestService userRequestService;
 
     private final UserRequestDTOFactory userRequestDTOFactory;
 
-    public UserController(RegexUtil regexUtil, UserService userService, UserDTOFactory userDTOFactory, ImageService imageService, UserRequestService userRequestService, UserRequestDTOFactory userRequestDTOFactory) {
+    public UserController(RegexUtil regexUtil, SessionService sessionService, UserService userService, UserDTOFactory userDTOFactory, ImageFactory imageFactory, UserRequestService userRequestService, UserRequestDTOFactory userRequestDTOFactory) {
         this.regexUtil = regexUtil;
+        this.sessionService = sessionService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
-        this.imageService = imageService;
+        this.imageFactory = imageFactory;
         this.userRequestService = userRequestService;
         this.userRequestDTOFactory = userRequestDTOFactory;
     }
@@ -65,7 +68,6 @@ public class UserController {
      */
     @GetMapping("/user/{username}")
     public String userProfile(@PathVariable String username, Model model, Authentication authentication) throws UserNotFoundException {
-
 
         boolean clientIsContainsAdminRole = authentication
                 .getAuthorities()
@@ -83,11 +85,7 @@ public class UserController {
         List<UserRequest> requests = userRequestService.findAllUserRequestsByUser(user);
         model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
 
-        try {
-            model.addAttribute("avatar", imageService.getImage(user.getAvatar_id()));
-        } catch (ImageNotFoundException e) {
-            model.addAttribute("avatar", null);
-        }
+        model.addAttribute("avatar", user.getAvatar());
         model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
         return "profile";
 
@@ -108,14 +106,9 @@ public class UserController {
 
         try {
             User user = userService.findUserById(id);
-            if (user.getAvatar_id() == null) {
-                Long imageId = imageService.saveImage(file);
-                user.setAvatar_id(imageId);
-            } else {
-                imageService.updateImage(user.getAvatar_id(), file);
-            }
+            user.setAvatar(imageFactory.getImage(file));
             userService.updateUser(user);
-        } catch (UserNotFoundException | IOException | ImageNotFoundException e) {
+        } catch (UserNotFoundException | IOException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok().body("\"\"");
@@ -131,10 +124,9 @@ public class UserController {
     public ResponseEntity<String> getAvatar(@PathVariable(name = "id") Long id) {
 
         try {
-            User user = userService.findUserById(id);
-            Image image = imageService.getImage(user.getAvatar_id());
+            Image image = userService.findUserById(id).getAvatar();
             return ResponseEntity.ok("\"data:" + image.getType() + ";base64," + image.getBase64Image() + "\"");
-        } catch (UserNotFoundException | ImageNotFoundException e) {
+        } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -147,10 +139,13 @@ public class UserController {
      */
     @ResponseBody
     @PostMapping("/user/{id}/update")
-    public ResponseEntity<String> updateUser(@PathVariable(name = "id") Long id, @RequestBody UserDTO userDTO) {
+    public ResponseEntity<String> updateUser(@PathVariable(name = "id") Long id, @RequestBody UserDTO userDTO, Authentication authentication) {
+
+        boolean needLogout = false;
+        User user;
 
         try {
-            User user = userService.findUserById(id);
+            user = userService.findUserById(id);
 
             //Проверка username на изменения
             if(!userDTO.username.equals(user.getUsername())) {
@@ -160,6 +155,8 @@ public class UserController {
                 //Проверка username на корректность (Regex)
                 if (!regexUtil.checkUsername(userDTO.username))
                     return ResponseEntity.badRequest().body("Некорректное имя пользователя");
+                user.setUsername(userDTO.username);
+                needLogout = true;
             }
 
             //Проверка email на изменения
@@ -170,6 +167,7 @@ public class UserController {
                 //Проверка email на корректность (Regex)
                 if (!regexUtil.checkEmail(userDTO.email))
                     return ResponseEntity.badRequest().body("Некорректный email");
+                user.setEmail(userDTO.email);
             }
 
             //Проверка description на изменения
@@ -182,6 +180,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
+        if(needLogout) sessionService.expireUserSessions(authentication.getName());
         return ResponseEntity.ok().body("\"\"");
     }
 
@@ -207,7 +206,7 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@PathVariable(value = "id") Long id) {
         try {
             userService.deleteUserById(id);
-        } catch (UserNotFoundException | ImageNotFoundException e) {
+        } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         return ResponseEntity.ok().build();

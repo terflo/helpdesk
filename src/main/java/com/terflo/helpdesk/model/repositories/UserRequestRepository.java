@@ -14,4 +14,5 @@ public interface UserRequestRepository extends CrudRepository<UserRequest, Long>
 
     List<UserRequest> findAllByOperatorOrderByStatus(User operator);
 
+    void deleteAllByUser(User user);
 }

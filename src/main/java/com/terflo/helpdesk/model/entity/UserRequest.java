@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.3
  * Обращение пользователя для связи с сотрудником тех-поддержки
  */
 @Data
@@ -42,7 +42,7 @@ public class UserRequest {
     /**
      * Владелец обращения
      */
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private User user;
 
@@ -79,7 +79,11 @@ public class UserRequest {
     /**
      * Сообщения в обращении
      */
-    @JoinColumn(name = "user_request_id")
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            mappedBy = "userRequest",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<Message> messages;
 }

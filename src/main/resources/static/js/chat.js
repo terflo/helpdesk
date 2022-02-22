@@ -63,7 +63,7 @@ function showMessageOutput(messageOutput) {
     } else {
         element = $('<li class="chat-left">')
             .append('<div class="chat-avatar">\n' +
-                '                                <img src="../img/support.png" alt="Avatar">\n' +
+                '                                <img src="' + avatar + '" alt="Avatar">\n' +
                 '                                <div class="chat-name">' + message.sender.username + '</div>\n' +
                 '                            </div>')
             .append('<div class="chat-text">' + message['message'] + '</div>')
@@ -106,7 +106,7 @@ function getAvatar(id) {
             base64avatar = data
         },
         error: function (data) {
-            alert(data.responseText)
+            console.log(data.responseText)
         }
     });
     return base64avatar

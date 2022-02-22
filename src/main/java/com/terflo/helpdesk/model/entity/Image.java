@@ -18,7 +18,7 @@ public class Image {
     private Long id;
 
     @Lob
-    @Column(name = "bytes")
+    @Column(name = "bytes", nullable = false)
     private byte[] bytes;
 
     @Column(name = "type", nullable = false)

@@ -1,17 +1,23 @@
 package com.terflo.helpdesk.controllers;
 
+import com.terflo.helpdesk.model.entity.Image;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
+import com.terflo.helpdesk.model.factory.ImageFactory;
 import com.terflo.helpdesk.model.requests.RegistrationRequest;
 import com.terflo.helpdesk.model.responses.RegistrationResponse;
+import com.terflo.helpdesk.model.services.ImageService;
 import com.terflo.helpdesk.model.services.UserService;
 import com.terflo.helpdesk.utils.RegexUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -33,9 +39,15 @@ public class RegistrationController {
      */
     private final UserService userService;
 
-    public RegistrationController(RegexUtil regexUtil, UserService userService) {
+    private final ImageFactory imageFactory;
+
+    private final ImageService imageService;
+
+    public RegistrationController(RegexUtil regexUtil, UserService userService, ImageFactory imageFactory, ImageService imageService) {
         this.regexUtil = regexUtil;
         this.userService = userService;
+        this.imageFactory = imageFactory;
+        this.imageService = imageService;
     }
 
     /**
@@ -79,6 +91,14 @@ public class RegistrationController {
             user.setPassword(request.getPassword());
             user.setEmail(request.getEmail());
             user.setDate(new Date());
+
+            try {
+                Image image = imageFactory.getImage(new File(ResourceUtils.getFile("classpath:static/img/user.png").getPath()));
+                user.setAvatar(image);
+            } catch (IOException e) {
+                errors.add(e.getMessage());
+            }
+
 
             try {
                 userService.saveUser(user);

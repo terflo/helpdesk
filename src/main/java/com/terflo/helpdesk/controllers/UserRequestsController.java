@@ -219,12 +219,8 @@ public class UserRequestsController {
 
         for (Message message : messages) {
             Long senderID = message.getSender().getId();
-            try {
-                Image image = imageService.getImage(message.getSender().getAvatar_id());
-                avatarsBase64.put(senderID, "data:" + image.getType() + ";base64," + image.getBase64Image());
-            } catch (ImageNotFoundException e) {
-                avatarsBase64.put(senderID, null);
-            }
+            Image image = message.getSender().getAvatar();
+            avatarsBase64.put(senderID, "data:" + image.getType() + ";base64," + image.getBase64Image());
         }
 
         model.addAttribute("userRequest", userRequestDTOFactory.convertToUserRequestDTO(userRequest));
