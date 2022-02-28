@@ -15,7 +15,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.3
  * Конфигурация безопасности веб-приложения
  */
 @Configuration
@@ -44,8 +44,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/", "/css/**", "/js/**", "/img/**", "/api/checkRegistrationData/**").permitAll()
-                .antMatchers("/registration").not().fullyAuthenticated()
+                .antMatchers("/", "/css/**", "/js/**", "/img/**", "/registration/checkUserData/**").permitAll()
+                .antMatchers("/registration", "/activate/**").not().fullyAuthenticated()
                 .antMatchers("/requests/free", "/requests/supervised", "/requests/accept", "requests/close").hasRole("OPERATOR")
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()

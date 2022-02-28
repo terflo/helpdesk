@@ -13,6 +13,7 @@
         <script th:src="@{js/registration.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{js/jQuery.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{js/toast.js}" rel="script" type="text/javascript"></script>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     </head>
 
@@ -58,8 +59,11 @@
                         <span>Пароль слишком короткий</span>
                     </div>
 
+                    <div class="g-recaptcha mb-3"
+                         th:attr="data-sitekey=${@captchaSettings.getSite()}"></div>
+
                     <section th:if="not ${#lists.isEmpty(errors)}" th:each="error : ${errors}">
-                        <div class="mb-3 alert alert-danger hidden" role="alert">
+                        <div class="mb-3 alert alert-danger" role="alert">
                             <span th:text="${error}"></span>
                         </div>
                     </section>

@@ -52,7 +52,10 @@
             </div>
         </nav>
         <script>
-            document.getElementById("profile_link").setAttribute("href", "/user/" + document.getElementById("account_name").innerText);
+            let profileLink = document.getElementById("profile_link")
+            let accountName = document.getElementById("account_name")
+            if(profileLink != null && accountName != null)
+                profileLink.setAttribute("href", "/user/" + accountName.innerText);
         </script>
     </div>
 

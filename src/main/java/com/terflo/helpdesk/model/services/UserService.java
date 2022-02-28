@@ -1,21 +1,21 @@
 package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.User;
-import com.terflo.helpdesk.model.exceptions.RoleNotFoundException;
-import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
-import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
-import com.terflo.helpdesk.model.repositories.RoleRepository;
+import com.terflo.helpdesk.model.exceptions.*;
+import com.terflo.helpdesk.model.factory.ImageFactory;
 import com.terflo.helpdesk.model.repositories.UserRepository;
-import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
-import lombok.extern.log4j.Log4j2;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
 import javax.transaction.Transactional;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -29,7 +29,10 @@ import java.util.stream.StreamSupport;
  * Сервис для работы с пользователями
  */
 @Service
+@AllArgsConstructor
 public class UserService implements UserDetailsService {
+
+    private final DecisionService decisionService;
 
     /**
      * Репозиторий пользователей
@@ -56,14 +59,9 @@ public class UserService implements UserDetailsService {
      */
     private final UserRequestService userRequestService;
 
+    private final ImageFactory imageFactory;
 
-    public UserService(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder passwordEncoder, SessionRegistry sessionRegistry, UserRequestService userRequestService) {
-        this.userRepository = userRepository;
-        this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
-        this.sessionRegistry = sessionRegistry;
-        this.userRequestService = userRequestService;
-    }
+    private final VerificationTokenService verificationTokenService;
 
     /**
      * Функция поиска пользователя по индификатору
@@ -118,21 +116,30 @@ public class UserService implements UserDetailsService {
     /**
      * Функция добавления пользователя в базу данных
      *
-     * @param user пользователь, которого нужно добавить
+     * @param username имя пользователя
+     * @param email почта пользователя
+     * @param password пароль пользователя
      */
-    public void saveNewUser(User user) throws UserAlreadyExistException, RoleNotFoundException {
+    public User saveNewUser(String username, String email, String password) throws UserAlreadyExistException, RoleNotFoundException, IOException {
 
-        if (userRepository.findByUsername(user.getUsername()).isPresent())
+        if (userRepository.findByUsername(username).isPresent())
             throw new UserAlreadyExistException("Такой пользователь уже существует");
 
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
         user.setDate(new Date());
         user.setRoles(Collections.singleton(roleService.getRoleByName("ROLE_USER")));
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setEnabled(true);
+        user.setEnabled(false);
         user.setCredentials_expired(false);
         user.setExpired(false);
         user.setLocked(false);
-        userRepository.save(user);
+        user.setAvatar(
+                imageFactory.getImage(new File(ResourceUtils.getFile("classpath:static/img/user.png").getPath()))
+        );
+
+        return userRepository.save(user);
     }
 
     public void saveUser(User user) throws UserAlreadyExistException {
@@ -159,11 +166,25 @@ public class UserService implements UserDetailsService {
      * @param id уникальный индификатор пользователя
      * @throws UserNotFoundException возникает при ненахождении пользователя
      */
+    @Transactional
     public void switchLockUserById(Long id) throws UserNotFoundException {
         User user = userRepository
                 .findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
         user.switchLock();
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void activateUserByUsername(String username) throws UserNotFoundException, UserAlreadyActivatedException {
+        User user = userRepository
+                .findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+
+        if(user.isEnabled())
+            throw new UserAlreadyActivatedException("Данный пользователь уже активирован");
+
+        user.setEnabled(true);
         userRepository.save(user);
     }
 
@@ -179,9 +200,11 @@ public class UserService implements UserDetailsService {
             throw new UserNotFoundException("Пользователь не найден");
         } else {
             try {
+                verificationTokenService.deleteByUser(user.get());
+                decisionService.deleteAllDecisionByAuthor(user.get());
                 userRequestService.deleteAllByUser(user.get());
-            } catch (UserRequestNotFoundException ignored) {}
-            //Если обращений не нашлось, то удалять и нечего
+            } catch (UserRequestNotFoundException | VerificationTokenNotFoundException ignored) {}
+            //Если обращений, токенов верификации, частых вопросов не нашлось, то удалять и нечего
             userRepository.deleteById(id);
         }
     }
@@ -198,9 +221,11 @@ public class UserService implements UserDetailsService {
             throw new UserNotFoundException("Пользователь не найден");
         } else {
             try {
+                verificationTokenService.deleteByUser(user.get());
+                decisionService.deleteAllDecisionByAuthor(user.get());
                 userRequestService.deleteAllByUser(user.get());
-            } catch (UserRequestNotFoundException ignored) {}
-            //Если обращений не нашлось, то удалять и нечего
+            } catch (UserRequestNotFoundException | VerificationTokenNotFoundException ignored) {}
+            //Если обращений, токенов верификации, частых вопросов не нашлось, то удалять и нечего
             userRepository.deleteUserByUsername(username);
         }
     }

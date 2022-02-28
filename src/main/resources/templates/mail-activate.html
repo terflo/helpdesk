@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+
+    <body style="text-align: center; vertical-align: middle">
+        <h1 th:text="'Добро пожаловать, ' + ${username}"></h1>
+        <br>
+        <label>Чтобы подтвердить регистрацию аккаунта и электронный почтовый ящик, перейдите по ссылке ниже:</label>
+        <br>
+        <label th:text="${URL}"></label>
+        <br>
+        <label>Если вы не регистрировались, то возможно Ваш почтоый ящик указали случайно, проигнорируйте данное сообщение</label>
+        <br>
+        <label>Данное сообщение сгенерированно автоматически, пожалуйста не отвечайте на него</label>
+    </body>
+</html>

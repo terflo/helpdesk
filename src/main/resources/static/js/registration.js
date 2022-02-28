@@ -46,6 +46,9 @@ function checkRegistrationData() {
                 else if(data.passwordStatus === 'NOT MATCH')
                     showToast('Пароли не совпадают')
             }
+        },
+        error: function (data) {
+            alert(data.responseText)
         }
     });
 }

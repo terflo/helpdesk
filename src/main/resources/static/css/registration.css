@@ -21,7 +21,7 @@ img {
 }
 
 .login-clean form {
-    max-width: 320px;
+    max-width: 25vw;
     width: 90%;
     margin: 0 auto;
     background-color: #ffffff;

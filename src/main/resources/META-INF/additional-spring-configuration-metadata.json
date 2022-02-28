@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "google.recaptcha.key.site",
+      "type": "java.lang.String",
+      "description": "Description for google.recaptcha.key.site."
+    },
+    {
+      "name": "application.name",
+      "type": "java.lang.String",
+      "description": "Description for application.name."
+    }
+  ] }

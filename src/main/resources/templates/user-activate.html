@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <link rel="shortcut icon" th:href="@{~/img/help.png}" type="image/png">
+        <meta charset="UTF-8" content="text/html">
+        <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
+        <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
+        <title>Активация</title>
+    </head>
+    <body>
+        <div th:insert="blocks/navigation"></div>
+        <main class="h-100 row align-items-center" style="min-height: 75vh;">
+            <div class="col" style="text-align: center">
+                <h1>Активация</h1>
+                <label th:text="'Аккаунт ' + ${username} + ' успешно активирован'"></label>
+            </div>
+        </main>
+        <div th:insert="blocks/footer"></div>
+    </body>
+</html>

@@ -4,21 +4,18 @@ import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.exceptions.RoleAlreadyExistException;
 import com.terflo.helpdesk.model.exceptions.RoleNotFoundException;
 import com.terflo.helpdesk.model.repositories.RoleRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Service
+@AllArgsConstructor
 public class RoleService {
 
     private final RoleRepository roleRepository;
-
-    public RoleService(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
 
     public void saveRole(Role role) throws RoleAlreadyExistException {
         if(roleRepository.findByName(role.getName()).isPresent())

@@ -6,6 +6,7 @@ import com.terflo.helpdesk.model.entity.enums.MessageStatus;
 import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.MessageRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
  * Сервис для работы с сообщениями
  */
 @Service
+@AllArgsConstructor
 public class MessageService {
 
     /**
@@ -24,11 +26,6 @@ public class MessageService {
     private final MessageRepository messageRepository;
 
     private final UserRequestService userRequestService;
-
-    public MessageService(MessageRepository messageRepository, UserRequestService userRequestService) {
-        this.messageRepository = messageRepository;
-        this.userRequestService = userRequestService;
-    }
 
     /**
      * Метод для подсчёта кол-ва новых сообщний

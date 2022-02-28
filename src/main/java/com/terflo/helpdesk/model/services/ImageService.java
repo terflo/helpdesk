@@ -4,6 +4,7 @@ import com.terflo.helpdesk.model.entity.Image;
 import com.terflo.helpdesk.model.exceptions.ImageNotFoundException;
 import com.terflo.helpdesk.model.factory.ImageFactory;
 import com.terflo.helpdesk.model.repositories.ImageRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,17 +12,12 @@ import javax.transaction.Transactional;
 import java.io.IOException;
 
 @Service
+@AllArgsConstructor
 public class ImageService {
 
     private final ImageRepository imageRepository;
 
     private final ImageFactory imageFactory;
-
-
-    public ImageService(ImageRepository imageRepository, ImageFactory imageFactory) {
-        this.imageRepository = imageRepository;
-        this.imageFactory = imageFactory;
-    }
 
 
     public Image getImage(Long id) throws ImageNotFoundException {

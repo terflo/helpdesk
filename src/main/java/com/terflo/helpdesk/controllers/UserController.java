@@ -97,7 +97,7 @@ public class UserController {
 
         model.addAttribute("avatar", user.getAvatar());
         model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
-        return "profile";
+        return "user-profile";
 
     }
 
@@ -190,7 +190,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
-        if(needLogout) sessionService.expireUserSessions(authentication.getName());
+        if (needLogout) sessionService.expireUserSessions(authentication.getName());
         return ResponseEntity.ok().body("\"\"");
     }
 

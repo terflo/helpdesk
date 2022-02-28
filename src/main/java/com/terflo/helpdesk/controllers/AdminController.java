@@ -1,5 +1,6 @@
 package com.terflo.helpdesk.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.terflo.helpdesk.model.entity.Decision;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.DecisionDTO;
@@ -11,6 +12,7 @@ import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
 import com.terflo.helpdesk.model.services.DecisionService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,6 +30,7 @@ import java.util.List;
  */
 @Log4j2
 @Controller
+@AllArgsConstructor
 public class AdminController {
 
     private final UserService userService;
@@ -39,14 +42,6 @@ public class AdminController {
     private final UserRequestService userRequestService;
 
     private final UserRequestDTOFactory userRequestDTOFactory;
-
-    public AdminController(UserService userService, DecisionService decisionService, DecisionDTOFactory decisionDTOFactory, UserRequestService userRequestService, UserRequestDTOFactory userRequestDTOFactory) {
-        this.userService = userService;
-        this.decisionService = decisionService;
-        this.decisionDTOFactory = decisionDTOFactory;
-        this.userRequestService = userRequestService;
-        this.userRequestDTOFactory = userRequestDTOFactory;
-    }
 
     /**
      * Mapping для вывода страницы админ-панели
@@ -78,19 +73,27 @@ public class AdminController {
     @PostMapping("/admin/decisions/add")
     public @ResponseBody ResponseEntity<String> addDecision(@RequestBody Decision decision, Authentication authentication) {
         if(decision.getName().isEmpty() || decision.getAnswer().isEmpty()) {
-            return ResponseEntity.ok("\"Поля не могут быть пустые\"");
+            return ResponseEntity.badRequest().body("\"Поля не могут быть пустые\"");
         } else {
             decision.setDate(new Date());
             try {
                 decision.setAuthor(userService.findUserByUsername(authentication.getName()));
-                decisionService.saveDecision(decision);
+                decision = decisionService.saveDecision(decision);
             } catch (DecisionNameAlreadyExistsException | UserNotFoundException e) {
                 log.error(e.getMessage());
                 return ResponseEntity.ok("\"" + e.getMessage() + "\"");
             }
         }
-        log.info("Добавлен новый частый вопрос id: " + decision.getId());
-        return ResponseEntity.ok().body("\"\"");
+        log.info("Добавлен новый частый вопрос с индификатором " + decision.getId());
+
+
+        try {
+            return ResponseEntity.ok().body(decisionDTOFactory.convertToDecisionDTO(decision).toJSON());
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+            return ResponseEntity.ok("\"" + e.getMessage() + "\"");
+        }
+
     }
 
     /**

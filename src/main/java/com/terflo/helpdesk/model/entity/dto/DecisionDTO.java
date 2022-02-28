@@ -1,5 +1,7 @@
 package com.terflo.helpdesk.model.entity.dto;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -21,4 +23,9 @@ public class DecisionDTO implements Serializable {
     public Date date;
 
     public UserDTO author;
+
+    public String toJSON() throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(this);
+    }
 }

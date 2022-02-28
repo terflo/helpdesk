@@ -8,6 +8,7 @@ import com.terflo.helpdesk.model.exceptions.UserRequestAlreadyHaveOperatorExcept
 import com.terflo.helpdesk.model.exceptions.UserRequestClosedException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.UserRequestRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +21,10 @@ import java.util.List;
  * Сервис для работы с запросами пользователй
  */
 @Service
+@AllArgsConstructor
 public class UserRequestService {
 
     private final UserRequestRepository userRequestRepository;
-
-    public UserRequestService(UserRequestRepository userRequestRepository) {
-        this.userRequestRepository = userRequestRepository;
-    }
 
     /**
      * Метод поиска всех запросов созданным пользователем
