@@ -2,7 +2,7 @@ package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.exceptions.*;
-import com.terflo.helpdesk.model.factory.ImageFactory;
+import com.terflo.helpdesk.model.factories.ImageFactory;
 import com.terflo.helpdesk.model.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.session.SessionRegistry;
@@ -61,6 +61,8 @@ public class UserService implements UserDetailsService {
 
     private final ImageFactory imageFactory;
 
+    private final ImageService imageService;
+
     private final VerificationTokenService verificationTokenService;
 
     /**
@@ -70,7 +72,11 @@ public class UserService implements UserDetailsService {
      * @return найденный пользователь из базы данных
      */
     public User findUserById(Long id) throws UserNotFoundException {
-        return userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        return userRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new UserNotFoundException(String.format("Пользователь #%s не найден", id))
+                );
     }
 
     /**
@@ -81,7 +87,11 @@ public class UserService implements UserDetailsService {
      * @throws UserNotFoundException возникает при ненахождении пользователя
      */
     public User findUserByUsername(String username) throws UserNotFoundException {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        return userRepository
+                .findByUsername(username)
+                .orElseThrow(
+                        () -> new UserNotFoundException(String.format("Пользователь %s не найден", username))
+                );
     }
 
     /**
@@ -91,7 +101,9 @@ public class UserService implements UserDetailsService {
      * @return результат поиска пользователя
      */
     public boolean userIsExistByUsername(String username) {
-        return userRepository.findByUsername(username).isPresent();
+        return userRepository
+                .findByUsername(username)
+                .isPresent();
     }
 
     /**
@@ -101,7 +113,9 @@ public class UserService implements UserDetailsService {
      * @return результат поиска пользователя
      */
     public boolean userIsExistByEmail(String email) {
-        return userRepository.findByEmail(email).isPresent();
+        return userRepository
+                .findByEmail(email)
+                .isPresent();
     }
 
     /**
@@ -110,7 +124,11 @@ public class UserService implements UserDetailsService {
      * @return все пользователи из базы данных
      */
     public List<User> getAllUsers() {
-        return StreamSupport.stream(userRepository.findAll().spliterator(), false).collect(Collectors.toList());
+        return StreamSupport
+                .stream(
+                        userRepository.findAll().spliterator(),
+                        false)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -123,7 +141,9 @@ public class UserService implements UserDetailsService {
     public User saveNewUser(String username, String email, String password) throws UserAlreadyExistException, RoleNotFoundException, IOException {
 
         if (userRepository.findByUsername(username).isPresent())
-            throw new UserAlreadyExistException("Такой пользователь уже существует");
+            throw new UserAlreadyExistException(
+                    String.format("Пользователь %s уже существует", username)
+            );
 
         User user = new User();
         user.setUsername(username);
@@ -136,7 +156,9 @@ public class UserService implements UserDetailsService {
         user.setExpired(false);
         user.setLocked(false);
         user.setAvatar(
-                imageFactory.getImage(new File(ResourceUtils.getFile("classpath:static/img/user.png").getPath()))
+                imageFactory.getImage(
+                        new File(ResourceUtils.getFile("classpath:static/img/user.png").getPath())
+                )
         );
 
         return userRepository.save(user);
@@ -144,7 +166,9 @@ public class UserService implements UserDetailsService {
 
     public void saveUser(User user) throws UserAlreadyExistException {
         if (userRepository.findByUsername(user.getUsername()).isPresent())
-            throw new UserAlreadyExistException("Такой пользователь уже существует");
+            throw new UserAlreadyExistException(
+                    String.format("Пользователь %s уже существует", user.getUsername())
+            );
         userRepository.save(user);
     }
 
@@ -158,7 +182,9 @@ public class UserService implements UserDetailsService {
         if(userRepository.findById(user.getId()).isPresent())
             userRepository.save(user);
         else
-            throw new UserNotFoundException("Пользователь не найден");
+            throw new UserNotFoundException(
+                    String.format("Пользователь %s не найден", user.getUsername())
+            );
     }
 
     /**
@@ -170,7 +196,9 @@ public class UserService implements UserDetailsService {
     public void switchLockUserById(Long id) throws UserNotFoundException {
         User user = userRepository
                 .findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+                .orElseThrow(() -> new UserNotFoundException(
+                        String.format("Пользователь #%s не найден", id)
+                        ));
         user.switchLock();
         userRepository.save(user);
     }
@@ -179,10 +207,14 @@ public class UserService implements UserDetailsService {
     public void activateUserByUsername(String username) throws UserNotFoundException, UserAlreadyActivatedException {
         User user = userRepository
                 .findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+                .orElseThrow(() -> new UserNotFoundException(
+                        String.format("Пользователь %s не найден", username)
+                ));
 
         if(user.isEnabled())
-            throw new UserAlreadyActivatedException("Данный пользователь уже активирован");
+            throw new UserAlreadyActivatedException(
+                    String.format("Пользователь %s уже активирован", username)
+            );
 
         user.setEnabled(true);
         userRepository.save(user);
@@ -197,7 +229,7 @@ public class UserService implements UserDetailsService {
     public void deleteUserById(Long id) throws UserNotFoundException {
         Optional<User> user = userRepository.findById(id);
         if (!user.isPresent()) {
-            throw new UserNotFoundException("Пользователь не найден");
+            throw new UserNotFoundException(String.format("Пользователь #%s не найден", id));
         } else {
             try {
                 verificationTokenService.deleteByUser(user.get());
@@ -218,13 +250,14 @@ public class UserService implements UserDetailsService {
     public void deleteUserByUsername(String username) throws UserNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
         if (!user.isPresent()) {
-            throw new UserNotFoundException("Пользователь не найден");
+            throw new UserNotFoundException(String.format("Пользователь %s не найден", username));
         } else {
             try {
                 verificationTokenService.deleteByUser(user.get());
                 decisionService.deleteAllDecisionByAuthor(user.get());
+                imageService.deleteImage(user.get().getAvatar());
                 userRequestService.deleteAllByUser(user.get());
-            } catch (UserRequestNotFoundException | VerificationTokenNotFoundException ignored) {}
+            } catch (UserRequestNotFoundException | VerificationTokenNotFoundException | ImageNotFoundException ignored) {}
             //Если обращений, токенов верификации, частых вопросов не нашлось, то удалять и нечего
             userRepository.deleteUserByUsername(username);
         }
@@ -238,7 +271,9 @@ public class UserService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        return userRepository.findByUsername(s).orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+        return userRepository
+                .findByUsername(s)
+                .orElseThrow(() -> new UsernameNotFoundException(String.format("Пользователь %s не найден", s)));
     }
 
     /**

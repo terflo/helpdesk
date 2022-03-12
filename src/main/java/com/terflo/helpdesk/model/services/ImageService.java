@@ -2,7 +2,7 @@ package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.Image;
 import com.terflo.helpdesk.model.exceptions.ImageNotFoundException;
-import com.terflo.helpdesk.model.factory.ImageFactory;
+import com.terflo.helpdesk.model.factories.ImageFactory;
 import com.terflo.helpdesk.model.repositories.ImageRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,9 @@ public class ImageService {
 
     @Transactional
     public void updateImage(Long id, MultipartFile file) throws ImageNotFoundException, IOException {
-        Image image = imageRepository.findById(id).orElseThrow(() -> new ImageNotFoundException("Изображение не найдено"));
+        Image image = imageRepository
+                .findById(id)
+                .orElseThrow(() -> new ImageNotFoundException("Изображение не найдено"));
         image.setBytes(file.getBytes());
         imageRepository.save(image);
     }

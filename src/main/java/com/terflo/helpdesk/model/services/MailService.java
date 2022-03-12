@@ -4,6 +4,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring5.SpringTemplateEngine;
@@ -34,6 +35,7 @@ public class MailService {
         this.springTemplateEngine = springTemplateEngine;
     }
 
+    @Async
     public void sendRegistrationMail(String address, String username, String activateCode) throws MessagingException {
         log.info("Письмо с подтверждением регистрации на адрес " + address + " принято в обработку");
 
@@ -51,7 +53,7 @@ public class MailService {
                 username,
                 activateCode));
 
-        String emailContent = springTemplateEngine.process("mail-activate", context);
+        String emailContent = springTemplateEngine.process("mail/activate", context);
 
         mimeMessageHelper.setTo(address);
         mimeMessageHelper.setFrom(FROM);

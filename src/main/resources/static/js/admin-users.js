@@ -1,7 +1,7 @@
 function deleteUser(id) {
     $.ajax({
         type: "DELETE",
-        url: "/admin/users/delete/" + id,
+        url: "/admin/users/" + id,
         cache: false,
         timeout: 600000,
         async: true,
@@ -17,7 +17,7 @@ function deleteUser(id) {
 function switchUserLock(id) {
     $.ajax({
         type: "POST",
-        url: "/admin/users/switchLock/" + id,
+        url: "/admin/users/" + id + "/switchLock",
         cache: false,
         timeout: 600000,
         async: true,

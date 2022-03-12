@@ -1,4 +1,4 @@
-package com.terflo.helpdesk.model.factory;
+package com.terflo.helpdesk.model.factories;
 
 import com.terflo.helpdesk.model.entity.Image;
 import org.springframework.stereotype.Component;
@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 

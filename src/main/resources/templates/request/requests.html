@@ -30,8 +30,6 @@
                         <th scope="col">Статус</th>
                         <th scope="col">Приоритет</th>
                         <th scope="col">Оператор</th>
-                        <th scope="col">Просмотреть</th>
-                        <th sec:authorize="hasRole('ROLE_OPERATOR')" scope="col">Закрыть</th>
                     </tr>
                 </thead>
                 <tbody th:if="not ${#lists.isEmpty(requests)}" th:each="request : ${requests}" style="overflow-y: scroll">
@@ -54,10 +52,10 @@
                         <td>
                             <a th:href="'/requests/' + ${request?.id}"><img th:src="@{~/img/loupe.png}" style="height: 2vw" alt="see details"></a>
                         </td>
-                        <td th:if="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">
+                        <td sec:authorize="hasRole('ROLE_OPERATOR')" th:if="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">
                             <input disabled type="image" th:src="@{~/img/close.png}" style="height: 2vw">
                         </td>
-                        <td th:id="'close_button_' + ${request?.id}" th:unless="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">
+                        <td sec:authorize="hasRole('ROLE_OPERATOR')" th:id="'close_button_' + ${request?.id}" th:unless="${request?.status == T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">
                             <input th:onclick="'closeRequest(' + ${request?.id} + ');'" type="image" th:src="@{~/img/close.png}" style="height: 2vw">
                         </td>
                     </tr>

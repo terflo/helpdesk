@@ -5,11 +5,12 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Set;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.1
  * Сущность для транспортировки информации о пользователе по сети
  * (Шаблон Data Transfer Object)
  */
@@ -42,5 +43,10 @@ public class UserDTO implements Serializable {
      * Описание пользователя
      */
     public String description;
+
+    /**
+     * Дата регистрации пользователя
+     */
+    public Date date;
 
 }

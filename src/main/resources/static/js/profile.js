@@ -32,8 +32,8 @@ function editProfile() {
 function updateProfile(id) {
 
     $.ajax({
-        type: "POST",
-        url: "/user/" + id + "/update",
+        type: "PUT",
+        url: "/user/" + id,
         cache: true,
         timeout: 600000,
         data: JSON.stringify({
@@ -72,9 +72,14 @@ function uploadAvatar(id) {
     let formData = new FormData()
     formData.append('file', $("#avatar-file")[0].files[0]);
 
+    if(formData.get('file').size > 10485760) {
+        alert("Размер файла привышает 10 мбайт")
+        return;
+    }
+
     $.ajax({
-        type: "POST",
-        url: "/user/" + id + "/updateAvatar",
+        type: "PUT",
+        url: "/user/" + id + "/avatar",
         cache: true,
         timeout: 600000,
         data: formData,
@@ -92,8 +97,8 @@ function uploadAvatar(id) {
 
 function setAvatar(id) {
     $.ajax({
-        type: "POST",
-        url: "/user/" + id + "/getAvatar",
+        type: "GET",
+        url: "/user/" + id + "/avatar",
         cache: true,
         timeout: 600000,
         dataType: "json",

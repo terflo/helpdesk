@@ -4,6 +4,7 @@ import com.terflo.helpdesk.model.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -23,7 +24,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     /**
      * Функция создания бина с кодировщиком паролей
@@ -46,8 +47,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/", "/css/**", "/js/**", "/img/**", "/registration/checkUserData/**").permitAll()
                 .antMatchers("/registration", "/activate/**").not().fullyAuthenticated()
-                .antMatchers("/requests/free", "/requests/supervised", "/requests/accept", "requests/close").hasRole("OPERATOR")
-                .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/requests/free", "/requests/supervised", "/requests/*/accept", "requests/*/close").hasRole("OPERATOR")
+                .antMatchers("/admin/**", "/decisions/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/requests/*").hasRole("ADMIN")
                 .anyRequest().authenticated()
                     .and()
                 .formLogin()

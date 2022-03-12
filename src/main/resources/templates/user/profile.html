@@ -21,11 +21,13 @@
                                 <div class="account-settings">
                                     <div class="user-profile">
                                         <div class="user-avatar">
-                                            <img th:src="${avatar == null} ? @{~/img/user.png} : 'data:image/png;base64,' + ${avatar.getBase64Image()}"
+                                            <img th:src="'data:image/png;base64,' + ${avatar.getBase64Image()}"
                                                  alt="User avatar"
                                                  id="user-avatar">
                                         </div>
-                                        <h5 id="username-profile" th:text="${user?.username}" class="user-name">Username</h5><h6 id="email-profile" th:text="${user?.email}" class="user-email">Email</h6>
+                                        <h5 id="username-profile" th:text="${user?.username}" class="user-name">Username</h5>
+                                        <h6 id="email-profile" th:text="${user?.email}" class="user-email">Email</h6>
+                                        <h6 id="registration-date" th:text="${#dates.format(user?.date, 'dd MMM yyyy')}" class="user-email" style="margin-top: 1vh">Register date</h6>
                                         <br>
                                         <button style="margin: 5px" class="btn btn-danger" th:if="${#lists.contains(user?.roles, 'ROLE_ADMIN')}">Администратор</button>
                                         <button style="margin: 5px" class="btn btn-primary" th:if="${#lists.contains(user?.roles, 'ROLE_OPERATOR')}">Оператор</button>

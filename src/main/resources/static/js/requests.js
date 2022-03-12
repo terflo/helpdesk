@@ -1,7 +1,7 @@
 function closeRequest(id) {
     $.ajax({
         type: "POST",
-        url: "/requests/close/" + id,
+        url: "/requests/" + id + "/close",
         cache: false,
         timeout: 600000,
         async: true,

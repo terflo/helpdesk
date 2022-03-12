@@ -8,9 +8,10 @@ import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
-import com.terflo.helpdesk.model.factory.MessageFactory;
+import com.terflo.helpdesk.model.factories.MessageDTOFactory;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
 
@@ -31,27 +33,34 @@ import java.util.Date;
  */
 @Log4j2
 @Controller
+@AllArgsConstructor
 public class ChatController {
 
+    /**
+     * Сервис для работы с сообщениями
+     */
     private final MessageService messageService;
 
-    private final MessageFactory messageFactory;
+    /**
+     * Фабрика сообщений
+     */
+    private final MessageDTOFactory messageDTOFactory;
 
+    /**
+     * Сервис обращений пользователей
+     */
     private final UserRequestService userRequestService;
 
+    /**
+     * Шаблон сообщений
+     */
     private final SimpMessagingTemplate messagingTemplate;
-
-    public ChatController(MessageService messageService, MessageFactory messageFactory, UserRequestService userRequestService, SimpMessagingTemplate messagingTemplate) {
-        this.messageService = messageService;
-        this.messageFactory = messageFactory;
-        this.userRequestService = userRequestService;
-        this.messagingTemplate = messagingTemplate;
-    }
 
     /**
      * Метод обработки входящего на сервер сообщения от пользователей
      * @param messageDTO сообщение от пользователей
      */
+    @ResponseBody
     @MessageMapping("/chat")
     public ResponseEntity<String> processMessage(@Payload MessageDTO messageDTO) {
 
@@ -60,6 +69,9 @@ public class ChatController {
             if(userRequestService.findUserRequestByID(messageDTO.userRequest).getStatus() == RequestStatus.CLOSED) {
                 log.error("Попытка отправить сообщение в закрытое обращение пользователем " + messageDTO.sender.username);
                 return ResponseEntity.badRequest().body("Обращение закрыто");
+            } else if(userRequestService.findUserRequestByID(messageDTO.userRequest).getStatus() == RequestStatus.BEGINNING) {
+                log.error("Попытка отправить сообщение в непринятое обращение");
+                return ResponseEntity.badRequest().body("Обращение не активно");
             }
         } catch (UserRequestNotFoundException e) {
             log.error(e.getMessage());
@@ -76,8 +88,7 @@ public class ChatController {
         //Конвертируем сообщение в нормальный вид из DTO вида,
         //сохраняем в базе данных и отправляем подписчикам уведомление о новом сообщении
         try {
-            Message message = messageFactory.convertToMessage(messageDTO);
-            messageService.saveMessage(message);
+            Message message = messageService.saveMessage(messageDTO);
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(messageDTO.userRequest),"/queue/messages",
                     new Notification(
@@ -119,7 +130,7 @@ public class ChatController {
         try {
             Message message = messageService.findMessageByID(id);
             message.setStatus(MessageStatus.DELIVERED);
-            return ResponseEntity.ok(messageFactory.convertToMessageDTO(message));
+            return ResponseEntity.ok(messageDTOFactory.convertToMessageDTO(message));
         } catch (MessageNotFoundException e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

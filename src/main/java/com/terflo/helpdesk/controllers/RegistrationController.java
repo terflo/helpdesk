@@ -28,7 +28,7 @@ import java.util.UUID;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.5
+ * @version 1.6
  * Контроллер страницы регистрации
  */
 @Log4j2
@@ -68,7 +68,7 @@ public class RegistrationController {
      */
     @GetMapping("/registration")
     public String registration() {
-        return "user-registration";
+        return "user/registration";
     }
 
     @PostMapping("/registration")
@@ -87,7 +87,7 @@ public class RegistrationController {
             errors.add(e.getMessage());
             model.addAttribute("data", request);
             model.addAttribute("errors", errors);
-            return "user-registration";
+            return "user/registration";
         }
 
         if(request.getPassword().trim().isEmpty() || request.getUsername().trim().isEmpty()) {
@@ -132,7 +132,7 @@ public class RegistrationController {
         } else {
             model.addAttribute("data", request);
             model.addAttribute("errors", errors);
-            return "user-registration";
+            return "user/registration";
         }
 
     }
@@ -159,7 +159,7 @@ public class RegistrationController {
 
         log.info("Пользователь " + username + " успешно активировал свой аккаунт");
         model.addAttribute("username", username);
-        return "user-activate";
+        return "user/activate";
     }
 
     /**
@@ -217,11 +217,5 @@ public class RegistrationController {
         }
 
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    @GetMapping("/mailTest")
-    public String mailTest() throws MessagingException {
-        mailService.sendRegistrationMail("danil70.krivoschiokov@gmail.com", "terflo", UUID.randomUUID().toString());
-        return "index";
     }
 }

@@ -1,12 +1,11 @@
 package com.terflo.helpdesk.utils;
 
-import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.exceptions.RoleAlreadyExistException;
 import com.terflo.helpdesk.model.exceptions.RoleNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
-import com.terflo.helpdesk.model.factory.ImageFactory;
+import com.terflo.helpdesk.model.factories.ImageFactory;
 import com.terflo.helpdesk.model.services.RoleService;
 import com.terflo.helpdesk.model.services.UserService;
 import lombok.extern.log4j.Log4j2;
@@ -21,7 +20,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Log4j2
 @Component

@@ -3,13 +3,11 @@ package com.terflo.helpdesk.model.services;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
-import com.terflo.helpdesk.model.exceptions.UserRequestAlreadyClosed;
 import com.terflo.helpdesk.model.exceptions.UserRequestAlreadyHaveOperatorException;
 import com.terflo.helpdesk.model.exceptions.UserRequestClosedException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.UserRequestRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -17,7 +15,7 @@ import java.util.List;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.1
  * Сервис для работы с запросами пользователй
  */
 @Service
@@ -51,7 +49,7 @@ public class UserRequestService {
      * @throws UserRequestAlreadyHaveOperatorException возникает при установки оператора к запросу уже имеющий оператора
      * @throws UserRequestClosedException возникает когда запрос уже закрыл
      */
-    public void acceptRequest(Long id, User operator) throws UserRequestNotFoundException, UserRequestAlreadyHaveOperatorException, UserRequestClosedException {
+    public UserRequest acceptRequest(Long id, User operator) throws UserRequestNotFoundException, UserRequestAlreadyHaveOperatorException, UserRequestClosedException {
         UserRequest userRequest = userRequestRepository.findById(id).orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"));
 
         if(userRequest.getStatus() == RequestStatus.CLOSED)
@@ -63,7 +61,7 @@ public class UserRequestService {
         } else {
             throw new UserRequestAlreadyHaveOperatorException("Данный запрос уже имеет оператора");
         }
-        userRequestRepository.save(userRequest);
+        return userRequestRepository.save(userRequest);
     }
 
     /**
@@ -110,13 +108,11 @@ public class UserRequestService {
      * @throws UserRequestNotFoundException возникает при ненахождении запроса пользователя в базе данных
      */
     @Transactional
-    public void setStatusUserRequestByID(Long id, RequestStatus status) throws UserRequestNotFoundException, UserRequestAlreadyClosed {
+    public void setStatusUserRequestByID(Long id, RequestStatus status) throws UserRequestNotFoundException {
 
         UserRequest userRequest = userRequestRepository.
                 findById(id).
                 orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"));
-
-        if(userRequest.getStatus() == RequestStatus.CLOSED) throw new UserRequestAlreadyClosed("Обращение пользователя уже закрыто");
 
             userRequestRepository
                     .findById(id)

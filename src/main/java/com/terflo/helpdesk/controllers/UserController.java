@@ -5,13 +5,14 @@ import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.UserDTO;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
-import com.terflo.helpdesk.model.factory.ImageFactory;
-import com.terflo.helpdesk.model.factory.UserDTOFactory;
-import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
+import com.terflo.helpdesk.model.factories.ImageFactory;
+import com.terflo.helpdesk.model.factories.UserDTOFactory;
+import com.terflo.helpdesk.model.factories.UserRequestDTOFactory;
 import com.terflo.helpdesk.model.services.SessionService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
 import com.terflo.helpdesk.utils.RegexUtil;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
  */
 @Log4j2
 @Controller
+@AllArgsConstructor
 public class UserController {
 
     private final static List<String> allowedContent = Arrays.asList("image/png", "image/jpeg", "image/jpg");
@@ -50,16 +52,6 @@ public class UserController {
     private final UserRequestService userRequestService;
 
     private final UserRequestDTOFactory userRequestDTOFactory;
-
-    public UserController(RegexUtil regexUtil, SessionService sessionService, UserService userService, UserDTOFactory userDTOFactory, ImageFactory imageFactory, UserRequestService userRequestService, UserRequestDTOFactory userRequestDTOFactory) {
-        this.regexUtil = regexUtil;
-        this.sessionService = sessionService;
-        this.userService = userService;
-        this.userDTOFactory = userDTOFactory;
-        this.imageFactory = imageFactory;
-        this.userRequestService = userRequestService;
-        this.userRequestDTOFactory = userRequestDTOFactory;
-    }
 
     /**
      * Отображение профиля пользователя
@@ -97,7 +89,7 @@ public class UserController {
 
         model.addAttribute("avatar", user.getAvatar());
         model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
-        return "user-profile";
+        return "user/profile";
 
     }
 
@@ -108,7 +100,7 @@ public class UserController {
      * @return HTTP ответ
      */
     @ResponseBody
-    @PostMapping("/user/{id}/updateAvatar")
+    @PutMapping("/user/{id}/avatar")
     public ResponseEntity<String> updateUserAvatar(@PathVariable(name = "id") Long id, @RequestParam MultipartFile file) {
 
         if(!allowedContent.contains(file.getContentType()))
@@ -130,7 +122,7 @@ public class UserController {
      * @return изображение в Base64 кодировке
      */
     @ResponseBody
-    @PostMapping("/user/{id}/getAvatar")
+    @GetMapping("/user/{id}/avatar")
     public ResponseEntity<String> getAvatar(@PathVariable(name = "id") Long id) {
 
         try {
@@ -148,7 +140,7 @@ public class UserController {
      * @return HTTP ответ
      */
     @ResponseBody
-    @PostMapping("/user/{id}/update")
+    @PutMapping("/user/{id}")
     public ResponseEntity<String> updateUser(@PathVariable(name = "id") Long id, @RequestBody UserDTO userDTO, Authentication authentication) {
 
         boolean needLogout = false;
@@ -203,7 +195,7 @@ public class UserController {
     public String getUsers(Model model) {
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("activeUsers", userService.getActiveUsernamesFromSessionRegistry());
-        return "admin-users";
+        return "admin/users";
     }
 
     /**
@@ -212,7 +204,7 @@ public class UserController {
      * @return возврат на страницу с списком пользователей
      */
     @ResponseBody
-    @DeleteMapping("/admin/users/delete/{id}")
+    @DeleteMapping("/admin/users/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable(value = "id") Long id) {
         try {
             userService.deleteUserById(id);
@@ -227,7 +219,7 @@ public class UserController {
      * @param id уникальный индификатор пользователя
      * @return HTTP ответ
      */
-    @PostMapping("/admin/users/switchLock/{id}")
+    @PostMapping("/admin/users/{id}/switchLock")
     public ResponseEntity<String> switchLockUser(@PathVariable(value = "id") Long id) {
         try {
             userService.switchLockUserById(id);

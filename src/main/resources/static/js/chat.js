@@ -94,8 +94,8 @@ function getMessage(messageID) {
 function getAvatar(id) {
     let base64avatar
     $.ajax({
-        type: "POST",
-        url: "/user/" + id + "/getAvatar",
+        type: "GET",
+        url: "/user/" + id + "/avatar",
         cache: true,
         timeout: 600000,
         dataType: "json",

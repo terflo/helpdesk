@@ -1,16 +1,21 @@
 package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.*;
+import com.terflo.helpdesk.model.entity.dto.UserRequestDTO;
+import com.terflo.helpdesk.model.entity.enums.FreeRequestStatus;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import com.terflo.helpdesk.model.exceptions.*;
-import com.terflo.helpdesk.model.factory.MessageFactory;
-import com.terflo.helpdesk.model.factory.UserDTOFactory;
-import com.terflo.helpdesk.model.factory.UserRequestDTOFactory;
+import com.terflo.helpdesk.model.factories.MessageDTOFactory;
+import com.terflo.helpdesk.model.factories.UserDTOFactory;
+import com.terflo.helpdesk.model.factories.UserRequestDTOFactory;
 import com.terflo.helpdesk.model.services.MessageService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -21,36 +26,48 @@ import java.util.*;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.3
  * Контроллер запросов пользователей на решение какой-либо проблемы
  */
 @Log4j2
 @Controller
+@AllArgsConstructor
 public class UserRequestsController {
 
+    /**
+     * Сервис для работы с пользователями
+     */
     private final UserService userService;
 
+    /**
+     * Сервис для работы с обращениями пользователей
+     */
     private final UserRequestService userRequestService;
 
+    /**
+     * Сервис для работы с сообщениями пользователей
+     */
     private final MessageService messageService;
 
+    /**
+     * Фабрика обращений пользователей
+     */
     private final UserRequestDTOFactory userRequestDTOFactory;
 
+    /**
+     * Шаблон сообщения
+     */
     private final SimpMessagingTemplate messagingTemplate;
 
-    private final MessageFactory messageFactory;
+    /**
+     * Фабрика сообщений пользователей
+     */
+    private final MessageDTOFactory messageDTOFactory;
 
+    /**
+     * Фабрика пользователей
+     */
     private final UserDTOFactory userDTOFactory;
-
-    public UserRequestsController(UserService userService, UserRequestService userRequestService, MessageService messageService, UserRequestDTOFactory userRequestDTOFactory, SimpMessagingTemplate messagingTemplate, MessageFactory messageFactory, UserDTOFactory userDTOFactory) {
-        this.userService = userService;
-        this.userRequestService = userRequestService;
-        this.messageService = messageService;
-        this.userRequestDTOFactory = userRequestDTOFactory;
-        this.messagingTemplate = messagingTemplate;
-        this.messageFactory = messageFactory;
-        this.userDTOFactory = userDTOFactory;
-    }
 
     /**
      * Контроллер GET-запроса на вывод страницы
@@ -73,16 +90,16 @@ public class UserRequestsController {
         List<UserRequest> userRequests = userRequestService.findAllUserRequestsByUser(user);
         model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
         model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(userRequests));
-        return "requests";
+        return "request/requests";
     }
 
     /**
-     * Контроллер GET-запроса на вывод страницы
+     * Контроллер GET-запроса на вывод страницы с добавление нового обращения
      * @return название страницы
      */
     @GetMapping("/requests/add")
     public String requests_add() {
-        return "request-add";
+        return "request/add";
     }
 
     /**
@@ -92,17 +109,35 @@ public class UserRequestsController {
      * @return результат запроса
      */
     @ResponseBody
-    @PostMapping("/requests/accept/{id}")
+    @PostMapping("/requests/{id}/accept")
     public ResponseEntity<String> acceptRequest(@PathVariable(value = "id") Long id, Authentication authentication) {
 
         try {
+
             User operator = userService.findUserByUsername(authentication.getName());
-            userRequestService.acceptRequest(id, operator);
-        } catch (UserRequestNotFoundException | UserRequestClosedException | UserRequestAlreadyHaveOperatorException | UserNotFoundException e) {
+            UserRequest userRequest = userRequestService.acceptRequest(id, operator);
+            Message message = messageService.generateAcceptRequestMessage(operator, userRequest);
+
+            messagingTemplate.convertAndSendToUser(
+                    String.valueOf(id), "/queue/messages",
+                    new Notification(
+                            message.getId(),
+                            message.getUserRequest().getId(),
+                            message.getSender().getId()
+                    )
+            );
+
+            messagingTemplate.convertAndSend(
+                    "requestMessages/free",
+                    new FreeRequestNotification(FreeRequestStatus.ACCEPTED, id, null)
+            );
+
+        } catch (UserRequestNotFoundException | UserRequestAlreadyHaveOperatorException | UserNotFoundException | UserRequestClosedException e) {
             log.error(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-        log.info("Обращение " + id + " закрыто пользователем " + authentication.getName());
+
+        log.info("Обращение #" + id + " принято пользователем " + authentication.getName());
         return ResponseEntity.ok("\"\"");
     }
 
@@ -115,7 +150,7 @@ public class UserRequestsController {
     public String freeRequests(Model model) {
         List<UserRequest> requests = userRequestService.findAllNonOperatorRequests();
         model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
-        return "requests-free";
+        return "request/free";
     }
 
     /**
@@ -138,7 +173,7 @@ public class UserRequestsController {
         }
         model.addAttribute("requests", userRequestService.findUserRequestsByOperator(operator));
         model.addAttribute("name", operator.getUsername());
-        return "requests-supervised";
+        return "request/supervised";
     }
 
     /**
@@ -147,7 +182,8 @@ public class UserRequestsController {
      * @param userRequest тело запроса пользователя (название, описание, приоритет и т.п.)
      * @return страница с запросами
      */
-    @PostMapping("/requests/add")
+    @ResponseBody
+    @PostMapping("/requests")
     public ResponseEntity<String> addRequest(Authentication authentication, @RequestBody UserRequest userRequest) {
 
         //Список ошибок
@@ -170,6 +206,15 @@ public class UserRequestsController {
         if(errors.isEmpty()) {
             userRequest.setDate(new Date());
             userRequestService.saveUserRequest(userRequest);
+
+
+            messagingTemplate.convertAndSend("/requests/free", new FreeRequestNotification(
+                    FreeRequestStatus.NEW,
+                    userRequest.getId(),
+                    userRequestDTOFactory.convertToUserRequestDTO(userRequest)
+            ));
+
+
             return ResponseEntity.ok().body("\"\"");
         } else {
             return ResponseEntity.badRequest().body(errors.toString());
@@ -181,21 +226,21 @@ public class UserRequestsController {
      * @param id уникальный индификатор запроса
      * @return страница с запросами
      */
-    @PostMapping("/requests/close/{id}")
+    @ResponseBody
+    @PostMapping("/requests/{id}/close")
     public ResponseEntity<String> closeRequest(@PathVariable(value = "id") Long id, Authentication authentication) {
 
         try {
             userRequestService.setStatusUserRequestByID(id, RequestStatus.CLOSED);
             User operator = userService.findUserByUsername(authentication.getName());
-            Message message = messageFactory.getCloseRequestMessage(operator, id);
-            messageService.saveMessage(message);
+            Message message = messageService.generateCloseRequestMessage(operator, id);
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(id),"/queue/messages",
                     new Notification(
                             message.getId(),
                             message.getUserRequest().getId(),
                             message.getSender().getId()));
-        } catch (UserNotFoundException | UserRequestNotFoundException | UserRequestAlreadyClosed e) {
+        } catch (UserNotFoundException | UserRequestNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
@@ -207,13 +252,16 @@ public class UserRequestsController {
      * @param id уникальный индификатор обращения
      * @return страница с обращениями
      */
-    @DeleteMapping("/admin/requests/delete/{id}")
-    public ResponseEntity<String> deleteRequest(@PathVariable(value = "id") Long id) {
+    @ResponseBody
+    @DeleteMapping("/requests/{id}")
+    public ResponseEntity<String> deleteRequest(@PathVariable(value = "id") Long id, Authentication authentication) {
         try {
             userRequestService.deleteByID(id);
         } catch (UserRequestNotFoundException e) {
+            log.error(e.getMessage());
             ResponseEntity.badRequest().body(e.getMessage());
         }
+        log.info(String.format("Обращение #%s удалено пользователем %s", id, authentication.getName()));
         return ResponseEntity.ok().build();
     }
 
@@ -250,9 +298,29 @@ public class UserRequestsController {
 
         model.addAttribute("userRequest", userRequestDTOFactory.convertToUserRequestDTO(userRequest));
         model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
-        model.addAttribute("messages", messageFactory.convertToMessageDTO(messages));
+        model.addAttribute("messages", messageDTOFactory.convertToMessageDTO(messages));
         model.addAttribute("avatars", avatarsBase64);
 
-        return "request";
+        return "request/request";
+    }
+
+    @ResponseBody
+    @MessageMapping("/free")
+    public ResponseEntity<String> freeRequests(@Payload FreeRequestNotification freeRequestNotification) {
+
+        log.warn("В сокет свободных обращений пришло сообщение: " + freeRequestNotification.toString());
+
+        messagingTemplate.convertAndSend("/free", freeRequestNotification);
+
+        /*
+        messagingTemplate.convertAndSendToUser(
+                "free","/queue/messages",
+                new Notification(
+                        message.getId(),
+                        message.getUserRequest().getId(),
+                        message.getSender().getId()));
+                        */
+
+        return ResponseEntity.ok().body("\"\"");
     }
 }

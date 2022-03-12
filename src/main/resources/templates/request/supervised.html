@@ -16,19 +16,22 @@
             <table class="table" style="text-align: center; vertical-align: middle;">
                 <thead>
                     <tr>
-                        <th>Номер</th>
+                        <th>#</th>
                         <th>Наименование</th>
                         <th>Статус</th>
                         <th>Приоритет</th>
                         <th>Отправитель</th>
-                        <th>Просмотреть</th>
-                        <th>Закрыть</th>
                     </tr>
                 </thead>
                 <tbody th:if="not ${#lists.isEmpty(requests)}" th:each="request : ${requests}">
                     <tr>
                         <td th:text="${request?.id}"></td>
                         <td th:text="${request?.name}"></td>
+                        <td style="width: 30vw">
+                            <label style="width: 100%">
+                                <textarea class="form-control" rows="2" th:text="${request?.description}" style="resize: none; overflow-y: scroll;" readonly></textarea>
+                            </label>
+                        </td>
                         <td  th:switch="${request?.status}">
                             <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}">В работе</label>
                             <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>

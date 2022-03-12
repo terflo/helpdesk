@@ -1,4 +1,4 @@
-package com.terflo.helpdesk.model.factory;
+package com.terflo.helpdesk.model.factories;
 
 import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
@@ -25,12 +25,13 @@ public class UserDTOFactory {
                         .stream()
                         .map((Role::getName))
                         .collect(Collectors.toSet()),
-                user.getDescription()
+                user.getDescription(),
+                user.getDate()
         );
     }
 
     /**
-     * Метод преобразует список из User в список из UserDTO
+     * Метод преобразует список User в список UserDTO
      * @param users список пользователей
      * @return список конвертированных пользователей
      */

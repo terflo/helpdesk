@@ -1,7 +1,7 @@
 function addRequest() {
     $.ajax({
         type: "POST",
-        url: "/requests/add",
+        url: "/requests",
         data: JSON.stringify({
             name: $("#name").val(),
             description: $("#description").val(),

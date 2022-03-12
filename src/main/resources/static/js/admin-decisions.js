@@ -1,7 +1,7 @@
 function addDecision() {
     $.ajax({
         type: "POST",
-        url: "/admin/decisions/add",
+        url: "/decisions",
         cache: false,
         timeout: 600000,
         data: JSON.stringify({
@@ -12,18 +12,16 @@ function addDecision() {
         contentType: "application/json",
         async: true,
         success: function (data) {
-            console.log(data)
-
             $("#tbody_decisions").append(
                 "<tr id=\"decision_row_" + data.id + "\"  style=\"text-align: center; vertical-align: middle;\">\n" +
                 "                                        <th>" + data.id + "</th>\n" +
                 "                                        <th>\n" +
-                "                                            <label>\n" +
+                "                                            <label style=\"width: 100%\">\n" +
                 "                                                <input class=\"form-control\" value=\"" + data.name + "\" type=\"text\" readonly id=\"decision_name_" + data.id + "\">\n" +
                 "                                            </label>\n" +
                 "                                        </th>\n" +
                 "                                        <th>\n" +
-                "                                            <label>\n" +
+                "                                            <label style=\"width: 100%\">\n" +
                 "                                                <textarea class=\"form-control\" rows=\"2\" style=\"resize: none;\" readonly id=\"decision_answer_" + data.id + "\">" + data.answer + "</textarea>\n" +
                 "                                            </label>\n" +
                 "                                        </th>\n" +
@@ -49,7 +47,7 @@ function addDecision() {
 function deleteDecision(id) {
     $.ajax({
         type: "DELETE",
-        url: "/admin/decisions/delete/" + id,
+        url: "/decisions/" + id,
         cache: false,
         timeout: 600000,
         async: true,
@@ -71,8 +69,8 @@ function editDecision(id) {
 
 function updateDecision(id) {
     $.ajax({
-        type: "POST",
-        url: "/admin/decisions/update",
+        type: "PUT",
+        url: "/decisions",
         cache: true,
         timeout: 600000,
         data: JSON.stringify({

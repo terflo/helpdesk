@@ -1,7 +1,7 @@
 function closeRequest(id) {
     $.ajax({
         type: "POST",
-        url: "../requests/close/" + id,
+        url: "../requests/" + id + "/close",
         cache: false,
         timeout: 600000,
         async: true,
@@ -18,7 +18,7 @@ function closeRequest(id) {
 function deleteRequest(id) {
     $.ajax({
         type: "DELETE",
-        url: "/admin/requests/delete/" + id,
+        url: "/requests/" + id,
         cache: false,
         timeout: 600000,
         async: true,
