@@ -83,7 +83,7 @@ public class InitializerUtil {
 
         //Последний этап проверки: проверка есть ли у пользователя root все возможные права
         if(user.getRoles().size() != roleService.findAll().size()) {
-            log.warn("У пользователя root не обнаружен полный списко прав, обновление прав пользователя");
+            log.warn("У пользователя root не обнаружен полный список прав, права будут установленны автоматически");
             user.setRoles(roleService.findAll());
             try {
                 userService.updateUser(user);

@@ -12,6 +12,10 @@ function addDecision() {
         contentType: "application/json",
         async: true,
         success: function (data) {
+
+            $("#name").val("")
+            $("#answer").val("")
+
             $("#tbody_decisions").append(
                 "<tr id=\"decision_row_" + data.id + "\"  style=\"text-align: center; vertical-align: middle;\">\n" +
                 "                                        <th>" + data.id + "</th>\n" +

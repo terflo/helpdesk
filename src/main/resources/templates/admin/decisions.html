@@ -56,6 +56,7 @@
                     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4" style="min-height: 75vh">
                         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                             <h1 class="h2">Частые вопросы</h1>
+                            <button class="col-md-2 btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDecisionModal">Добавить</button>
                         </div>
                         <div class="table-responsive" style="min-height: 30vh">
                             <table class="table table-striped table-sm">
@@ -95,20 +96,23 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div style="margin: 5vh 18vw;">
-                            <div class="container form-control" style="margin: 1vw; padding: 1vw 3vw 1vw 3vw">
-                                <div class="row">
-                                    <label class="form-label" for="name">Вопрос</label>
-                                    <input placeholder="Наименование вопроса" class="form-control" id="name" name="name" type="text" required>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <label class="form-label" for="answer">Ответ</label>
-                                    <textarea placeholder="Опишите ответ в развернутом виде..." class="form-control" id="answer" name="answer" style="resize: none" rows="5" required></textarea>
-                                </div>
-                                <br>
-                                <div class="row">
-                                    <input onclick="addDecision()" class="btn-primary form-control" type="submit" value="Добавить">
+                        <div class="modal fade" tabindex="-1" id="addDecisionModal" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Добавить частый вопрос</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <label class="form-label" for="name">Вопрос</label>
+                                        <input placeholder="Наименование вопроса" class="form-control" id="name" name="name" type="text" required>
+                                        <label class="form-label" for="answer">Ответ</label>
+                                        <textarea placeholder="Опишите ответ в развернутом виде..." class="form-control" id="answer" name="answer" style="resize: none" rows="5" required></textarea>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                        <input onclick="addDecision()" class="btn btn-primary" type="button" value="Добавить" data-bs-dismiss="modal">
+                                    </div>
                                 </div>
                             </div>
                         </div>
