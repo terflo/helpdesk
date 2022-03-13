@@ -14,6 +14,7 @@
         <main style="min-height: 38vw">
             <h1 th:text="'Обращения курируемые пользователем ' + ${name}"></h1>
             <table class="table" style="text-align: center; vertical-align: middle;">
+                <caption th:text="'Всего записей: ' + ${requests.size()}"></caption>
                 <thead>
                     <tr>
                         <th>#</th>
