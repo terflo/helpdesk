@@ -1,7 +1,7 @@
 function deleteUser(id) {
     $.ajax({
         type: "DELETE",
-        url: "/admin/users/" + id,
+        url: "/users/" + id,
         cache: false,
         timeout: 600000,
         async: true,
@@ -27,6 +27,48 @@ function switchUserLock(id) {
                 switchInput.prop("src", "/img/on.png")
             else
                 switchInput.prop("src", "/img/off.png")
+        },
+        error: function (data) {
+            alert(data.responseText)
+        }
+    });
+}
+
+function addRoleToUser(id, role) {
+
+    console.log("addRoleToUser")
+    console.log(id)
+    console.log(role)
+
+    $.ajax({
+        type: "PUT",
+        url: "/users/" + id + "/" + role,
+        cache: false,
+        timeout: 600000,
+        async: true,
+        success: function () {
+            console.log("Выполнено")
+        },
+        error: function (data) {
+            alert(data.responseText)
+        }
+    });
+}
+
+function deleteRoleToUser(id, role) {
+
+    console.log("deleteRoleToUser")
+    console.log(id)
+    console.log(role)
+
+    $.ajax({
+        type: "DELETE",
+        url: "/users/" + id + "/" + role,
+        cache: false,
+        timeout: 600000,
+        async: true,
+        success: function () {
+            console.log("Выполнено")
         },
         error: function (data) {
             alert(data.responseText)

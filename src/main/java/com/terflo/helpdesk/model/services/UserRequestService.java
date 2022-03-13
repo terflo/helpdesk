@@ -42,29 +42,6 @@ public class UserRequestService {
     }
 
     /**
-     * Метод приявязки запроса к оператору и изменения его статуса
-     * @param id уникальный индификатор запроса
-     * @param operator пользователь системы
-     * @throws UserRequestNotFoundException возникает при ненахождении оператора
-     * @throws UserRequestAlreadyHaveOperatorException возникает при установки оператора к запросу уже имеющий оператора
-     * @throws UserRequestClosedException возникает когда запрос уже закрыл
-     */
-    public UserRequest acceptRequest(Long id, User operator) throws UserRequestNotFoundException, UserRequestAlreadyHaveOperatorException, UserRequestClosedException {
-        UserRequest userRequest = userRequestRepository.findById(id).orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"));
-
-        if(userRequest.getStatus() == RequestStatus.CLOSED)
-            throw new UserRequestClosedException("Данный запрос уже закрыт");
-
-        if(userRequest.getOperator() == null) {
-            userRequest.setOperator(operator);
-            userRequest.setStatus(RequestStatus.IN_PROCESS);
-        } else {
-            throw new UserRequestAlreadyHaveOperatorException("Данный запрос уже имеет оператора");
-        }
-        return userRequestRepository.save(userRequest);
-    }
-
-    /**
      * Метод поиска всех запросов пользователей, который решает данные оператор
      * @param operator оператор, который прикреплен к запросом
      * @return список всех запросов связанные с указанным оператором
@@ -99,6 +76,30 @@ public class UserRequestService {
      */
     public void saveUserRequest(UserRequest userRequest) {
         userRequestRepository.save(userRequest);
+    }
+
+    /**
+     * Метод приявязки запроса к оператору и изменения его статуса
+     * @param id уникальный индификатор запроса
+     * @param operator пользователь системы
+     * @throws UserRequestNotFoundException возникает при ненахождении оператора
+     * @throws UserRequestAlreadyHaveOperatorException возникает при установки оператора к запросу уже имеющий оператора
+     * @throws UserRequestClosedException возникает когда запрос уже закрыл
+     */
+    @Transactional
+    public UserRequest acceptRequest(Long id, User operator) throws UserRequestNotFoundException, UserRequestAlreadyHaveOperatorException, UserRequestClosedException {
+        UserRequest userRequest = userRequestRepository.findById(id).orElseThrow(() -> new UserRequestNotFoundException("Запрос пользователя не был найден"));
+
+        if(userRequest.getStatus() == RequestStatus.CLOSED)
+            throw new UserRequestClosedException("Данный запрос уже закрыт");
+
+        if(userRequest.getOperator() == null) {
+            userRequest.setOperator(operator);
+            userRequest.setStatus(RequestStatus.IN_PROCESS);
+        } else {
+            throw new UserRequestAlreadyHaveOperatorException("Данный запрос уже имеет оператора");
+        }
+        return userRequestRepository.save(userRequest);
     }
 
     /**

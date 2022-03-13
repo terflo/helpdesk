@@ -128,7 +128,7 @@ public class UserRequestsController {
             );
 
             messagingTemplate.convertAndSend(
-                    "requestMessages/free",
+                    "/requests/free",
                     new FreeRequestNotification(FreeRequestStatus.ACCEPTED, id, null)
             );
 

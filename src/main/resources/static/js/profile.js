@@ -33,7 +33,7 @@ function updateProfile(id) {
 
     $.ajax({
         type: "PUT",
-        url: "/user/" + id,
+        url: "/users/" + id,
         cache: true,
         timeout: 600000,
         data: JSON.stringify({

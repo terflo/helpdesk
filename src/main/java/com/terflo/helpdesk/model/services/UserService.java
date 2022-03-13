@@ -1,5 +1,6 @@
 package com.terflo.helpdesk.model.services;
 
+import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.exceptions.*;
 import com.terflo.helpdesk.model.factories.ImageFactory;
@@ -129,6 +130,51 @@ public class UserService implements UserDetailsService {
                         userRepository.findAll().spliterator(),
                         false)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Метод поиска не истёкших сессий пользователей
+     * @return список имен активных пользователей
+     */
+    public List<String> getActiveUsernamesFromSessionRegistry() {
+        return sessionRegistry
+                .getAllPrincipals()
+                .stream()
+                .filter(u -> !sessionRegistry.getAllSessions(u, false).isEmpty())
+                .map(o -> ((User) o).getUsername())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Метод добавляет пользователю новую роль
+     * @param id уникальный индификатор пользователя
+     * @param role добавляемая роль
+     * @throws UserNotFoundException возникает в случае не нахождении пользователя
+     */
+    public void addRoleToUser(Long id, Role role) throws UserNotFoundException {
+        User user = userRepository
+                .findById(id)
+                .orElseThrow(
+                    () -> new UserNotFoundException(String.format("Пользователь #%s не найден", id))
+                );
+        user.getRoles().add(role);
+        userRepository.save(user);
+    }
+
+    /**
+     * Метод забирает у пользователя роль
+     * @param id уникальный индификатор пользователя
+     * @param role удаляемая роль
+     * @throws UserNotFoundException возникает в случае не нахождении пользоввателя
+     */
+    public void deleteRoleToUser(Long id, Role role) throws UserNotFoundException {
+        User user = userRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new UserNotFoundException(String.format("Пользователь #%s не найден", id))
+                );
+        user.getRoles().remove(role);
+        userRepository.save(user);
     }
 
     /**
@@ -274,18 +320,5 @@ public class UserService implements UserDetailsService {
         return userRepository
                 .findByUsername(s)
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("Пользователь %s не найден", s)));
-    }
-
-    /**
-     * Метод поиска не истёкших сессий пользователей
-     * @return список имен активных пользователей
-     */
-    public List<String> getActiveUsernamesFromSessionRegistry() {
-        return sessionRegistry
-                .getAllPrincipals()
-                .stream()
-                .filter(u -> !sessionRegistry.getAllSessions(u, false).isEmpty())
-                .map(o -> ((User) o).getUsername())
-                .collect(Collectors.toList());
     }
 }

@@ -1,13 +1,16 @@
 package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.Image;
+import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.UserDTO;
+import com.terflo.helpdesk.model.exceptions.RoleNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.factories.ImageFactory;
 import com.terflo.helpdesk.model.factories.UserDTOFactory;
 import com.terflo.helpdesk.model.factories.UserRequestDTOFactory;
+import com.terflo.helpdesk.model.services.RoleService;
 import com.terflo.helpdesk.model.services.SessionService;
 import com.terflo.helpdesk.model.services.UserRequestService;
 import com.terflo.helpdesk.model.services.UserService;
@@ -48,6 +51,8 @@ public class UserController {
     private final UserDTOFactory userDTOFactory;
 
     private final ImageFactory imageFactory;
+
+    private final RoleService roleService;
 
     private final UserRequestService userRequestService;
 
@@ -140,7 +145,7 @@ public class UserController {
      * @return HTTP ответ
      */
     @ResponseBody
-    @PutMapping("/user/{id}")
+    @PutMapping("/users/{id}")
     public ResponseEntity<String> updateUser(@PathVariable(name = "id") Long id, @RequestBody UserDTO userDTO, Authentication authentication) {
 
         boolean needLogout = false;
@@ -193,8 +198,16 @@ public class UserController {
      */
     @GetMapping("/admin/users")
     public String getUsers(Model model) {
+
+        model.addAttribute("roleNames", roleService
+                .findAll()
+                .stream()
+                .map(Role::getName)
+                .collect(Collectors.toList()));
+
         model.addAttribute("users", userService.getAllUsers());
         model.addAttribute("activeUsers", userService.getActiveUsernamesFromSessionRegistry());
+
         return "admin/users";
     }
 
@@ -204,7 +217,7 @@ public class UserController {
      * @return возврат на страницу с списком пользователей
      */
     @ResponseBody
-    @DeleteMapping("/admin/users/{id}")
+    @DeleteMapping("/users/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable(value = "id") Long id) {
         try {
             userService.deleteUserById(id);
@@ -219,6 +232,7 @@ public class UserController {
      * @param id уникальный индификатор пользователя
      * @return HTTP ответ
      */
+    @ResponseBody
     @PostMapping("/admin/users/{id}/switchLock")
     public ResponseEntity<String> switchLockUser(@PathVariable(value = "id") Long id) {
         try {
@@ -226,6 +240,34 @@ public class UserController {
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+        return ResponseEntity.ok().body("\"\"");
+    }
+
+    @ResponseBody
+    @PutMapping("/users/{id}/{roleName}")
+    public ResponseEntity<String> addUserRole(@PathVariable("id") Long id, @PathVariable("roleName") String roleName) {
+
+        try {
+            Role role = roleService.getRoleByName(roleName);
+            userService.addRoleToUser(id, role);
+        } catch (RoleNotFoundException | UserNotFoundException e) {
+            return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
+        }
+
+        return ResponseEntity.ok().body("\"\"");
+    }
+
+    @ResponseBody
+    @DeleteMapping("/users/{id}/{roleName}")
+    public ResponseEntity<String> deleteUserRole(@PathVariable("id") Long id, @PathVariable("roleName") String roleName) {
+
+        try {
+            Role role = roleService.getRoleByName(roleName);
+            userService.deleteRoleToUser(id, role);
+        } catch (RoleNotFoundException | UserNotFoundException e) {
+            return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
+        }
+
         return ResponseEntity.ok().body("\"\"");
     }
 }
