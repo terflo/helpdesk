@@ -10,11 +10,17 @@
     <body>
         <div th:insert="blocks/navigation"></div>
         <main class="h-100 row align-items-center" style="min-height: 75vh;">
-            <div class="col" style="text-align: center">
+            <div class="col rounded border border-dark" style="text-align: center; margin-left: 30vw; margin-right: 30vw; padding: 5vh">
                 <h1>Активация</h1>
-                <label th:text="'Аккаунт ' + ${username} + ' успешно активирован'"></label>
+                <label th:text="'Пользователь ' + ${username} + ' успешно активирован'"></label>
+                <label>Через 5 секунд Вы будете перенаправлены на авторизацию...</label>
             </div>
         </main>
         <div th:insert="blocks/footer"></div>
     </body>
+    <script>
+        window.setTimeout(function (){
+            window.location.href = '/login'
+        }, 5000)
+    </script>
 </html>

@@ -21,8 +21,8 @@ public class MailService {
 
     private final SpringTemplateEngine springTemplateEngine;
 
-    @Value("${server.address}")
-    private String SERVER_ADDRESS;
+    //@Value("${server.address}")
+    private final String SERVER_ADDRESS = "5.129.199.198";
 
     @Value("${server.port}")
     private int SERVER_PORT;
@@ -53,7 +53,7 @@ public class MailService {
                 username,
                 activateCode));
 
-        String emailContent = springTemplateEngine.process("mail/activate", context);
+        String emailContent = springTemplateEngine.process("mail/user-activate", context);
 
         mimeMessageHelper.setTo(address);
         mimeMessageHelper.setFrom(FROM);
@@ -62,5 +62,34 @@ public class MailService {
         javaMailSender.send(message);
 
         log.info("Письмо с подтверждением регистрации на адрес " + address + " отправлено");
+    }
+
+    @Async
+    public void sendConfirmEmailAddress(String username, String address, String activateCode) throws MessagingException {
+        log.info("Письмо с подтверждением нового почтового ящика на адрес " + address + " принято в обработку");
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message,
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
+
+        Context context = new Context();
+        context.setVariable("username", username);
+        context.setVariable("activateCode", activateCode);
+        context.setVariable("URL", String.format("http://%s:%s/activate/%s/%s",
+                SERVER_ADDRESS,
+                SERVER_PORT,
+                username,
+                activateCode));
+
+        String emailContent = springTemplateEngine.process("mail/email-activate", context);
+
+        mimeMessageHelper.setTo(address);
+        mimeMessageHelper.setFrom(FROM);
+        mimeMessageHelper.setSubject("Подтверждение почты");
+        mimeMessageHelper.setText(emailContent, true);
+        javaMailSender.send(message);
+
+        log.info("Письмо с подтверждением нового почтового ящика на адрес " + address + " отправлено");
     }
 }

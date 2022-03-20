@@ -29,4 +29,18 @@ public class SessionService {
             }
         }
     }
+
+    public void expireUserSessions(Long id) {
+        for (Object principal : sessionRegistry.getAllPrincipals()) {
+            if (principal instanceof User) {
+                User user = (User) principal;
+                if (user.getId().equals(id)) {
+                    System.out.println("Пользователь " + user.getUsername() + " выгнан из сессии");
+                    for (SessionInformation information : sessionRegistry.getAllSessions(user, true)) {
+                        information.expireNow();
+                    }
+                }
+            }
+        }
+    }
 }

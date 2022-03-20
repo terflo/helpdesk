@@ -16,7 +16,7 @@ function deleteUser(id) {
 
 function switchUserLock(id) {
     $.ajax({
-        type: "POST",
+        type: "PUT",
         url: "/admin/users/" + id + "/switchLock",
         cache: false,
         timeout: 600000,
@@ -35,11 +35,6 @@ function switchUserLock(id) {
 }
 
 function addRoleToUser(id, role) {
-
-    console.log("addRoleToUser")
-    console.log(id)
-    console.log(role)
-
     $.ajax({
         type: "PUT",
         url: "/users/" + id + "/" + role,
@@ -56,11 +51,6 @@ function addRoleToUser(id, role) {
 }
 
 function deleteRoleToUser(id, role) {
-
-    console.log("deleteRoleToUser")
-    console.log(id)
-    console.log(role)
-
     $.ajax({
         type: "DELETE",
         url: "/users/" + id + "/" + role,

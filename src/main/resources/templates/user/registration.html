@@ -8,8 +8,9 @@
 
         <link th:href="@{~/css/toast.css}" rel="stylesheet" type="text/css"/>
         <link th:href="@{~/css/registration.css}" rel="stylesheet" type="text/css"/>
-        <link th:href="@{~/css/bootstrap.min.css}" rel="stylesheet" type="text/css"/>
+        <link th:href="@{~/css/bootstrap.css}" rel="stylesheet" type="text/css"/>
 
+        <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{~/js/registration.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{~/js/jQuery.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{~/js/toast.js}" rel="script" type="text/javascript"></script>
@@ -21,22 +22,22 @@
         <div th:insert="blocks/navigation"></div>
         <main>
             <section class="login-clean">
-                <form th:action="@{/registration}" method="post">
+                <div class="form">
 
                     <div class="mb-3">
-                        <input th:value="${data?.username}" class="form-control" type="text" id="username" name="username" placeholder="Имя пользователя" onchange="checkRegistrationData();" required autofocus/>
+                        <input class="form-control" type="text" id="username" name="username" placeholder="Имя пользователя" onchange="checkRegistrationData();" required autofocus/>
                     </div>
 
                     <div class="mb-3">
-                        <input th:value="${data?.email}" class="form-control" type="text" id="email" name="email" placeholder="Почта" onchange="checkRegistrationData();" required autofocus/>
+                        <input class="form-control" type="text" id="email" name="email" placeholder="Почта" onchange="checkRegistrationData();" required autofocus/>
                     </div>
 
                     <div class="mb-3">
-                        <input th:value="${data?.password}" class="form-control" type="password" id="password" name="password" placeholder="Пароль" onchange="checkRegistrationData();" required />
+                        <input class="form-control" type="password" id="password" name="password" placeholder="Пароль" onchange="checkRegistrationData();" required />
                     </div>
 
                     <div class="mb-3">
-                        <input th:value="${data?.passwordConfirm}" class="form-control" type="password" id="password-confirm" name="passwordConfirm" placeholder="Повторите пароль" onchange="checkRegistrationData();" required />
+                        <input class="form-control" type="password" id="password-confirm" name="passwordConfirm" placeholder="Повторите пароль" onchange="checkRegistrationData();" required />
                     </div>
 
                     <div class="mb-3 alert alert-danger hidden" id="username-already-exists" role="alert">
@@ -62,20 +63,31 @@
                     <div class="g-recaptcha mb-3"
                          th:attr="data-sitekey=${@captchaSettings.getSite()}"></div>
 
-                    <section th:if="not ${#lists.isEmpty(errors)}" th:each="error : ${errors}">
-                        <div class="mb-3 alert alert-danger" role="alert">
-                            <span th:text="${error}"></span>
-                        </div>
-                    </section>
-
                     <div class="mb-3">
-                        <button class="btn btn-primary d-block w-100" type="submit">Зарегестрироваться</button>
+                        <button class="btn btn-primary d-block w-100" onclick="sendRegistrationData()">Зарегестрироваться</button>
                     </div>
-                </form>
+                </div>
             </section>
         </main>
 
         <footer th:insert="blocks/footer"></footer>
+
+        <div class="modal fade" id="registration_accessed" tabindex="-1" aria-labelledby="registration_accessed_label" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="registration_accessed_label">Регистрация</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label>Для окончания регистрации подтвердите электронную почту, перейдя по ссылке в письме</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="window.location='/login'">Авторизация</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </body>
 </html>

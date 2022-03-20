@@ -26,7 +26,7 @@ public class RegexTest {
 
         Assertions.assertTrue(regexUtil.checkUsername("terflo"));
 
-        Assertions.assertTrue(regexUtil.checkUsername("root"));
+        Assertions.assertFalse(regexUtil.checkUsername("root"));
 
         Assertions.assertFalse(regexUtil.checkUsername("qwe qwe 22"));
 

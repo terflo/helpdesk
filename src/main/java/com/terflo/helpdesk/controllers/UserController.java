@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 /**
  * Контроллер для работы с пользователями
  * @author Danil Krivoschiokov
- * @version 1.1
+ * @version 1.4
  */
 @Log4j2
 @Controller
@@ -148,11 +148,10 @@ public class UserController {
     @PutMapping("/users/{id}")
     public ResponseEntity<String> updateUser(@PathVariable(name = "id") Long id, @RequestBody UserDTO userDTO, Authentication authentication) {
 
-        boolean needLogout = false;
-        User user;
-
         try {
-            user = userService.findUserById(id);
+
+            boolean needLogout = false;
+            User user = userService.findUserById(id);
 
             //Проверка username на изменения
             if(!userDTO.username.equals(user.getUsername())) {
@@ -183,12 +182,12 @@ public class UserController {
 
             userService.updateUser(user);
 
+            if (needLogout) sessionService.expireUserSessions(authentication.getName());
+            return ResponseEntity.ok().body("\"\"");
+
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        if (needLogout) sessionService.expireUserSessions(authentication.getName());
-        return ResponseEntity.ok().body("\"\"");
     }
 
     /**
@@ -233,13 +232,14 @@ public class UserController {
      * @return HTTP ответ
      */
     @ResponseBody
-    @PostMapping("/admin/users/{id}/switchLock")
+    @PutMapping("/admin/users/{id}/switchLock")
     public ResponseEntity<String> switchLockUser(@PathVariable(value = "id") Long id) {
         try {
             userService.switchLockUserById(id);
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+        sessionService.expireUserSessions(id);
         return ResponseEntity.ok().body("\"\"");
     }
 

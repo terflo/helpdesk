@@ -69,9 +69,6 @@ public class ChatController {
             if(userRequestService.findUserRequestByID(messageDTO.userRequest).getStatus() == RequestStatus.CLOSED) {
                 log.error("Попытка отправить сообщение в закрытое обращение пользователем " + messageDTO.sender.username);
                 return ResponseEntity.badRequest().body("Обращение закрыто");
-            } else if(userRequestService.findUserRequestByID(messageDTO.userRequest).getStatus() == RequestStatus.BEGINNING) {
-                log.error("Попытка отправить сообщение в непринятое обращение");
-                return ResponseEntity.badRequest().body("Обращение не активно");
             }
         } catch (UserRequestNotFoundException e) {
             log.error(e.getMessage());

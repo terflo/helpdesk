@@ -1,10 +1,37 @@
-function showToast(text) {
+function showToast(text, theme) {
     new Toast({
         title: false,
         text: text,
-        theme: 'light',
+        theme: theme,
         autohide: true,
-        interval: 5000
+        interval: 2500
+    })
+}
+
+function sendRegistrationData() {
+
+    let response = grecaptcha.getResponse()
+
+    $.ajax({
+        type: "POST",
+        url: "/registration?g-recaptcha-response=" + response,
+        data: JSON.stringify({
+            username: $("#username").val().trim(),
+            email: $("#email").val().trim(),
+            password: $("#password").val().trim(),
+            passwordConfirm: $("#password-confirm").val().trim()
+        }),
+        dataType: "json",
+        contentType: "application/json",
+        cache: false,
+        timeout: 600000,
+        success: function () {
+            $('#registration_accessed').modal('show')
+        },
+        error: function (data) {
+            console.log(data)
+            data.responseJSON.forEach(element => showToast(element, 'warning'))
+        }
     })
 }
 
@@ -13,43 +40,21 @@ function checkRegistrationData() {
         type: "POST",
         url: "/registration/checkUserData",
         data: JSON.stringify({
-            username: $("#username").val(),
-            email: $("#email").val(),
-            password: $("#password").val(),
-            passwordConfirm: $("#password-confirm").val()
+            username: $("#username").val().trim(),
+            email: $("#email").val().trim(),
+            password: $("#password").val().trim(),
+            passwordConfirm: $("#password-confirm").val().trim()
         }),
         dataType: "json",
         contentType: "application/json",
         cache: false,
         timeout: 600000,
-        success: function (data) {
-
-            console.log(data)
-
-            if(data.usernameStatus !== null && data.usernameStatus !== 'OK') {
-                if(data.usernameStatus === 'INCORRECT USERNAME')
-                    showToast('Некорректное имя пользователя')
-                else if(data.usernameStatus === 'ALREADY EXISTS')
-                    showToast('Пользователь с таким именем уже существует')
-            }
-
-            if(data.emailStatus !== null && data.emailStatus !== 'OK') {
-                if(data.emailStatus === 'INCORRECT EMAIL')
-                    showToast('Некорректный email')
-                else if(data.emailStatus === 'ALREADY EXISTS')
-                    showToast('Пользователь с таким email уже существует')
-            }
-
-            if(data.passwordStatus !== null && data.passwordStatus !== 'OK') {
-                if(data.passwordStatus === 'TOO SHORT')
-                    showToast('Пароль слишком короткий')
-                else if(data.passwordStatus === 'NOT MATCH')
-                    showToast('Пароли не совпадают')
-            }
+        success: function () {
+            showToast('Данные корректны', 'info')
         },
         error: function (data) {
-            alert(data.responseText)
+            data.responseJSON.forEach(element => showToast(element, 'warning'))
         }
-    });
+    })
 }
 
