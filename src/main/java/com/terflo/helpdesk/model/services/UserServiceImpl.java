@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     /**
      * Репозиторий ролей
      */
-    private final RoleService roleService;
+    private final RoleServiceImpl roleServiceImpl;
 
     /**
      * Кодировщик паролей
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final ImageServiceImpl imageServiceImpl;
 
-    private final VerificationTokenService verificationTokenService;
+    private final VerificationTokenServiceImpl verificationTokenServiceImpl;
 
     /**
      * Функция поиска пользователя по индификатору
@@ -197,7 +197,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setDate(new Date());
-        user.setRoles(Collections.singleton(roleService.getRoleByName("ROLE_USER")));
+        user.setRoles(Collections.singleton(roleServiceImpl.getRoleByName("ROLE_USER")));
         user.setEnabled(false);
         user.setCredentials_expired(false);
         user.setExpired(false);
@@ -279,7 +279,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             throw new UserNotFoundException(String.format("Пользователь #%s не найден", id));
         } else {
             try {
-                verificationTokenService.deleteByUser(user.get());
+                verificationTokenServiceImpl.deleteByUser(user.get());
                 decisionServiceImpl.deleteAllDecisionByAuthor(user.get());
                 userRequestServiceImpl.deleteAllByUser(user.get());
             } catch (UserRequestNotFoundException | VerificationTokenNotFoundException ignored) {}
@@ -301,7 +301,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
             throw new UserNotFoundException(String.format("Пользователь %s не найден", username));
         } else {
             try {
-                verificationTokenService.deleteByUser(user.get());
+                verificationTokenServiceImpl.deleteByUser(user.get());
                 decisionServiceImpl.deleteAllDecisionByAuthor(user.get());
                 imageServiceImpl.deleteImage(user.get().getAvatar());
                 userRequestServiceImpl.deleteAllByUser(user.get());

@@ -1,8 +1,9 @@
 package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.UserRequest;
-import com.terflo.helpdesk.model.factories.UserRequestDTOFactory;
+import com.terflo.helpdesk.model.factories.UserRequestFactory;
 import com.terflo.helpdesk.model.services.UserRequestServiceImpl;
+import com.terflo.helpdesk.model.services.interfaces.UserRequestService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
@@ -24,12 +25,12 @@ public class AdminController {
     /**
      * Сервис для работы обращений пользователей
      */
-    private final UserRequestServiceImpl userRequestServiceImpl;
+    private final UserRequestService userRequestService;
 
     /**
      * DTO фабрика обращений пользователей
      */
-    private final UserRequestDTOFactory userRequestDTOFactory;
+    private final UserRequestFactory userRequestFactory;
 
     /**
      * Mapping для вывода страницы админ-панели
@@ -47,8 +48,8 @@ public class AdminController {
      */
     @GetMapping("/admin/requests")
     public String requests(Model model) {
-        List<UserRequest> requests = userRequestServiceImpl.findAll();
-        model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
+        List<UserRequest> requests = userRequestService.findAll();
+        model.addAttribute("requests", userRequestFactory.convertToUserRequestDTO(requests));
         return "admin/requests";
     }
 

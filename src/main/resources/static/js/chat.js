@@ -2,8 +2,12 @@
 let stompClient = null;
 
 $(document).ready(function() {
-    $('#message').keydown(function(e) {
-        if(e.keyCode === 13 && stompClient != null) {
+
+    let textField = $('#message')
+
+    textField.keydown(function(e) {
+        if(e.keyCode === 13 && stompClient != null && textField.val().trim() !== "") {
+            e.preventDefault();
             sendMessage();
         }
     });
@@ -49,22 +53,23 @@ function disconnect() {
 /* Функция отправки сообщения */
 function sendMessage() {
 
-    let textField = $("#message");
+    let textField = $("#message")
+
     if(textField.val().trim().length > 255) {
-        showToast("Длина сообщения не может быть больше 255 символов", 'warning')
+        showToast("Длина сообщения должна быть до 255 символов", "warning")
         return
     }
 
-
-    if(textField.val().trim() !== "") {
+    if(textField.val().trim() !== "")
         stompClient.send("/app/chat", {},
             JSON.stringify({
                 'sender': user,
                 'message': textField.val().trim(),
                 'userRequest': request.id
             }));
-        textField.val('')
-    }
+
+    textField.val("")
+
 }
 
 /* Функция отображения полученого сообщения */

@@ -3,7 +3,7 @@ package com.terflo.helpdesk.model.factories;
 import com.terflo.helpdesk.model.entity.Decision;
 import com.terflo.helpdesk.model.entity.dto.DecisionDTO;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
-import com.terflo.helpdesk.model.services.UserServiceImpl;
+import com.terflo.helpdesk.model.services.interfaces.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class DecisionFactory {
 
-    private final UserDTOFactory userDTOFactory;
+    private final UserFactory userFactory;
 
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
     public DecisionDTO convertToDecisionDTO(Decision decision) {
         return new DecisionDTO(
@@ -24,7 +24,7 @@ public class DecisionFactory {
                 decision.getName(),
                 decision.getAnswer(),
                 decision.getDate(),
-                userDTOFactory.convertToUserDTO(decision.getAuthor())
+                userFactory.convertToUserDTO(decision.getAuthor())
         );
     }
 
@@ -34,7 +34,7 @@ public class DecisionFactory {
                 decisionDTO.name,
                 decisionDTO.answer,
                 decisionDTO.date,
-                decisionDTO.author == null ? null : userServiceImpl.findUserByUsername(decisionDTO.author.username)
+                decisionDTO.author == null ? null : userService.findUserByUsername(decisionDTO.author.username)
         );
     }
 

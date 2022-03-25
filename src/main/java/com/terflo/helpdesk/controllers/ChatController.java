@@ -9,9 +9,9 @@ import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
-import com.terflo.helpdesk.model.factories.MessageDTOFactory;
-import com.terflo.helpdesk.model.services.MessageServiceImpl;
-import com.terflo.helpdesk.model.services.UserRequestServiceImpl;
+import com.terflo.helpdesk.model.factories.MessageFactory;
+import com.terflo.helpdesk.model.services.interfaces.MessageService;
+import com.terflo.helpdesk.model.services.interfaces.UserRequestService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -42,17 +42,17 @@ public class ChatController {
     /**
      * Сервис для работы с сообщениями
      */
-    private final MessageServiceImpl messageServiceImpl;
+    private final MessageService messageService;
 
     /**
      * Фабрика сообщений
      */
-    private final MessageDTOFactory messageDTOFactory;
+    private final MessageFactory messageFactory;
 
     /**
      * Сервис обращений пользователей
      */
-    private final UserRequestServiceImpl userRequestServiceImpl;
+    private final UserRequestService userRequestService;
 
     /**
      * Шаблон сообщений
@@ -70,7 +70,7 @@ public class ChatController {
         //Если запрос закрыт, то игнорируем
         try {
 
-            UserRequest userRequest = userRequestServiceImpl.findUserRequestByID(messageDTO.userRequest);
+            UserRequest userRequest = userRequestService.findUserRequestByID(messageDTO.userRequest);
 
             if(userRequest.getStatus().equals(RequestStatus.CLOSED)) {
                 log.error("Попытка отправить сообщение в закрытое обращение пользователем " + Objects.requireNonNull(messageDTO.sender).username);
@@ -87,7 +87,7 @@ public class ChatController {
         //Конвертируем сообщение в нормальный вид из DTO вида,
         //сохраняем в базе данных и отправляем подписчикам уведомление о новом сообщении
         try {
-            Message message = messageServiceImpl.saveMessage(messageDTOFactory.convertToNewMessage(messageDTO));
+            Message message = messageService.saveMessage(messageFactory.convertToNewMessage(messageDTO));
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(messageDTO.userRequest),"/queue/messages",
                     new Notification(
@@ -111,7 +111,7 @@ public class ChatController {
     public ResponseEntity<?> countNewMessages(@PathVariable(name = "userRequestID") Long userRequestID) {
 
         try {
-            return ResponseEntity.ok(messageServiceImpl.countNewMessagesByUserRequestID(userRequestID));
+            return ResponseEntity.ok(messageService.countNewMessagesByUserRequestID(userRequestID));
         } catch (UserRequestNotFoundException e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -127,9 +127,9 @@ public class ChatController {
     public ResponseEntity<?> findMessage (@PathVariable Long id) {
 
         try {
-            Message message = messageServiceImpl.findMessageByID(id);
+            Message message = messageService.findMessageByID(id);
             message.setStatus(MessageStatus.DELIVERED);
-            return ResponseEntity.ok(messageDTOFactory.convertToMessageDTO(message));
+            return ResponseEntity.ok(messageFactory.convertToMessageDTO(message));
         } catch (MessageNotFoundException e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

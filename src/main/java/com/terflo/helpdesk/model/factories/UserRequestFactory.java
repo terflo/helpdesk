@@ -4,7 +4,7 @@ import java.util.List;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.UserRequestDTO;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
-import com.terflo.helpdesk.model.services.UserRequestServiceImpl;
+import com.terflo.helpdesk.model.services.interfaces.UserRequestService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -18,17 +18,17 @@ import java.util.stream.Collectors;
  */
 @Component
 @AllArgsConstructor
-public class UserRequestDTOFactory {
+public class UserRequestFactory {
 
-    private final UserRequestServiceImpl userRequestServiceImpl;
+    private final UserRequestService userRequestService;
 
-    private final UserDTOFactory userDTOFactory;
+    private final UserFactory userFactory;
 
     public UserRequestDTO convertToUserRequestDTO(UserRequest userRequest) {
             return new UserRequestDTO(
                     userRequest.getId(),
-                    userRequest.getOperator() != null ? userDTOFactory.convertToUserDTO(userRequest.getOperator()) : null,
-                    userRequest.getUser() != null ? userDTOFactory.convertToUserDTO(userRequest.getUser()) : null,
+                    userRequest.getOperator() != null ? userFactory.convertToUserDTO(userRequest.getOperator()) : null,
+                    userRequest.getUser() != null ? userFactory.convertToUserDTO(userRequest.getUser()) : null,
                     userRequest.getStatus(),
                     userRequest.getPriority(),
                     userRequest.getName(),
@@ -41,7 +41,7 @@ public class UserRequestDTOFactory {
 
         try {
             //Поиск запроса в базе данных
-            UserRequest userRequest = userRequestServiceImpl.findUserRequestByID(userRequestDTO.id);
+            UserRequest userRequest = userRequestService.findUserRequestByID(Objects.requireNonNull(userRequestDTO.id));
 
             //Если находим по id и сравнивание основных данных проходит успешно
             if(!Objects.equals(this.convertToUserRequestDTO(userRequest), userRequestDTO))
@@ -53,8 +53,8 @@ public class UserRequestDTOFactory {
             //иначе создаем объект с такими же основными параметрами
             return new UserRequest(
                     userRequestDTO.id,
-                    userRequestDTO.operator != null ? userDTOFactory.convertToUser(userRequestDTO.operator) : null,
-                    userRequestDTO.user != null ? userDTOFactory.convertToUser(userRequestDTO.user) : null,
+                    userRequestDTO.operator != null ? userFactory.convertToUser(userRequestDTO.operator) : null,
+                    userRequestDTO.user != null ? userFactory.convertToUser(userRequestDTO.user) : null,
                     userRequestDTO.status,
                     userRequestDTO.priority,
                     userRequestDTO.name,

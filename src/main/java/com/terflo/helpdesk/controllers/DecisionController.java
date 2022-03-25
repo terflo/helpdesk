@@ -7,8 +7,8 @@ import com.terflo.helpdesk.model.exceptions.DecisionNameAlreadyExistsException;
 import com.terflo.helpdesk.model.exceptions.DecisionNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.factories.DecisionFactory;
-import com.terflo.helpdesk.model.services.DecisionServiceImpl;
-import com.terflo.helpdesk.model.services.UserServiceImpl;
+import com.terflo.helpdesk.model.services.interfaces.DecisionService;
+import com.terflo.helpdesk.model.services.interfaces.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -33,12 +33,12 @@ public class DecisionController {
     /**
      * Серввис для работы с пользователями
      */
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
     /**
      * Сервис для работы с частыми вопросами
      */
-    private final DecisionServiceImpl decisionServiceImpl;
+    private final DecisionService decisionService;
 
     /**
      * DTO фабрика частых вопросов
@@ -52,7 +52,7 @@ public class DecisionController {
      */
     @GetMapping("/decisions")
     public String decisions(Model model) {
-        model.addAttribute("decisions", decisionFactory.convertToDecisionDTO(decisionServiceImpl.findAllDecisions()));
+        model.addAttribute("decisions", decisionFactory.convertToDecisionDTO(decisionService.findAllDecisions()));
         return "admin/decisions";
     }
 
@@ -68,9 +68,9 @@ public class DecisionController {
 
         try {
             Decision newDecision = decisionFactory.convertToDecision(decision);
-            newDecision.setAuthor(userServiceImpl.findUserByUsername(authentication.getName()));
+            newDecision.setAuthor(userService.findUserByUsername(authentication.getName()));
             newDecision.setDate(new Date());
-            newDecision = decisionServiceImpl.saveDecision(newDecision);
+            newDecision = decisionService.saveDecision(newDecision);
 
             log.info("Добавлен новый частый вопрос #" + newDecision.getId());
             return ResponseEntity.ok().body(decisionFactory.convertToDecisionDTO(newDecision).toJSON());
@@ -89,7 +89,7 @@ public class DecisionController {
     @DeleteMapping("/decisions/{id}")
     public ResponseEntity<String> deleteDecision(@PathVariable(name = "id") Long id) {
         try {
-            decisionServiceImpl.deleteDecisionByID(id);
+            decisionService.deleteDecisionByID(id);
         } catch (DecisionNotFoundException e) {
             log.error(e.getMessage());
             return ResponseEntity.notFound().build();
@@ -109,7 +109,7 @@ public class DecisionController {
 
         try {
             Decision updatedDecision = decisionFactory.convertToDecision(decision);
-            decisionServiceImpl.updateDecision(updatedDecision);
+            decisionService.updateDecision(updatedDecision);
         } catch (DecisionNotFoundException | UserNotFoundException e) {
             log.error(e.getMessage());
             return ResponseEntity.ok("\"" + e.getMessage() + "\"");

@@ -5,12 +5,12 @@ import com.terflo.helpdesk.model.entity.dto.UserRequestDTO;
 import com.terflo.helpdesk.model.entity.enums.FreeRequestStatus;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
 import com.terflo.helpdesk.model.exceptions.*;
-import com.terflo.helpdesk.model.factories.MessageDTOFactory;
-import com.terflo.helpdesk.model.factories.UserDTOFactory;
-import com.terflo.helpdesk.model.factories.UserRequestDTOFactory;
-import com.terflo.helpdesk.model.services.MessageServiceImpl;
-import com.terflo.helpdesk.model.services.UserRequestServiceImpl;
-import com.terflo.helpdesk.model.services.UserServiceImpl;
+import com.terflo.helpdesk.model.factories.MessageFactory;
+import com.terflo.helpdesk.model.factories.UserFactory;
+import com.terflo.helpdesk.model.factories.UserRequestFactory;
+import com.terflo.helpdesk.model.services.interfaces.MessageService;
+import com.terflo.helpdesk.model.services.interfaces.UserRequestService;
+import com.terflo.helpdesk.model.services.interfaces.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -38,22 +38,22 @@ public class UserRequestsController {
     /**
      * Сервис для работы с пользователями
      */
-    private final UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
     /**
      * Сервис для работы с обращениями пользователей
      */
-    private final UserRequestServiceImpl userRequestServiceImpl;
+    private final UserRequestService userRequestService;
 
     /**
      * Сервис для работы с сообщениями пользователей
      */
-    private final MessageServiceImpl messageServiceImpl;
+    private final MessageService messageService;
 
     /**
      * Фабрика обращений пользователей
      */
-    private final UserRequestDTOFactory userRequestDTOFactory;
+    private final UserRequestFactory userRequestFactory;
 
     /**
      * Шаблон сообщения
@@ -63,12 +63,12 @@ public class UserRequestsController {
     /**
      * Фабрика сообщений пользователей
      */
-    private final MessageDTOFactory messageDTOFactory;
+    private final MessageFactory messageFactory;
 
     /**
      * Фабрика пользователей
      */
-    private final UserDTOFactory userDTOFactory;
+    private final UserFactory userFactory;
 
     /**
      * Контроллер GET-запроса на вывод страницы
@@ -80,7 +80,7 @@ public class UserRequestsController {
     public String requests(Authentication authentication, Model model) {
         User user;
         try {
-            user = userServiceImpl.findUserByUsername(authentication.getName());
+            user = userService.findUserByUsername(authentication.getName());
         } catch (UserNotFoundException e) {
             log.error(e.getMessage());
             model.addAttribute("status", 404);
@@ -88,9 +88,9 @@ public class UserRequestsController {
             model.addAttribute("trace", Arrays.toString(e.getStackTrace()));
             return "error";
         }
-        List<UserRequest> userRequests = userRequestServiceImpl.findAllUserRequestsByUser(user);
-        model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
-        model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(userRequests));
+        List<UserRequest> userRequests = userRequestService.findAllUserRequestsByUser(user);
+        model.addAttribute("user", userFactory.convertToUserDTO(user));
+        model.addAttribute("requests", userRequestFactory.convertToUserRequestDTO(userRequests));
         return "request/requests";
     }
 
@@ -115,11 +115,11 @@ public class UserRequestsController {
 
         try {
 
-            User operator = userServiceImpl.findUserByUsername(authentication.getName());
-            UserRequest userRequest = userRequestServiceImpl.acceptRequest(id, operator);
-            Message message = messageDTOFactory.generateAcceptRequestMessage(operator, userRequest);
+            User operator = userService.findUserByUsername(authentication.getName());
+            UserRequest userRequest = userRequestService.acceptRequest(id, operator);
+            Message message = messageFactory.generateAcceptRequestMessage(operator, userRequest);
 
-            message = messageServiceImpl.saveMessage(message);
+            message = messageService.saveMessage(message);
 
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(id), "/queue/messages",
@@ -151,8 +151,8 @@ public class UserRequestsController {
      */
     @GetMapping("/requests/free")
     public String freeRequests(Model model) {
-        List<UserRequest> requests = userRequestServiceImpl.findAllUserRequestsByOperator(null);
-        model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
+        List<UserRequest> requests = userRequestService.findAllUserRequestsByOperator(null);
+        model.addAttribute("requests", userRequestFactory.convertToUserRequestDTO(requests));
         return "request/free";
     }
 
@@ -166,7 +166,7 @@ public class UserRequestsController {
     public String supervisedRequests(Model model, Authentication authentication) {
         User operator;
         try {
-            operator = userServiceImpl.findUserByUsername(authentication.getName());
+            operator = userService.findUserByUsername(authentication.getName());
         } catch (UserNotFoundException e) {
             log.error(e.getMessage());
             model.addAttribute("status", 404);
@@ -174,7 +174,7 @@ public class UserRequestsController {
             model.addAttribute("trace", Arrays.toString(e.getStackTrace()));
             return "error";
         }
-        model.addAttribute("requests", userRequestServiceImpl.findAllUserRequestsByOperator(operator));
+        model.addAttribute("requests", userRequestService.findAllUserRequestsByOperator(operator));
         model.addAttribute("name", operator.getUsername());
         return "request/supervised";
     }
@@ -191,17 +191,17 @@ public class UserRequestsController {
                                              @Valid @RequestBody UserRequestDTO userRequestDTO) {
         try {
 
-            UserRequest userRequest = userRequestDTOFactory.convertToUserRequest(userRequestDTO);
+            UserRequest userRequest = userRequestFactory.convertToUserRequest(userRequestDTO);
             userRequest.setStatus(RequestStatus.BEGINNING); //устанавливаем статус что обращение принято в систему
-            userRequest.setUser(userServiceImpl.findUserByUsername(authentication.getName()));  //устанавливаем отправителя обращения
+            userRequest.setUser(userService.findUserByUsername(authentication.getName()));  //устанавливаем отправителя обращения
             userRequest.setDate(new Date());    //устанавливаем дату обращения
 
-            userRequest = userRequestServiceImpl.saveUserRequest(userRequest);
+            userRequest = userRequestService.saveUserRequest(userRequest);
 
             messagingTemplate.convertAndSend("/requests/free", new FreeRequestNotification(
                     FreeRequestStatus.NEW,
                     userRequest.getId(),
-                    userRequestDTOFactory.convertToUserRequestDTO(userRequest)
+                    userRequestFactory.convertToUserRequestDTO(userRequest)
             ));
 
             return ResponseEntity.ok().body("\"\"");
@@ -222,11 +222,11 @@ public class UserRequestsController {
 
         try {
 
-            UserRequest userRequest = userRequestServiceImpl.setStatusUserRequestByID(id, RequestStatus.CLOSED);
-            User operator = userServiceImpl.findUserByUsername(authentication.getName());
-            Message message = messageDTOFactory.generateCloseRequestMessage(operator, userRequest);
+            UserRequest userRequest = userRequestService.setStatusUserRequestByID(id, RequestStatus.CLOSED);
+            User operator = userService.findUserByUsername(authentication.getName());
+            Message message = messageFactory.generateCloseRequestMessage(operator, userRequest);
 
-            message = messageServiceImpl.saveMessage(message);
+            message = messageService.saveMessage(message);
 
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(id),"/queue/messages",
@@ -253,7 +253,7 @@ public class UserRequestsController {
     public ResponseEntity<String> deleteRequest(@PathVariable(value = "id") Long id, Authentication authentication) {
 
         try {
-            userRequestServiceImpl.deleteByID(id);
+            userRequestService.deleteByID(id);
         } catch (UserRequestNotFoundException e) {
             log.error(e.getMessage());
             ResponseEntity.badRequest().body(e.getMessage());
@@ -274,10 +274,10 @@ public class UserRequestsController {
 
         try {
 
-            UserRequest userRequest = userRequestServiceImpl.findUserRequestByID(id);
-            User user = userServiceImpl.findUserByUsername(authentication.getName());
+            UserRequest userRequest = userRequestService.findUserRequestByID(id);
+            User user = userService.findUserByUsername(authentication.getName());
 
-            List<Message> messages = messageServiceImpl.findMessagesByUserRequest(userRequest);
+            List<Message> messages = messageService.findMessagesByUserRequest(userRequest);
             HashMap<Long, String> avatarsBase64 = new HashMap<>();
 
             for (Message message : messages) {
@@ -286,9 +286,9 @@ public class UserRequestsController {
                 avatarsBase64.put(senderID, "data:" + image.getType() + ";base64," + image.getBase64Image());
             }
 
-            model.addAttribute("userRequest", userRequestDTOFactory.convertToUserRequestDTO(userRequest));
-            model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
-            model.addAttribute("messages", messageDTOFactory.convertToMessageDTO(messages));
+            model.addAttribute("userRequest", userRequestFactory.convertToUserRequestDTO(userRequest));
+            model.addAttribute("user", userFactory.convertToUserDTO(user));
+            model.addAttribute("messages", messageFactory.convertToMessageDTO(messages));
             model.addAttribute("avatars", avatarsBase64);
 
             return "request/request";

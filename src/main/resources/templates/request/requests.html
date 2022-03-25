@@ -36,15 +36,11 @@
                     <tr>
                         <td th:text="${request?.id}"></td>
                         <td th:text="${request?.name}"></td>
-                        <td th:switch="${request?.status}">
-                            <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}">В работе</label>
-                            <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>
-                            <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}">Начато</label>
+                        <td>
+                            <label th:id="'request_status_' + ${request?.id}" th:text="${request?.status.toString()}"></label>
                         </td>
-                        <td th:switch="${request?.priority}">
-                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).LOW}">Низкий</label>
-                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).NORMAL}">Средний</label>
-                            <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).MAX}">Высокий</label>
+                        <td>
+                            <label th:text="${request?.priority.toString()}"></label>
                         </td>
                         <td>
                             <a th:href="'/user/' + ${request?.operator?.username}" th:text="${request?.operator?.username}"></a>

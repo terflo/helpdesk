@@ -4,8 +4,8 @@ import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.dto.UserDTO;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
-import com.terflo.helpdesk.model.services.UserServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.terflo.helpdesk.model.services.interfaces.UserService;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,10 +13,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
-public class UserDTOFactory {
+@AllArgsConstructor
+public class UserFactory {
 
-    @Autowired
-    private UserServiceImpl userServiceImpl;
+    private final UserService userService;
 
     /**
      * Метод преобразует объект User в UserDTO
@@ -37,18 +37,14 @@ public class UserDTOFactory {
         );
     }
 
-    //TODO: Проверять совпадания UserDTO и User
     public User convertToUser(UserDTO userDTO) {
 
         try {
-
-            User user = userServiceImpl.findUserByUsername(userDTO.username);
+            User user = userService.findUserByUsername(userDTO.username);
 
             if(!Objects.equals(this.convertToUserDTO(user), userDTO))
                 throw new UserNotFoundException("Пользователь не найден");
-
             return user;
-
         } catch (UserNotFoundException | NullPointerException e) {
             return null;
         }

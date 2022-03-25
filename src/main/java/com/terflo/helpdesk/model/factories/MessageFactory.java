@@ -7,7 +7,6 @@ import com.terflo.helpdesk.model.entity.dto.MessageDTO;
 import com.terflo.helpdesk.model.entity.enums.MessageStatus;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
-import com.terflo.helpdesk.model.services.interfaces.MessageService;
 import com.terflo.helpdesk.model.services.interfaces.UserRequestService;
 import com.terflo.helpdesk.model.services.interfaces.UserService;
 import lombok.AllArgsConstructor;
@@ -24,9 +23,9 @@ import java.util.List;
  */
 @Component
 @AllArgsConstructor
-public class MessageDTOFactory {
+public class MessageFactory {
 
-    private final UserDTOFactory userDTOFactory;
+    private final UserFactory userFactory;
 
     private final UserService userService;
 
@@ -44,7 +43,7 @@ public class MessageDTOFactory {
 
     public MessageDTO convertToMessageDTO(Message message) {
         return new MessageDTO(
-                userDTOFactory.convertToUserDTO(message.getSender()),
+                userFactory.convertToUserDTO(message.getSender()),
                 message.getUserRequest().getId(),
                 message.getMessage(),
                 message.getDate(),

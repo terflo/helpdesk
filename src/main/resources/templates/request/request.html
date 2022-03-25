@@ -32,35 +32,32 @@
             <h2 class="h2 mb-3" th:text="'Обращение #' + ${userRequest.id}" style="margin-left: 10px"></h2>
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <label class="row form-label" for="requestName">Наименование проблемы</label>
-                        <input class="row form-control" id="requestName" name="requestName" readonly th:value="${userRequest.name}" type="text">
+                        <label class="row form-label" for="requestName">Наименование проблемы
+                            <input class="row form-control" id="requestName" name="requestName" readonly th:value="${userRequest.name}" type="text">
+                        </label>
                     </div>
                     <div class="col-sm-6">
-                        <label class="row form-label">Приоритет</label>
-                        <div th:switch="${userRequest.priority}">
-                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).LOW}" value="Низкий" type="text" name="priority" class="row form-control" readonly/>
-                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).NORMAL}" value="Средний" type="text" name="priority" class="row form-control" readonly/>
-                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).MAX}" value="Высокий" type="text" name="priority" class="row form-control" readonly/>
-                        </div>
+                        <label class="row form-label">Приоритет
+                            <input th:value="${userRequest?.status.toString()}" type="text" name="priority" class="row form-control" readonly/>
+                        </label>
                     </div>
                 </div>
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <label class="row form-label">Статус</label>
-                        <div th:switch="${userRequest.status}">
-                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}" class="row form-control" name="requestName" readonly th:value="'В процессе'" type="text">
-                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}" class="row form-control" name="requestName" readonly th:value="'Начато'" type="text">
-                            <input th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}" class="row form-control" name="requestName" readonly th:value="'Закрыто'" type="text">
-                        </div>
+                        <label class="row form-label">Статус
+                            <input class="row form-control" name="requestName" readonly th:value="${userRequest.status.toString()}" type="text">
+                        </label>
                     </div>
                     <div class="col-sm-6">
-                        <label class="row form-label" for="requestDate">Дата создания</label>
-                        <input th:value="${#dates.format(userRequest.date, 'dd.MM.yyyy HH:mm')}" type="text" id="requestDate" name="priority" class="row form-control" readonly/>
+                        <label class="row form-label" for="requestDate">Дата создания
+                            <input th:value="${#dates.format(userRequest.date, 'dd.MM.yyyy HH:mm')}" type="text" id="requestDate" name="priority" class="row form-control" readonly/>
+                        </label>
                     </div>
 
                     <div class="col-12">
-                        <label for="requestDescription" class="form-label">Описание проблемы</label>
-                        <textarea readonly rows="6" class="form-control" id="requestDescription" style="resize: none; overflow-y: scroll;" th:text="${userRequest.description}"></textarea>
+                        <label for="requestDescription" class="form-label col-12">Описание проблемы
+                            <textarea readonly rows="6" class="form-control" id="requestDescription" style="resize: none; overflow-y: scroll;" th:text="${userRequest.description}"></textarea>
+                        </label>
                     </div>
                 </div>
 
@@ -73,7 +70,9 @@
             <div class="container-fluid chat-container">
                     <ul id="chat-box" class="chat-box chatContainerScroll" style="min-height: 40vw; max-height: 40vw">
                         <li class="chat-right" th:each="message : ${messages}" th:attr="class=${message.sender.username == user.username ? 'chat-right' : 'chat-left'}">
-                            <div th:unless="${message?.sender.username != user.username}" class="chat-hour" th:text="${#dates.format(message?.date, 'HH:mm')}"> <span class="fa fa-check-circle"></span></div>
+                            <div th:unless="${message?.sender.username != user.username}" class="chat-hour" th:text="${#dates.format(message?.date, 'HH:mm')}">
+                                <span class="fa fa-check-circle"></span>
+                            </div>
                             <div th:if="${message?.sender.username != user.username}" class="chat-avatar">
                                 <img th:if="${avatars.get(message?.sender.id)} != null" th:src="${avatars.get(message?.sender.id)}" alt="Avatar">
                                 <img th:unless="${avatars.get(message?.sender.id)} != null" th:src="@{~/img/user.png}" alt="Avatar">
@@ -89,8 +88,10 @@
                         </li>
                     </ul>
                 <div class="row">
-                    <textarea id="message" style="resize: none" class="col-sm-4 form-control" rows="3" placeholder="Введите ваше сообщение..."></textarea>
-                    <button id="send-button" class="col-sm-2 form-control" onclick="sendMessage()">Отправить</button>
+                    <label>Ваше сообщение
+                        <textarea id="message" style="resize: none" class="col-sm-4 form-control" rows="3" placeholder="Введите текст сообщения..."></textarea>
+                        <button id="send-button" class="col-sm-2 form-control" onclick="sendMessage()">Отправить</button>
+                    </label>
                 </div>
                 </div>
             </div>
