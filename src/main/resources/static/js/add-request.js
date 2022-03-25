@@ -15,8 +15,18 @@ function addRequest() {
                 window.location.replace("/requests")
         },
         error: function (data) {
-            alert(data.responseText)
+            data.responseJSON.forEach(element => showToast(element, 'warning'))
         }
 
     });
+}
+
+function showToast(text, theme) {
+    new Toast({
+        title: false,
+        text: text,
+        theme: theme,
+        autohide: true,
+        interval: 2500
+    })
 }

@@ -9,6 +9,7 @@ import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.MessageRepository;
+import com.terflo.helpdesk.model.services.interfaces.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +18,12 @@ import java.util.List;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.2
+ * @version 1.3
  * Сервис для работы с сообщениями
  */
 @Service
 @AllArgsConstructor
-public class MessageService {
+public class MessageServiceImpl implements MessageService {
 
     /**
      * Репозиторий сообщений
@@ -32,21 +33,22 @@ public class MessageService {
     /**
      * Сервис для работы с обращениями пользователей
      */
-    private final UserRequestService userRequestService;
+    private final UserRequestServiceImpl userRequestServiceImpl;
 
     /**
      * Сервис для работы с пользователями
      */
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     /**
      * Метод для подсчёта кол-ва новых сообщний
      * @param userRequestID уникальный индификатор запроса пользователя
      * @return кол-во новых сообщений
      */
-    public Long countNewMessages(Long userRequestID) throws UserRequestNotFoundException {
+    @Override
+    public Long countNewMessagesByUserRequestID(Long userRequestID) throws UserRequestNotFoundException {
         return messageRepository
-                .findAllByUserRequestOrderByDate(userRequestService.findUserRequestByID(userRequestID))
+                .findAllByUserRequestOrderByDate(userRequestServiceImpl.findUserRequestByID(userRequestID))
                 .stream()
                 .filter((message -> message.getStatus() == MessageStatus.RECEIVED))
                 .count();
@@ -58,6 +60,7 @@ public class MessageService {
      * @return сообщение
      * @throws MessageNotFoundException возникает при ненахождении сообщения
      */
+    @Override
     public Message findMessageByID(Long id) throws MessageNotFoundException {
         return messageRepository.findById(id).orElseThrow(() -> new MessageNotFoundException("Сообщение не найдено"));
     }
@@ -67,6 +70,7 @@ public class MessageService {
      * @param userRequest запрос пользователя
      * @return список сообщений
      */
+    @Override
     public List<Message> findMessagesByUserRequest (UserRequest userRequest) {
         return messageRepository.findAllByUserRequestOrderByDate(userRequest);
     }
@@ -75,46 +79,8 @@ public class MessageService {
      * Метод сохранения сообщения в базу данных
      * @param message сохраняемое сообщение
      */
-    public void saveMessage(Message message) {
-        messageRepository.save(message);
-    }
-
-    /**
-     * Метод сохранения сообщения в базу данных
-     * @param messageDTO сохраняемое сообщение
-     * @return сообщение сохраненное в базе данных
-     * @throws UserRequestNotFoundException возникает в случае не нахождения обращения пользователя в базе данных
-     * @throws UserNotFoundException возникает в случае не нахождения пользователя в базе данных
-     */
-    public Message saveMessage(MessageDTO messageDTO) throws UserRequestNotFoundException, UserNotFoundException {
-        return messageRepository.save(new Message(
-                null,
-                userService.findUserById(messageDTO.sender.id),
-                userRequestService.findUserRequestByID(messageDTO.userRequest),
-                messageDTO.message,
-                messageDTO.date,
-                messageDTO.status));
-    }
-
-    public Message generateCloseRequestMessage(User operator, Long id) throws UserRequestNotFoundException {
-        return messageRepository.save(new Message(
-                null,
-                operator,
-                userRequestService.findUserRequestByID(id),
-                String.format("Обращение закрыто оператором %s", operator.getUsername()),
-                new Date(),
-                MessageStatus.RECEIVED
-        ));
-    }
-
-    public Message generateAcceptRequestMessage(User operator, UserRequest userRequest) throws UserRequestNotFoundException {
-        return messageRepository.save(new Message(
-                null,
-                operator,
-                userRequest,
-                String.format("Оператор %s принял обращение в обработку", operator.getUsername()),
-                new Date(),
-                MessageStatus.RECEIVED
-        ));
+    @Override
+    public Message saveMessage(Message message) {
+        return messageRepository.save(message);
     }
 }

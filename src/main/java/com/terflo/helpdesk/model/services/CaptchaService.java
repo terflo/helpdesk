@@ -3,6 +3,7 @@ package com.terflo.helpdesk.model.services;
 import com.terflo.helpdesk.config.CaptchaSettings;
 import com.terflo.helpdesk.model.exceptions.InvalidReCaptchaException;
 import com.terflo.helpdesk.model.responses.GoogleResponse;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestOperations;
@@ -12,6 +13,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 @Service
+@AllArgsConstructor
 public class CaptchaService {
 
     private final ReCaptchaAttemptService reCaptchaAttemptService;
@@ -23,12 +25,6 @@ public class CaptchaService {
     private static final Pattern RESPONSE_PATTERN = Pattern.compile("[A-Za-z0-9_-]+");
 
     private static final String VERIFY_URI = "https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s&remoteip=%s";
-
-    public CaptchaService(ReCaptchaAttemptService reCaptchaAttemptService, CaptchaSettings captchaSettings, RestOperations restTemplate) {
-        this.reCaptchaAttemptService = reCaptchaAttemptService;
-        this.captchaSettings = captchaSettings;
-        this.restTemplate = restTemplate;
-    }
 
     public void processResponse(String response, String clientIP) throws InvalidReCaptchaException {
         if(!responseSanityCheck(response)) {

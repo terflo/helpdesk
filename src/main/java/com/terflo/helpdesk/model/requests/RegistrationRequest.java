@@ -3,6 +3,7 @@ package com.terflo.helpdesk.model.requests;
 import com.terflo.helpdesk.model.validators.Email;
 import com.terflo.helpdesk.model.validators.PasswordMatcher;
 import com.terflo.helpdesk.model.validators.Username;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
@@ -15,6 +16,7 @@ import javax.validation.constraints.NotNull;
  */
 @Data
 @PasswordMatcher
+@AllArgsConstructor
 public class RegistrationRequest {
 
     /**

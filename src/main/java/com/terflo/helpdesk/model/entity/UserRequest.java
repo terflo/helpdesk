@@ -1,15 +1,17 @@
 package com.terflo.helpdesk.model.entity;
 
+import com.terflo.helpdesk.model.entity.dto.UserDTO;
+import com.terflo.helpdesk.model.entity.dto.UserRequestDTO;
 import com.terflo.helpdesk.model.entity.enums.PriorityStatus;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.Hibernate;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author Danil Krivoschiokov
@@ -85,5 +87,6 @@ public class UserRequest {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @ToString.Exclude
     private List<Message> messages;
 }

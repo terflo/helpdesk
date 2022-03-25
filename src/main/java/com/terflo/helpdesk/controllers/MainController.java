@@ -1,7 +1,7 @@
 package com.terflo.helpdesk.controllers;
 
-import com.terflo.helpdesk.model.factories.DecisionDTOFactory;
-import com.terflo.helpdesk.model.services.DecisionService;
+import com.terflo.helpdesk.model.factories.DecisionFactory;
+import com.terflo.helpdesk.model.services.DecisionServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,12 +19,12 @@ public class MainController {
     /**
      * Сервис частых вопросовв
      */
-    private final DecisionService decisionService;
+    private final DecisionServiceImpl decisionServiceImpl;
 
     /**
      * Фабрика частых вопросов
      */
-    private final DecisionDTOFactory decisionDTOFactory;
+    private final DecisionFactory decisionFactory;
 
     /**
      * Отображение главной страницы (index.html)
@@ -33,7 +33,7 @@ public class MainController {
      */
     @GetMapping("/")
     public String main(Model model) {
-        model.addAttribute("decisions", decisionDTOFactory.convertToDecisionDTO(decisionService.findAllDecisions()));
+        model.addAttribute("decisions", decisionFactory.convertToDecisionDTO(decisionServiceImpl.findAllDecisions()));
         return "index";
     }
 }

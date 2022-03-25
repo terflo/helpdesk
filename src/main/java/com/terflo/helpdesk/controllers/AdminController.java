@@ -2,7 +2,7 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.factories.UserRequestDTOFactory;
-import com.terflo.helpdesk.model.services.UserRequestService;
+import com.terflo.helpdesk.model.services.UserRequestServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
@@ -24,7 +24,7 @@ public class AdminController {
     /**
      * Сервис для работы обращений пользователей
      */
-    private final UserRequestService userRequestService;
+    private final UserRequestServiceImpl userRequestServiceImpl;
 
     /**
      * DTO фабрика обращений пользователей
@@ -47,7 +47,7 @@ public class AdminController {
      */
     @GetMapping("/admin/requests")
     public String requests(Model model) {
-        List<UserRequest> requests = userRequestService.findAll();
+        List<UserRequest> requests = userRequestServiceImpl.findAll();
         model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
         return "admin/requests";
     }

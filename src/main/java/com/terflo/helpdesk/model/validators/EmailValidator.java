@@ -1,6 +1,6 @@
 package com.terflo.helpdesk.model.validators;
 
-import com.terflo.helpdesk.model.services.UserService;
+import com.terflo.helpdesk.model.services.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.ConstraintValidator;
@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 public class EmailValidator implements ConstraintValidator<Email, String> {
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     private final static Pattern VALID_EMAIL_ADDRESS_REGEX =
             Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
@@ -26,7 +26,7 @@ public class EmailValidator implements ConstraintValidator<Email, String> {
                     .addConstraintViolation()
                     .disableDefaultConstraintViolation();
             return false;
-        } else if(userService.userIsExistByEmail(s)) {
+        } else if(userServiceImpl.userIsExistByEmail(s)) {
             constraintValidatorContext
                     .buildConstraintViolationWithTemplate("Такой email уже зарегестрирован")
                     .addConstraintViolation()

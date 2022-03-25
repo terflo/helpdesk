@@ -3,9 +3,12 @@ package com.terflo.helpdesk.model.factories;
 import java.util.List;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.UserRequestDTO;
+import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
+import com.terflo.helpdesk.model.services.UserRequestServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -16,6 +19,8 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class UserRequestDTOFactory {
+
+    private final UserRequestServiceImpl userRequestServiceImpl;
 
     private final UserDTOFactory userDTOFactory;
 
@@ -30,6 +35,34 @@ public class UserRequestDTOFactory {
                     userRequest.getDescription(),
                     userRequest.getDate()
             );
+    }
+
+    public UserRequest convertToUserRequest(UserRequestDTO userRequestDTO) {
+
+        try {
+            //Поиск запроса в базе данных
+            UserRequest userRequest = userRequestServiceImpl.findUserRequestByID(userRequestDTO.id);
+
+            //Если находим по id и сравнивание основных данных проходит успешно
+            if(!Objects.equals(this.convertToUserRequestDTO(userRequest), userRequestDTO))
+                throw new UserRequestNotFoundException("Обращение пользователя не найдено");
+            else return userRequest;    //возвращаем обращение
+
+        } catch (UserRequestNotFoundException | NullPointerException e) {
+
+            //иначе создаем объект с такими же основными параметрами
+            return new UserRequest(
+                    userRequestDTO.id,
+                    userRequestDTO.operator != null ? userDTOFactory.convertToUser(userRequestDTO.operator) : null,
+                    userRequestDTO.user != null ? userDTOFactory.convertToUser(userRequestDTO.user) : null,
+                    userRequestDTO.status,
+                    userRequestDTO.priority,
+                    userRequestDTO.name,
+                    userRequestDTO.description,
+                    userRequestDTO.date,
+                    null
+            );
+        }
     }
 
     public List<UserRequestDTO> convertToUserRequestDTO(List<UserRequest> userRequest) {

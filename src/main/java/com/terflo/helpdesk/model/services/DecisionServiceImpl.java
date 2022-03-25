@@ -2,10 +2,10 @@ package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.Decision;
 import com.terflo.helpdesk.model.entity.User;
-import com.terflo.helpdesk.model.entity.dto.DecisionDTO;
 import com.terflo.helpdesk.model.exceptions.DecisionNameAlreadyExistsException;
 import com.terflo.helpdesk.model.exceptions.DecisionNotFoundException;
 import com.terflo.helpdesk.model.repositories.DecisionRepository;
+import com.terflo.helpdesk.model.services.interfaces.DecisionService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,21 +15,24 @@ import java.util.stream.StreamSupport;
 
 @Service
 @AllArgsConstructor
-public class DecisionService {
+public class DecisionServiceImpl implements DecisionService {
 
     private final DecisionRepository decisionRepository;
 
+    @Override
     public List<Decision> findAllDecisions() {
         return StreamSupport
                 .stream(decisionRepository.findAll().spliterator(), false)
                 .collect(Collectors.toList());
     }
 
+    @Override
     public void deleteAllDecisionByAuthor(User author) {
         decisionRepository.deleteAllByAuthor(author);
     }
 
-    public void deleteDecision(Long id) throws DecisionNotFoundException {
+    @Override
+    public void deleteDecisionByID(Long id) throws DecisionNotFoundException {
         if(!decisionRepository.findById(id).isPresent())
             throw new DecisionNotFoundException(
                     String.format("Частый вопрос с индификатором %s не найден", id));
@@ -37,24 +40,23 @@ public class DecisionService {
             decisionRepository.deleteById(id);
     }
 
+    @Override
     public Decision saveDecision(Decision decision) throws DecisionNameAlreadyExistsException {
+
         if(decisionRepository.findDecisionByName(decision.getName()).isPresent()) {
             throw new DecisionNameAlreadyExistsException(
-                    String.format("Название %s частого вопроса уже существует", decision.getName())
-            );
-        }
-        else
-            return decisionRepository.save(decision);
+                    String.format("Название %s частого вопроса уже существует", decision.getName()));
+        } else return decisionRepository.save(decision);
     }
 
-    public void updateDecision(DecisionDTO decisionDTO) throws DecisionNotFoundException {
+    @Override
+    public Decision updateDecision(Decision newDecision) throws DecisionNotFoundException {
         Decision decision = decisionRepository
-                .findById(decisionDTO.id)
+                .findById(newDecision.getId())
                 .orElseThrow(() -> new DecisionNotFoundException(
-                        String.format("Уникальный индификатор %s частого вопроса не был найден)", decisionDTO.id)
-                ));
-        decision.setName(decisionDTO.name);
-        decision.setAnswer(decisionDTO.answer);
-        decisionRepository.save(decision);
+                        String.format("Уникальный индификатор %s частого вопроса не был найден)", newDecision.getId())));
+        decision.setName(decision.getName());
+        decision.setAnswer(decision.getAnswer());
+        return decisionRepository.save(decision);
     }
 }

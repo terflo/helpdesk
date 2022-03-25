@@ -8,9 +8,9 @@ import com.terflo.helpdesk.model.exceptions.*;
 import com.terflo.helpdesk.model.factories.MessageDTOFactory;
 import com.terflo.helpdesk.model.factories.UserDTOFactory;
 import com.terflo.helpdesk.model.factories.UserRequestDTOFactory;
-import com.terflo.helpdesk.model.services.MessageService;
-import com.terflo.helpdesk.model.services.UserRequestService;
-import com.terflo.helpdesk.model.services.UserService;
+import com.terflo.helpdesk.model.services.MessageServiceImpl;
+import com.terflo.helpdesk.model.services.UserRequestServiceImpl;
+import com.terflo.helpdesk.model.services.UserServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.*;
 
 /**
@@ -37,17 +38,17 @@ public class UserRequestsController {
     /**
      * Сервис для работы с пользователями
      */
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     /**
      * Сервис для работы с обращениями пользователей
      */
-    private final UserRequestService userRequestService;
+    private final UserRequestServiceImpl userRequestServiceImpl;
 
     /**
      * Сервис для работы с сообщениями пользователей
      */
-    private final MessageService messageService;
+    private final MessageServiceImpl messageServiceImpl;
 
     /**
      * Фабрика обращений пользователей
@@ -79,7 +80,7 @@ public class UserRequestsController {
     public String requests(Authentication authentication, Model model) {
         User user;
         try {
-            user = userService.findUserByUsername(authentication.getName());
+            user = userServiceImpl.findUserByUsername(authentication.getName());
         } catch (UserNotFoundException e) {
             log.error(e.getMessage());
             model.addAttribute("status", 404);
@@ -87,7 +88,7 @@ public class UserRequestsController {
             model.addAttribute("trace", Arrays.toString(e.getStackTrace()));
             return "error";
         }
-        List<UserRequest> userRequests = userRequestService.findAllUserRequestsByUser(user);
+        List<UserRequest> userRequests = userRequestServiceImpl.findAllUserRequestsByUser(user);
         model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
         model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(userRequests));
         return "request/requests";
@@ -114,9 +115,11 @@ public class UserRequestsController {
 
         try {
 
-            User operator = userService.findUserByUsername(authentication.getName());
-            UserRequest userRequest = userRequestService.acceptRequest(id, operator);
-            Message message = messageService.generateAcceptRequestMessage(operator, userRequest);
+            User operator = userServiceImpl.findUserByUsername(authentication.getName());
+            UserRequest userRequest = userRequestServiceImpl.acceptRequest(id, operator);
+            Message message = messageDTOFactory.generateAcceptRequestMessage(operator, userRequest);
+
+            message = messageServiceImpl.saveMessage(message);
 
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(id), "/queue/messages",
@@ -148,7 +151,7 @@ public class UserRequestsController {
      */
     @GetMapping("/requests/free")
     public String freeRequests(Model model) {
-        List<UserRequest> requests = userRequestService.findAllNonOperatorRequests();
+        List<UserRequest> requests = userRequestServiceImpl.findAllUserRequestsByOperator(null);
         model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
         return "request/free";
     }
@@ -163,7 +166,7 @@ public class UserRequestsController {
     public String supervisedRequests(Model model, Authentication authentication) {
         User operator;
         try {
-            operator = userService.findUserByUsername(authentication.getName());
+            operator = userServiceImpl.findUserByUsername(authentication.getName());
         } catch (UserNotFoundException e) {
             log.error(e.getMessage());
             model.addAttribute("status", 404);
@@ -171,7 +174,7 @@ public class UserRequestsController {
             model.addAttribute("trace", Arrays.toString(e.getStackTrace()));
             return "error";
         }
-        model.addAttribute("requests", userRequestService.findUserRequestsByOperator(operator));
+        model.addAttribute("requests", userRequestServiceImpl.findAllUserRequestsByOperator(operator));
         model.addAttribute("name", operator.getUsername());
         return "request/supervised";
     }
@@ -179,34 +182,21 @@ public class UserRequestsController {
     /**
      * Контроллер POST-запроса для создания запроса пользователя
      * @param authentication информация о пользователе
-     * @param userRequest тело запроса пользователя (название, описание, приоритет и т.п.)
+     * @param userRequestDTO тело запроса пользователя (название, описание, приоритет и т.п.)
      * @return страница с запросами
      */
     @ResponseBody
     @PostMapping("/requests")
-    public ResponseEntity<String> addRequest(Authentication authentication, @RequestBody UserRequest userRequest) {
-
-        //Список ошибок
-        ArrayList<String> errors = new ArrayList<>();
-
-        //Проверка на пустое название проблемы
-        if(userRequest.getName().isEmpty())
-            errors.add("Название проблемы не может быть пустое");
-        //Проверка на пустое описание проблемы
-        if(userRequest.getDescription().isEmpty())
-            errors.add("Описание проблемы не может быть пустое");
-        //Проверка на существование пользователя, отправляющего запрос
+    public ResponseEntity<String> addRequest(Authentication authentication,
+                                             @Valid @RequestBody UserRequestDTO userRequestDTO) {
         try {
+
+            UserRequest userRequest = userRequestDTOFactory.convertToUserRequest(userRequestDTO);
             userRequest.setStatus(RequestStatus.BEGINNING); //устанавливаем статус что обращение принято в систему
-            userRequest.setUser(userService.findUserByUsername(authentication.getName()));  //устанавливаем создателя обращения
-        } catch (UserNotFoundException e) { //в случае если пользователь не был найден
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+            userRequest.setUser(userServiceImpl.findUserByUsername(authentication.getName()));  //устанавливаем отправителя обращения
+            userRequest.setDate(new Date());    //устанавливаем дату обращения
 
-        if(errors.isEmpty()) {
-            userRequest.setDate(new Date());
-            userRequestService.saveUserRequest(userRequest);
-
+            userRequest = userRequestServiceImpl.saveUserRequest(userRequest);
 
             messagingTemplate.convertAndSend("/requests/free", new FreeRequestNotification(
                     FreeRequestStatus.NEW,
@@ -214,10 +204,10 @@ public class UserRequestsController {
                     userRequestDTOFactory.convertToUserRequestDTO(userRequest)
             ));
 
-
             return ResponseEntity.ok().body("\"\"");
-        } else {
-            return ResponseEntity.badRequest().body(errors.toString());
+
+        } catch (UserNotFoundException e) { //в случае если пользователь не был найден
+            return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
         }
     }
 
@@ -231,9 +221,13 @@ public class UserRequestsController {
     public ResponseEntity<String> closeRequest(@PathVariable(value = "id") Long id, Authentication authentication) {
 
         try {
-            userRequestService.setStatusUserRequestByID(id, RequestStatus.CLOSED);
-            User operator = userService.findUserByUsername(authentication.getName());
-            Message message = messageService.generateCloseRequestMessage(operator, id);
+
+            UserRequest userRequest = userRequestServiceImpl.setStatusUserRequestByID(id, RequestStatus.CLOSED);
+            User operator = userServiceImpl.findUserByUsername(authentication.getName());
+            Message message = messageDTOFactory.generateCloseRequestMessage(operator, userRequest);
+
+            message = messageServiceImpl.saveMessage(message);
+
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(id),"/queue/messages",
                     new Notification(
@@ -243,6 +237,8 @@ public class UserRequestsController {
         } catch (UserNotFoundException | UserRequestNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+
+        log.info(String.format("Пользователь %s закрыл обращение #%s", authentication.getName(), id));
 
         return ResponseEntity.ok().body("\"\"");
     }
@@ -255,14 +251,16 @@ public class UserRequestsController {
     @ResponseBody
     @DeleteMapping("/requests/{id}")
     public ResponseEntity<String> deleteRequest(@PathVariable(value = "id") Long id, Authentication authentication) {
+
         try {
-            userRequestService.deleteByID(id);
+            userRequestServiceImpl.deleteByID(id);
         } catch (UserRequestNotFoundException e) {
             log.error(e.getMessage());
             ResponseEntity.badRequest().body(e.getMessage());
         }
+
         log.info(String.format("Обращение #%s удалено пользователем %s", id, authentication.getName()));
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body("\"\"");
     }
 
     /**
@@ -274,11 +272,27 @@ public class UserRequestsController {
     @GetMapping("/requests/{id}")
     public String showRequest(@PathVariable(value = "id") Long id, Model model, Authentication authentication) {
 
-        UserRequest userRequest;
-        User user;
         try {
-            userRequest = userRequestService.findUserRequestByID(id);
-            user = userService.findUserByUsername(authentication.getName());
+
+            UserRequest userRequest = userRequestServiceImpl.findUserRequestByID(id);
+            User user = userServiceImpl.findUserByUsername(authentication.getName());
+
+            List<Message> messages = messageServiceImpl.findMessagesByUserRequest(userRequest);
+            HashMap<Long, String> avatarsBase64 = new HashMap<>();
+
+            for (Message message : messages) {
+                Long senderID = message.getSender().getId();
+                Image image = message.getSender().getAvatar();
+                avatarsBase64.put(senderID, "data:" + image.getType() + ";base64," + image.getBase64Image());
+            }
+
+            model.addAttribute("userRequest", userRequestDTOFactory.convertToUserRequestDTO(userRequest));
+            model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
+            model.addAttribute("messages", messageDTOFactory.convertToMessageDTO(messages));
+            model.addAttribute("avatars", avatarsBase64);
+
+            return "request/request";
+
         } catch (UserRequestNotFoundException | UserNotFoundException e) {
             log.error(e.getMessage());
             model.addAttribute("status", 404);
@@ -286,22 +300,6 @@ public class UserRequestsController {
             model.addAttribute("trace", Arrays.toString(e.getStackTrace()));
             return "error";
         }
-
-        List<Message> messages = messageService.findMessagesByUserRequest(userRequest);
-        HashMap<Long, String> avatarsBase64 = new HashMap<>();
-
-        for (Message message : messages) {
-            Long senderID = message.getSender().getId();
-            Image image = message.getSender().getAvatar();
-            avatarsBase64.put(senderID, "data:" + image.getType() + ";base64," + image.getBase64Image());
-        }
-
-        model.addAttribute("userRequest", userRequestDTOFactory.convertToUserRequestDTO(userRequest));
-        model.addAttribute("user", userDTOFactory.convertToUserDTO(user));
-        model.addAttribute("messages", messageDTOFactory.convertToMessageDTO(messages));
-        model.addAttribute("avatars", avatarsBase64);
-
-        return "request/request";
     }
 
     @ResponseBody
@@ -309,18 +307,7 @@ public class UserRequestsController {
     public ResponseEntity<String> freeRequests(@Payload FreeRequestNotification freeRequestNotification) {
 
         log.warn("В сокет свободных обращений пришло сообщение: " + freeRequestNotification.toString());
-
         messagingTemplate.convertAndSend("/free", freeRequestNotification);
-
-        /*
-        messagingTemplate.convertAndSendToUser(
-                "free","/queue/messages",
-                new Notification(
-                        message.getId(),
-                        message.getUserRequest().getId(),
-                        message.getSender().getId()));
-                        */
-
         return ResponseEntity.ok().body("\"\"");
     }
 }

@@ -12,8 +12,8 @@ import com.terflo.helpdesk.model.factories.UserDTOFactory;
 import com.terflo.helpdesk.model.factories.UserRequestDTOFactory;
 import com.terflo.helpdesk.model.services.RoleService;
 import com.terflo.helpdesk.model.services.SessionService;
-import com.terflo.helpdesk.model.services.UserRequestService;
-import com.terflo.helpdesk.model.services.UserService;
+import com.terflo.helpdesk.model.services.UserRequestServiceImpl;
+import com.terflo.helpdesk.model.services.UserServiceImpl;
 import com.terflo.helpdesk.utils.RegexUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -46,7 +46,7 @@ public class UserController {
 
     private final SessionService sessionService;
 
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     private final UserDTOFactory userDTOFactory;
 
@@ -54,7 +54,7 @@ public class UserController {
 
     private final RoleService roleService;
 
-    private final UserRequestService userRequestService;
+    private final UserRequestServiceImpl userRequestServiceImpl;
 
     private final UserRequestDTOFactory userRequestDTOFactory;
 
@@ -69,7 +69,7 @@ public class UserController {
 
         User user;
         try {
-            user = userService.findUserByUsername(username);
+            user = userServiceImpl.findUserByUsername(username);
         } catch (UserNotFoundException e) {
             log.error("Попытка получения профиля несуществующего пользователя " + username);
             model.addAttribute("status", 404);
@@ -89,7 +89,7 @@ public class UserController {
         model.addAttribute("clientUsername", authentication.getName());
         model.addAttribute("isAdmin", clientIsContainsAdminRole);
 
-        List<UserRequest> requests = userRequestService.findAllUserRequestsByUser(user);
+        List<UserRequest> requests = userRequestServiceImpl.findAllUserRequestsByUser(user);
         model.addAttribute("requests", userRequestDTOFactory.convertToUserRequestDTO(requests));
 
         model.addAttribute("avatar", user.getAvatar());
@@ -112,9 +112,9 @@ public class UserController {
             return ResponseEntity.badRequest().body("Не поддерживаемый тип изображения");
 
         try {
-            User user = userService.findUserById(id);
+            User user = userServiceImpl.findUserById(id);
             user.setAvatar(imageFactory.getImage(file));
-            userService.updateUser(user);
+            userServiceImpl.updateUser(user);
         } catch (UserNotFoundException | IOException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -131,7 +131,7 @@ public class UserController {
     public ResponseEntity<String> getAvatar(@PathVariable(name = "id") Long id) {
 
         try {
-            Image image = userService.findUserById(id).getAvatar();
+            Image image = userServiceImpl.findUserById(id).getAvatar();
             return ResponseEntity.ok("\"data:" + image.getType() + ";base64," + image.getBase64Image() + "\"");
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -151,12 +151,12 @@ public class UserController {
         try {
 
             boolean needLogout = false;
-            User user = userService.findUserById(id);
+            User user = userServiceImpl.findUserById(id);
 
             //Проверка username на изменения
             if(!userDTO.username.equals(user.getUsername())) {
                 //Проверка username на уникальность
-                if (userService.userIsExistByUsername(userDTO.username))
+                if (userServiceImpl.userIsExistByUsername(userDTO.username))
                     return ResponseEntity.badRequest().body("Такое имя уже занято");
                 //Проверка username на корректность (Regex)
                 if (!regexUtil.checkUsername(userDTO.username))
@@ -168,7 +168,7 @@ public class UserController {
             //Проверка email на изменения
             if(!userDTO.email.equals(user.getEmail())) {
                 //Проверка email на уникальность
-                if (userService.userIsExistByEmail(userDTO.email))
+                if (userServiceImpl.userIsExistByEmail(userDTO.email))
                     return ResponseEntity.badRequest().body("Такой email уже занят");
                 //Проверка email на корректность (Regex)
                 if (!regexUtil.checkEmail(userDTO.email))
@@ -180,7 +180,7 @@ public class UserController {
             if(!userDTO.description.equals(user.getDescription()))
                 user.setDescription(userDTO.description);
 
-            userService.updateUser(user);
+            userServiceImpl.updateUser(user);
 
             if (needLogout) sessionService.expireUserSessions(authentication.getName());
             return ResponseEntity.ok().body("\"\"");
@@ -204,8 +204,8 @@ public class UserController {
                 .map(Role::getName)
                 .collect(Collectors.toList()));
 
-        model.addAttribute("users", userService.getAllUsers());
-        model.addAttribute("activeUsers", userService.getActiveUsernamesFromSessionRegistry());
+        model.addAttribute("users", userServiceImpl.getAllUsers());
+        model.addAttribute("activeUsers", userServiceImpl.getActiveUsernamesFromSessionRegistry());
 
         return "admin/users";
     }
@@ -219,7 +219,7 @@ public class UserController {
     @DeleteMapping("/users/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable(value = "id") Long id) {
         try {
-            userService.deleteUserById(id);
+            userServiceImpl.deleteUserById(id);
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -235,7 +235,7 @@ public class UserController {
     @PutMapping("/admin/users/{id}/switchLock")
     public ResponseEntity<String> switchLockUser(@PathVariable(value = "id") Long id) {
         try {
-            userService.switchLockUserById(id);
+            userServiceImpl.switchLockUserById(id);
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -249,7 +249,7 @@ public class UserController {
 
         try {
             Role role = roleService.getRoleByName(roleName);
-            userService.addRoleToUser(id, role);
+            userServiceImpl.addRoleToUser(id, role);
         } catch (RoleNotFoundException | UserNotFoundException e) {
             return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
         }
@@ -263,7 +263,7 @@ public class UserController {
 
         try {
             Role role = roleService.getRoleByName(roleName);
-            userService.deleteRoleToUser(id, role);
+            userServiceImpl.deleteRoleToUser(id, role);
         } catch (RoleNotFoundException | UserNotFoundException e) {
             return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
         }

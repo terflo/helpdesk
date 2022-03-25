@@ -6,6 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -24,40 +28,50 @@ public class UserRequestDTO implements Serializable {
     /**
      * ID запроса
      */
+    @Nullable
     public Long id;
 
     /**
      * Оператор запроса
      */
+    @Nullable
     public UserDTO operator;
 
     /**
-     * Создать запроса
+     * Отправитель запроса
      */
+    @Nullable
     public UserDTO user;
 
     /**
      * Статус запроса
      */
+    @Nullable
     public RequestStatus status;
 
     /**
      * Приоритет запроса
      */
+    @NotNull(message = "Приоритет обращения не может быть пустым")
     public PriorityStatus priority;
 
     /**
      * Имя запроса
      */
+    @NotBlank
+    @Size(min = 10, max = 255, message = "Длина наименования обращения может быть от 10 до 255 символов")
     public String name;
 
     /**
      * Описание запроса
      */
+    @NotBlank
+    @Size(min = 10, max = 2048, message = "Длина описания обращения может быть от 10 до 2048 символов")
     public String description;
 
     /**
      * Дата создания запроса
      */
+    @Nullable
     public Date date;
 }

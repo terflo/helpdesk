@@ -7,7 +7,8 @@ import com.terflo.helpdesk.model.exceptions.UserAlreadyExistException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.factories.ImageFactory;
 import com.terflo.helpdesk.model.services.RoleService;
-import com.terflo.helpdesk.model.services.UserService;
+import com.terflo.helpdesk.model.services.UserServiceImpl;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -23,24 +24,18 @@ import java.util.List;
 
 @Log4j2
 @Component
+@AllArgsConstructor
 public class InitializerUtil {
 
     private final static List<String> requiredRoles = Arrays.asList("ROLE_USER", "ROLE_OPERATOR", "ROLE_ADMIN");
 
     private final RoleService roleService;
 
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     private final ImageFactory imageFactory;
 
     private final BCryptPasswordEncoder passwordEncoder;
-
-    public InitializerUtil(RoleService roleService, UserService userService, ImageFactory imageFactory, BCryptPasswordEncoder passwordEncoder) {
-        this.roleService = roleService;
-        this.userService = userService;
-        this.imageFactory = imageFactory;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void init() throws IOException {
@@ -61,7 +56,7 @@ public class InitializerUtil {
         User user;
         //Проверка на существование пользователя root
         try {
-            user = userService.findUserByUsername("root");
+            user = userServiceImpl.findUserByUsername("root");
         } catch (UserNotFoundException e) {
             log.warn("Пользователь root не найден в базе и будет перезаписан");
             User root = new User();
@@ -76,7 +71,7 @@ public class InitializerUtil {
             root.setRoles(roleService.findAll());
             root.setDate(new Date());
             try {
-                userService.saveUser(root);
+                userServiceImpl.saveUser(root);
             } catch (UserAlreadyExistException ignored) {}
             return;
         }
@@ -86,7 +81,7 @@ public class InitializerUtil {
             log.warn("У пользователя root не обнаружен полный список прав, права будут установленны автоматически");
             user.setRoles(roleService.findAll());
             try {
-                userService.updateUser(user);
+                userServiceImpl.updateUser(user);
             } catch (UserNotFoundException ignored) {}
         }
     }

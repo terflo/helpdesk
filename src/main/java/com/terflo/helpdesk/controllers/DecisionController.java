@@ -6,9 +6,9 @@ import com.terflo.helpdesk.model.entity.dto.DecisionDTO;
 import com.terflo.helpdesk.model.exceptions.DecisionNameAlreadyExistsException;
 import com.terflo.helpdesk.model.exceptions.DecisionNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
-import com.terflo.helpdesk.model.factories.DecisionDTOFactory;
-import com.terflo.helpdesk.model.services.DecisionService;
-import com.terflo.helpdesk.model.services.UserService;
+import com.terflo.helpdesk.model.factories.DecisionFactory;
+import com.terflo.helpdesk.model.services.DecisionServiceImpl;
+import com.terflo.helpdesk.model.services.UserServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +17,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Date;
 
 /**
  * Контроллер для работы с часто задаваемыми вопросами
- * @version 1.1
+ * @version 1.2
  * @author Danil Krivoschiokov
  */
 @Log4j2
@@ -32,17 +33,17 @@ public class DecisionController {
     /**
      * Серввис для работы с пользователями
      */
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     /**
      * Сервис для работы с частыми вопросами
      */
-    private final DecisionService decisionService;
+    private final DecisionServiceImpl decisionServiceImpl;
 
     /**
      * DTO фабрика частых вопросов
      */
-    private final DecisionDTOFactory decisionDTOFactory;
+    private final DecisionFactory decisionFactory;
 
     /**
      * Mapping для вывода страницы с частыми вопросами
@@ -51,41 +52,32 @@ public class DecisionController {
      */
     @GetMapping("/decisions")
     public String decisions(Model model) {
-        model.addAttribute("decisions", decisionDTOFactory.convertToDecisionDTO(decisionService.findAllDecisions()));
+        model.addAttribute("decisions", decisionFactory.convertToDecisionDTO(decisionServiceImpl.findAllDecisions()));
         return "admin/decisions";
     }
 
     /**
-     * Mapping для добавление частого вопроса
+     * Добавление часто задаваемого вопроса в базу данных
      * @param decision часто задаваемый вопрос
-     * @param authentication авторизация клиента
-     * @return HTTP ответ
+     * @param authentication данные авторизации пользователя
+     * @return сохраненный часто задаваемый вопрос
      */
     @ResponseBody
     @PostMapping("/decisions")
-    public ResponseEntity<String> addDecision(@RequestBody Decision decision, Authentication authentication) {
-        if(decision.getName().isEmpty() || decision.getAnswer().isEmpty()) {
-            return ResponseEntity.badRequest().body("\"Поля не могут быть пустые\"");
-        } else {
-            decision.setDate(new Date());
-            try {
-                decision.setAuthor(userService.findUserByUsername(authentication.getName()));
-                decision = decisionService.saveDecision(decision);
-            } catch (DecisionNameAlreadyExistsException | UserNotFoundException e) {
-                log.error(e.getMessage());
-                return ResponseEntity.ok("\"" + e.getMessage() + "\"");
-            }
-        }
-        log.info("Добавлен новый частый вопрос с индификатором " + decision.getId());
-
+    public ResponseEntity<String> addDecision(@Valid @RequestBody DecisionDTO decision, Authentication authentication) {
 
         try {
-            return ResponseEntity.ok().body(decisionDTOFactory.convertToDecisionDTO(decision).toJSON());
-        } catch (JsonProcessingException e) {
-            log.error(e.getMessage());
-            return ResponseEntity.ok("\"" + e.getMessage() + "\"");
-        }
+            Decision newDecision = decisionFactory.convertToDecision(decision);
+            newDecision.setAuthor(userServiceImpl.findUserByUsername(authentication.getName()));
+            newDecision.setDate(new Date());
+            newDecision = decisionServiceImpl.saveDecision(newDecision);
 
+            log.info("Добавлен новый частый вопрос #" + newDecision.getId());
+            return ResponseEntity.ok().body(decisionFactory.convertToDecisionDTO(newDecision).toJSON());
+
+        } catch (UserNotFoundException | DecisionNameAlreadyExistsException | JsonProcessingException e) {
+            return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
+        }
     }
 
     /**
@@ -97,12 +89,12 @@ public class DecisionController {
     @DeleteMapping("/decisions/{id}")
     public ResponseEntity<String> deleteDecision(@PathVariable(name = "id") Long id) {
         try {
-            decisionService.deleteDecision(id);
+            decisionServiceImpl.deleteDecisionByID(id);
         } catch (DecisionNotFoundException e) {
             log.error(e.getMessage());
             return ResponseEntity.notFound().build();
         }
-        log.info("Удален частый вопрос id: " + id);
+        log.info("Удален частый вопрос #" + id);
         return ResponseEntity.ok().build();
     }
 
@@ -113,14 +105,17 @@ public class DecisionController {
      */
     @ResponseBody
     @PutMapping("/decisions")
-    public ResponseEntity<String> updateDecision(@RequestBody DecisionDTO decision) {
+    public ResponseEntity<String> updateDecision(@Valid @RequestBody DecisionDTO decision) {
+
         try {
-            decisionService.updateDecision(decision);
-        } catch (DecisionNotFoundException e) {
+            Decision updatedDecision = decisionFactory.convertToDecision(decision);
+            decisionServiceImpl.updateDecision(updatedDecision);
+        } catch (DecisionNotFoundException | UserNotFoundException e) {
             log.error(e.getMessage());
-            return ResponseEntity.ok(e.getMessage());
+            return ResponseEntity.ok("\"" + e.getMessage() + "\"");
         }
-        log.info("Обновлена информация частого вопроса id: " + decision.id);
+
+        log.info("Обновлена информация частого вопроса #" + decision.id);
         return ResponseEntity.ok().body("\"\"");
     }
 }

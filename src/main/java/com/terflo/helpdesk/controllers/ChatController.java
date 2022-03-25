@@ -2,6 +2,7 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.Message;
 import com.terflo.helpdesk.model.entity.Notification;
+import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.MessageDTO;
 import com.terflo.helpdesk.model.entity.enums.MessageStatus;
 import com.terflo.helpdesk.model.entity.enums.RequestStatus;
@@ -9,21 +10,23 @@ import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.factories.MessageDTOFactory;
-import com.terflo.helpdesk.model.services.MessageService;
-import com.terflo.helpdesk.model.services.UserRequestService;
+import com.terflo.helpdesk.model.services.MessageServiceImpl;
+import com.terflo.helpdesk.model.services.UserRequestServiceImpl;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.validation.Valid;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author Danil Krivoschiokov
@@ -39,7 +42,7 @@ public class ChatController {
     /**
      * Сервис для работы с сообщениями
      */
-    private final MessageService messageService;
+    private final MessageServiceImpl messageServiceImpl;
 
     /**
      * Фабрика сообщений
@@ -49,7 +52,7 @@ public class ChatController {
     /**
      * Сервис обращений пользователей
      */
-    private final UserRequestService userRequestService;
+    private final UserRequestServiceImpl userRequestServiceImpl;
 
     /**
      * Шаблон сообщений
@@ -62,12 +65,15 @@ public class ChatController {
      */
     @ResponseBody
     @MessageMapping("/chat")
-    public ResponseEntity<String> processMessage(@Payload MessageDTO messageDTO) {
+    public ResponseEntity<String> processMessage(@Valid @RequestBody MessageDTO messageDTO) {
 
         //Если запрос закрыт, то игнорируем
         try {
-            if(userRequestService.findUserRequestByID(messageDTO.userRequest).getStatus() == RequestStatus.CLOSED) {
-                log.error("Попытка отправить сообщение в закрытое обращение пользователем " + messageDTO.sender.username);
+
+            UserRequest userRequest = userRequestServiceImpl.findUserRequestByID(messageDTO.userRequest);
+
+            if(userRequest.getStatus().equals(RequestStatus.CLOSED)) {
+                log.error("Попытка отправить сообщение в закрытое обращение пользователем " + Objects.requireNonNull(messageDTO.sender).username);
                 return ResponseEntity.badRequest().body("Обращение закрыто");
             }
         } catch (UserRequestNotFoundException e) {
@@ -75,17 +81,13 @@ public class ChatController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 
-        //Если сообщение пустое, то игнорируем
-        if(messageDTO.message.trim().isEmpty())
-            return ResponseEntity.ok().body("\"\"");
-
         messageDTO.date = new Date();
         messageDTO.status = MessageStatus.RECEIVED;
 
         //Конвертируем сообщение в нормальный вид из DTO вида,
         //сохраняем в базе данных и отправляем подписчикам уведомление о новом сообщении
         try {
-            Message message = messageService.saveMessage(messageDTO);
+            Message message = messageServiceImpl.saveMessage(messageDTOFactory.convertToNewMessage(messageDTO));
             messagingTemplate.convertAndSendToUser(
                     String.valueOf(messageDTO.userRequest),"/queue/messages",
                     new Notification(
@@ -102,14 +104,14 @@ public class ChatController {
 
     /**
      * Метод для поучения кол-ва новых сообщений
-     * @param userRequest уникальный индификатор запроса пользователя
+     * @param userRequestID уникальный индификатор запроса пользователя
      * @return кол-во новых сообщений
      */
-    @GetMapping("/messages/{userRequest}/count")
-    public ResponseEntity<?> countNewMessages(@PathVariable Long userRequest) {
+    @GetMapping("/messages/{userRequestID}/count")
+    public ResponseEntity<?> countNewMessages(@PathVariable(name = "userRequestID") Long userRequestID) {
 
         try {
-            return ResponseEntity.ok(messageService.countNewMessages(userRequest));
+            return ResponseEntity.ok(messageServiceImpl.countNewMessagesByUserRequestID(userRequestID));
         } catch (UserRequestNotFoundException e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -125,7 +127,7 @@ public class ChatController {
     public ResponseEntity<?> findMessage (@PathVariable Long id) {
 
         try {
-            Message message = messageService.findMessageByID(id);
+            Message message = messageServiceImpl.findMessageByID(id);
             message.setStatus(MessageStatus.DELIVERED);
             return ResponseEntity.ok(messageDTOFactory.convertToMessageDTO(message));
         } catch (MessageNotFoundException e) {

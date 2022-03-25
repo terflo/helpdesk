@@ -9,6 +9,16 @@ $(document).ready(function() {
     });
 });
 
+function showToast(text, theme) {
+    new Toast({
+        title: false,
+        text: text,
+        theme: theme,
+        autohide: true,
+        interval: 2500
+    })
+}
+
 
 
 /* Функция срабатывает при загрузке страницы и открывает соединение с сервером по протоколу STOMP поверх SockJS
@@ -22,7 +32,10 @@ window.onload = function connect() {
         stompClient.subscribe('/requestMessages/' + request.id + '/queue/messages', function(messageOutput) {
             showMessageOutput(JSON.parse(messageOutput.body));
         });
-    });
+    },
+        function (err) {
+            err.forEach(element => showToast(element, 'warning'))
+        });
 }
 
 /* Функция закрытия соединения */
@@ -35,7 +48,14 @@ function disconnect() {
 
 /* Функция отправки сообщения */
 function sendMessage() {
-    let textField = $("#message")
+
+    let textField = $("#message");
+    if(textField.val().trim().length > 255) {
+        showToast("Длина сообщения не может быть больше 255 символов", 'warning')
+        return
+    }
+
+
     if(textField.val().trim() !== "") {
         stompClient.send("/app/chat", {},
             JSON.stringify({

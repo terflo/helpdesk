@@ -1,6 +1,7 @@
 package com.terflo.helpdesk.model.entity.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
@@ -15,6 +16,7 @@ import java.util.Set;
  * (Шаблон Data Transfer Object)
  */
 @ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO implements Serializable {

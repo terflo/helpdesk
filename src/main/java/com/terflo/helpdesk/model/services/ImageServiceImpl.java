@@ -2,50 +2,46 @@ package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.Image;
 import com.terflo.helpdesk.model.exceptions.ImageNotFoundException;
-import com.terflo.helpdesk.model.factories.ImageFactory;
 import com.terflo.helpdesk.model.repositories.ImageRepository;
+import com.terflo.helpdesk.model.services.interfaces.ImageService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.io.IOException;
 
 @Service
 @AllArgsConstructor
-public class ImageService {
+public class ImageServiceImpl implements ImageService {
 
     private final ImageRepository imageRepository;
 
-    private final ImageFactory imageFactory;
-
-
-    public Image getImage(Long id) throws ImageNotFoundException {
+    @Override
+    public Image getImageByID(Long id) throws ImageNotFoundException {
         if(id == null) throw new ImageNotFoundException("Изображение не найдено");
         return imageRepository
                 .findById(id)
                 .orElseThrow(() -> new ImageNotFoundException("Изображение не найдено"));
     }
 
-    public Long saveImage(MultipartFile file) throws IOException {
-        return imageRepository.save(imageFactory.getImage(file)).getId();
+    @Override
+    public Image saveImage(Image image) {
+        return imageRepository.save(image);
     }
 
-    public Long saveImage(Image image) {
-        return imageRepository.save(image).getId();
-    }
-
+    @Override
     @Transactional
-    public void updateImage(Long id, MultipartFile file) throws ImageNotFoundException, IOException {
+    public Image updateImageByID(Long id, Image newImage) throws ImageNotFoundException {
         Image image = imageRepository
                 .findById(id)
-                .orElseThrow(() -> new ImageNotFoundException("Изображение не найдено"));
-        image.setBytes(file.getBytes());
-        imageRepository.save(image);
+                .orElseThrow(() -> new ImageNotFoundException(String.format("Изображение #%s не найдено", id)));
+        image.setBytes(newImage.getBytes());
+        image.setType(newImage.getType());
+        return imageRepository.save(image);
     }
 
+    @Override
     @Transactional
-    public void deleteImage(Long id) throws ImageNotFoundException {
+    public void deleteImageByID(Long id) throws ImageNotFoundException {
         if(id == null)
             return;
         if(!imageRepository.findById(id).isPresent())
@@ -54,6 +50,7 @@ public class ImageService {
             imageRepository.deleteById(id);
     }
 
+    @Override
     @Transactional
     public void deleteImage(Image image) throws ImageNotFoundException {
         if(image == null)

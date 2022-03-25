@@ -6,7 +6,7 @@ import com.terflo.helpdesk.model.exceptions.*;
 import com.terflo.helpdesk.model.requests.RegistrationRequest;
 import com.terflo.helpdesk.model.services.CaptchaService;
 import com.terflo.helpdesk.model.services.MailService;
-import com.terflo.helpdesk.model.services.UserService;
+import com.terflo.helpdesk.model.services.UserServiceImpl;
 import com.terflo.helpdesk.model.services.VerificationTokenService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -34,7 +34,7 @@ public class RegistrationController {
     /**
      * Сервис для работы с пользователями
      */
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     /**
      * Сервис для работы с токенами валидации клиентов
@@ -88,7 +88,7 @@ public class RegistrationController {
 
         //Сохранение пользователя в базе и создания токена подтверждения регистрации
         try {
-            User user = userService.saveNewUser(request.getUsername(), request.getEmail(), request.getPassword());
+            User user = userServiceImpl.saveNewUser(request.getUsername(), request.getEmail(), request.getPassword());
             VerificationToken verificationToken = new VerificationToken(null, user, UUID.randomUUID().toString());
             verificationTokenService.saveToken(verificationToken);
             mailService.sendRegistrationMail(user.getEmail(), user.getUsername(), verificationToken.getActivateCode());
@@ -118,7 +118,7 @@ public class RegistrationController {
 
         try {
             VerificationToken verificationToken = verificationTokenService.findByActivateCode(activateCode);
-            userService.activateUserByUsername(username);
+            userServiceImpl.activateUserByUsername(username);
             verificationTokenService.deleteToken(verificationToken);
         } catch (UserNotFoundException | UserAlreadyActivatedException | VerificationTokenNotFoundException e) {
             log.error(e.getMessage());

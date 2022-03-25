@@ -334,6 +334,8 @@
     font-weight: 300;
     line-height: 150%;
     position: relative;
+    hyphens: auto;
+    word-break: break-all;
 }
 
 .chat-container li .chat-text:before {
@@ -345,16 +347,22 @@
     left: -20px;
     border: 10px solid;
     border-color: transparent #ffffff transparent transparent;
+    hyphens: auto;
+    word-break: break-all;
 }
 
 .chat-container li.chat-right > .chat-text {
     text-align: right;
+    hyphens: auto;
+    word-break: break-all;
 }
 
 .chat-container li.chat-right > .chat-text:before {
     right: -20px;
     border-color: transparent transparent transparent #ffffff;
     left: inherit;
+    hyphens: auto;
+    word-break: break-all;
 }
 
 .chat-container li .chat-hour {
@@ -415,6 +423,7 @@
     }
     .chat-container li .chat-text {
         font-size: .8rem;
+        hyphens: auto;
     }
 }
 

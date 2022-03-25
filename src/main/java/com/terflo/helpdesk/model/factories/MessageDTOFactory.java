@@ -2,12 +2,14 @@ package com.terflo.helpdesk.model.factories;
 
 import com.terflo.helpdesk.model.entity.Message;
 import com.terflo.helpdesk.model.entity.User;
+import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.MessageDTO;
 import com.terflo.helpdesk.model.entity.enums.MessageStatus;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
-import com.terflo.helpdesk.model.services.UserRequestService;
-import com.terflo.helpdesk.model.services.UserService;
+import com.terflo.helpdesk.model.services.interfaces.MessageService;
+import com.terflo.helpdesk.model.services.interfaces.UserRequestService;
+import com.terflo.helpdesk.model.services.interfaces.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +28,20 @@ public class MessageDTOFactory {
 
     private final UserDTOFactory userDTOFactory;
 
+    private final UserService userService;
+
+    private final UserRequestService userRequestService;
+
+    public Message convertToNewMessage(MessageDTO messageDTO) throws UserNotFoundException, UserRequestNotFoundException {
+        return new Message(
+                null,
+                messageDTO.sender == null ? null : userService.findUserById(messageDTO.sender.id),
+                messageDTO.userRequest == null ? null : userRequestService.findUserRequestByID(messageDTO.userRequest),
+                messageDTO.message,
+                messageDTO.date,
+                messageDTO.status);
+    }
+
     public MessageDTO convertToMessageDTO(Message message) {
         return new MessageDTO(
                 userDTOFactory.convertToUserDTO(message.getSender()),
@@ -41,5 +57,27 @@ public class MessageDTOFactory {
                 .stream()
                 .map(this::convertToMessageDTO)
                 .collect(Collectors.toList());
+    }
+
+    public Message generateCloseRequestMessage(User operator, UserRequest userRequest) {
+        return new Message(
+                null,
+                operator,
+                userRequest,
+                String.format("Обращение закрыто оператором %s", operator.getUsername()),
+                new Date(),
+                MessageStatus.RECEIVED
+        );
+    }
+
+    public Message generateAcceptRequestMessage(User operator, UserRequest userRequest) {
+        return new Message(
+                null,
+                operator,
+                userRequest,
+                String.format("Оператор %s принял обращение в обработку", operator.getUsername()),
+                new Date(),
+                MessageStatus.RECEIVED
+        );
     }
 }

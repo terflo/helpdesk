@@ -5,6 +5,7 @@ import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.exceptions.*;
 import com.terflo.helpdesk.model.factories.ImageFactory;
 import com.terflo.helpdesk.model.repositories.UserRepository;
+import com.terflo.helpdesk.model.services.interfaces.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,14 +27,14 @@ import java.util.stream.StreamSupport;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.3
  * Сервис для работы с пользователями
  */
 @Service
 @AllArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserServiceImpl implements UserDetailsService, UserService {
 
-    private final DecisionService decisionService;
+    private final DecisionServiceImpl decisionServiceImpl;
 
     /**
      * Репозиторий пользователей
@@ -58,11 +59,11 @@ public class UserService implements UserDetailsService {
     /**
      * Сервис аватаров пользователей
      */
-    private final UserRequestService userRequestService;
+    private final UserRequestServiceImpl userRequestServiceImpl;
 
     private final ImageFactory imageFactory;
 
-    private final ImageService imageService;
+    private final ImageServiceImpl imageServiceImpl;
 
     private final VerificationTokenService verificationTokenService;
 
@@ -210,12 +211,12 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public void saveUser(User user) throws UserAlreadyExistException {
+    public User saveUser(User user) throws UserAlreadyExistException {
         if (userRepository.findByUsername(user.getUsername()).isPresent())
             throw new UserAlreadyExistException(
                     String.format("Пользователь %s уже существует", user.getUsername())
             );
-        userRepository.save(user);
+        return userRepository.save(user);
     }
 
     /**
@@ -279,8 +280,8 @@ public class UserService implements UserDetailsService {
         } else {
             try {
                 verificationTokenService.deleteByUser(user.get());
-                decisionService.deleteAllDecisionByAuthor(user.get());
-                userRequestService.deleteAllByUser(user.get());
+                decisionServiceImpl.deleteAllDecisionByAuthor(user.get());
+                userRequestServiceImpl.deleteAllByUser(user.get());
             } catch (UserRequestNotFoundException | VerificationTokenNotFoundException ignored) {}
             //Если обращений, токенов верификации, частых вопросов не нашлось, то удалять и нечего
             userRepository.deleteById(id);
@@ -292,6 +293,7 @@ public class UserService implements UserDetailsService {
      * @param username имя пользователя
      * @throws UserNotFoundException возникает при ненахождении пользователя в базе данных
      */
+    @Override
     @Transactional
     public void deleteUserByUsername(String username) throws UserNotFoundException {
         Optional<User> user = userRepository.findByUsername(username);
@@ -300,9 +302,9 @@ public class UserService implements UserDetailsService {
         } else {
             try {
                 verificationTokenService.deleteByUser(user.get());
-                decisionService.deleteAllDecisionByAuthor(user.get());
-                imageService.deleteImage(user.get().getAvatar());
-                userRequestService.deleteAllByUser(user.get());
+                decisionServiceImpl.deleteAllDecisionByAuthor(user.get());
+                imageServiceImpl.deleteImage(user.get().getAvatar());
+                userRequestServiceImpl.deleteAllByUser(user.get());
             } catch (UserRequestNotFoundException | VerificationTokenNotFoundException | ImageNotFoundException ignored) {}
             //Если обращений, токенов верификации, частых вопросов не нашлось, то удалять и нечего
             userRepository.deleteUserByUsername(username);

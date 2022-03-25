@@ -29,7 +29,6 @@ function sendRegistrationData() {
             $('#registration_accessed').modal('show')
         },
         error: function (data) {
-            console.log(data)
             data.responseJSON.forEach(element => showToast(element, 'warning'))
         }
     })

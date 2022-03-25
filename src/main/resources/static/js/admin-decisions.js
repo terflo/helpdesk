@@ -13,6 +13,10 @@ function addDecision() {
         async: true,
         success: function (data) {
 
+            $("#addDecisionModal").modal("hide")
+
+            showToast("Частый вопрос успешно добавлен", 'light')
+
             $("#name").val("")
             $("#answer").val("")
 
@@ -43,7 +47,7 @@ function addDecision() {
             )
         },
         error: function (data) {
-            alert(data.responseText)
+            data.responseJSON.forEach(element => showToast(element, 'warning'))
         }
     });
 }
@@ -96,4 +100,14 @@ function updateDecision(id) {
             alert(data.responseText)
         }
     });
+}
+
+function showToast(text, theme) {
+    new Toast({
+        title: false,
+        text: text,
+        theme: theme,
+        autohide: true,
+        interval: 2500
+    })
 }
