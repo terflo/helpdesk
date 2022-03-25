@@ -151,7 +151,7 @@ public class UserRequestsController {
      */
     @GetMapping("/requests/free")
     public String freeRequests(Model model) {
-        List<UserRequest> requests = userRequestService.findAllUserRequestsByOperator(null);
+        List<UserRequest> requests = userRequestService.findAllUserRequestsByStatus(RequestStatus.BEGINNING);
         model.addAttribute("requests", userRequestFactory.convertToUserRequestDTO(requests));
         return "request/free";
     }

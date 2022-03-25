@@ -16,6 +16,8 @@ public interface UserRequestService {
 
     List<UserRequest> findAllUserRequestsByOperator(User operator);
 
+    List<UserRequest> findAllUserRequestsByStatus(RequestStatus requestStatus);
+
     List<UserRequest> findAll();
 
     UserRequest findUserRequestByID(@NonNull Long id) throws UserRequestNotFoundException;

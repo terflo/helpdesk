@@ -38,10 +38,10 @@ function addDecision() {
                 "                                        </th>\n" +
                 "                                        <th>" + $.format.date(new Date(data.date), "dd.MM.yyyy HH:mm") + "</th>\n" +
                 "                                        <th>\n" +
-                "                                            <input onclick=\"editDecision(" + data.id + ");\" type=\"image\" id=\"decision_edit_" + data.id + "\" src=\"/img/edit.png\" style=\"width: 2vw\" alt=\"edit\">\n" +
+                "                                            <input onclick=\"editDecision(" + data.id + ");\" type=\"image\" id=\"decision_edit_" + data.id + "\" src=\"/static/img/edit.png\" style=\"width: 2vw\" alt=\"edit\">\n" +
                 "                                        </th>\n" +
                 "                                        <th>\n" +
-                "                                            <input onclick=\"deleteDecision(" + data.id + ");\" type=\"image\" id=\"decision_delete_" + data.id + "\" src=\"/img/trash.png\" style=\"width: 2vw\" alt=\"delete\">\n" +
+                "                                            <input onclick=\"deleteDecision(" + data.id + ");\" type=\"image\" id=\"decision_delete_" + data.id + "\" src=\"/static/img/trash.png\" style=\"width: 2vw\" alt=\"delete\">\n" +
                 "                                        </th>\n" +
                 "                                    </tr>"
             )

@@ -7,7 +7,7 @@
         <link th:href="@{~/css/profile.css}" rel="stylesheet" type="text/css"/>
         <script th:src="@{~/js/bootstrap.js}" rel="script" type="text/javascript"></script>
         <script th:src="@{~/js/jQuery.js}" rel="script" type="text/javascript"></script>
-        <script th:src="@{~/js/profile.js}" rel="script" type="text/javascript"></script>
+        <script th:src="@{~/js/user/profile.js}" rel="script" type="text/javascript"></script>
         <title>Профиль</title>
     </head>
     <body>
@@ -117,15 +117,11 @@
                                                 <tr>
                                                     <td th:text="${request?.id}"></td>
                                                     <td th:text="${request?.name}"></td>
-                                                    <td th:switch="${request?.status}">
-                                                        <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).IN_PROCESS}">В работе</label>
-                                                        <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).CLOSED}">Закрыто</label>
-                                                        <label th:id="'request_status_' + ${request?.id}" th:case="${T(com.terflo.helpdesk.model.entity.enums.RequestStatus).BEGINNING}">Начато</label>
+                                                    <td>
+                                                        <label th:id="'request_status_' + ${request?.id}" th:text="${request?.status.toString()}"></label>
                                                     </td>
-                                                    <td th:switch="${request?.priority}">
-                                                        <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).LOW}">Низкий</label>
-                                                        <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).NORMAL}">Средний</label>
-                                                        <label th:case="${T(com.terflo.helpdesk.model.entity.enums.PriorityStatus).MAX}">Высокий</label>
+                                                    <td>
+                                                        <label th:text="${request?.priority.toString()}"></label>
                                                     </td>
                                                     <td th:text="${request?.operator?.username}"></td>
                                                     <td th:if="${#lists.contains(clientRoles, 'ROLE_ADMIN')} OR ${#lists.contains(clientRoles, 'ROLE_OPERATOR')} OR ${clientUsername} == ${user?.username}">

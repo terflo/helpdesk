@@ -1,4 +1,4 @@
-function addRequest() {
+function add() {
     $.ajax({
         type: "POST",
         url: "/requests",

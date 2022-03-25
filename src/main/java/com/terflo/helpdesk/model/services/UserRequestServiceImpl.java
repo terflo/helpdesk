@@ -49,6 +49,11 @@ public class UserRequestServiceImpl implements UserRequestService {
         return userRequestRepository.findAllByOperatorOrderByStatus(operator);
     }
 
+    @Override
+    public List<UserRequest> findAllUserRequestsByStatus(RequestStatus requestStatus) {
+        return userRequestRepository.findAllByStatus(requestStatus);
+    }
+
     /**
      * Метод поиска всех запросов пользователей
      * @return список всех запросов
