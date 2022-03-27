@@ -59,7 +59,7 @@ function updateProfile(id) {
                 descriptionProfileLabel.innerText = "Пока тут пусто :("
         },
         error: function (data) {
-            alert(data.responseText)
+            data.responseJSON.forEach(element => showToast(element, 'warning'))
         }
     });
 }
@@ -112,4 +112,14 @@ function setAvatar(id) {
             alert(data.responseText)
         }
     });
+}
+
+function showToast(text, theme) {
+    new Toast({
+        title: false,
+        text: text,
+        theme: theme,
+        autohide: true,
+        interval: 2500
+    })
 }

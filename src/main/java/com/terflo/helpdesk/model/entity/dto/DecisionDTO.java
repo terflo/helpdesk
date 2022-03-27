@@ -20,11 +20,11 @@ public class DecisionDTO implements Serializable {
     @Nullable
     public Long id;
 
-    @Size(min = 10, max = 255, message = "Минимальная длина наименования 10, максимальная 255")
+    @Size(min = 10, max = 255, message = "Длина наименования от 10 до 255 символов")
     @NotBlank(message = "Наименование должно иметь содержание")
     public String name;
 
-    @Size(min = 10, max = 2048, message = "Минимальная длина ответа 10, максимальная 2048")
+    @Size(min = 10, max = 2048, message = "Длина ответа от 10 до 2048 символов")
     @NotBlank(message = "Ответ должен иметь содержание")
     public String answer;
 

@@ -17,6 +17,9 @@ import java.util.stream.StreamSupport;
 @AllArgsConstructor
 public class DecisionServiceImpl implements DecisionService {
 
+    /**
+     * Репозиторий с часто задаваемыми вопросами
+     */
     private final DecisionRepository decisionRepository;
 
     @Override

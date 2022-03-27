@@ -111,7 +111,8 @@ public class ChatController {
     public ResponseEntity<?> countNewMessages(@PathVariable(name = "userRequestID") Long userRequestID) {
 
         try {
-            return ResponseEntity.ok(messageService.countNewMessagesByUserRequestID(userRequestID));
+            UserRequest userRequest = userRequestService.findUserRequestByID(userRequestID);
+            return ResponseEntity.ok(messageService.countNewMessagesByUserRequest(userRequest));
         } catch (UserRequestNotFoundException e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -25,6 +25,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -151,7 +152,7 @@ public class UserController {
     @ResponseBody
     @PutMapping("/users/{id}")
     public ResponseEntity<String> updateUser(@PathVariable(name = "id") Long id,
-                                             @RequestBody UserDTO userDTO,
+                                             @Valid @RequestBody UserDTO userDTO,
                                              Authentication authentication) {
 
         try {
@@ -161,24 +162,12 @@ public class UserController {
 
             //Проверка username на изменения
             if(!userDTO.username.equals(user.getUsername())) {
-                //Проверка username на уникальность
-                if (userService.userIsExistByUsername(userDTO.username))
-                    return ResponseEntity.badRequest().body("Такое имя уже занято");
-                //Проверка username на корректность (Regex)
-                if (!regexUtil.checkUsername(userDTO.username))
-                    return ResponseEntity.badRequest().body("Некорректное имя пользователя");
                 user.setUsername(userDTO.username);
                 needLogout = true;
             }
 
             //Проверка email на изменения
             if(!userDTO.email.equals(user.getEmail())) {
-                //Проверка email на уникальность
-                if (userService.userIsExistByEmail(userDTO.email))
-                    return ResponseEntity.badRequest().body("Такой email уже занят");
-                //Проверка email на корректность (Regex)
-                if (!regexUtil.checkEmail(userDTO.email))
-                    return ResponseEntity.badRequest().body("Некорректный email");
                 user.setEmail(userDTO.email);
             }
 

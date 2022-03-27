@@ -4,7 +4,6 @@ import com.terflo.helpdesk.model.entity.Message;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.enums.MessageStatus;
 import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
-import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.MessageRepository;
 import com.terflo.helpdesk.model.services.interfaces.MessageService;
 import lombok.AllArgsConstructor;
@@ -27,24 +26,14 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
 
     /**
-     * Сервис для работы с обращениями пользователей
-     */
-    private final UserRequestServiceImpl userRequestServiceImpl;
-
-    /**
-     * Сервис для работы с пользователями
-     */
-    private final UserServiceImpl userServiceImpl;
-
-    /**
      * Метод для подсчёта кол-ва новых сообщний
-     * @param userRequestID уникальный индификатор запроса пользователя
+     * @param userRequest запрос пользователя
      * @return кол-во новых сообщений
      */
     @Override
-    public Long countNewMessagesByUserRequestID(Long userRequestID) throws UserRequestNotFoundException {
+    public Long countNewMessagesByUserRequest(UserRequest userRequest) {
         return messageRepository
-                .findAllByUserRequestOrderByDate(userRequestServiceImpl.findUserRequestByID(userRequestID))
+                .findAllByUserRequestOrderByDate(userRequest)
                 .stream()
                 .filter((message -> message.getStatus() == MessageStatus.RECEIVED))
                 .count();

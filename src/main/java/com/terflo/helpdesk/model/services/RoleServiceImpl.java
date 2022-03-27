@@ -17,6 +17,9 @@ import java.util.stream.StreamSupport;
 @AllArgsConstructor
 public class RoleServiceImpl implements RoleService {
 
+    /**
+     * Репозиторий с ролями пользователей
+     */
     private final RoleRepository roleRepository;
 
     @Override

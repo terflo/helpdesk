@@ -1,5 +1,7 @@
 package com.terflo.helpdesk.model.entity.dto;
 
+import com.terflo.helpdesk.model.validators.Email;
+import com.terflo.helpdesk.model.validators.Username;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -29,11 +31,13 @@ public class UserDTO implements Serializable {
     /**
      * Имя пользователя
      */
+    @Username
     public String username;
 
     /**
      * Email пользователя
      */
+    @Email
     public String email;
 
     /**
