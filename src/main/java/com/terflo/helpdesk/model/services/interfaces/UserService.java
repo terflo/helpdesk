@@ -18,11 +18,13 @@ public interface UserService {
 
     User saveUser(User user) throws UserAlreadyExistException;
 
-    User saveNewUser(String username, String password, String email) throws UserAlreadyExistException, RoleNotFoundException, IOException;
-
     void deleteUserById(Long id) throws UserNotFoundException;
 
     void deleteUserByUsername(String username) throws UserNotFoundException;
+
+    void deleteUser(User user) throws UserNotFoundException;
+
+    void deleteUser(List<User> users) throws UserNotFoundException;
 
     boolean userIsExistByUsername(String username);
 

@@ -1,19 +1,15 @@
 package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.Message;
-import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.UserRequest;
-import com.terflo.helpdesk.model.entity.dto.MessageDTO;
 import com.terflo.helpdesk.model.entity.enums.MessageStatus;
 import com.terflo.helpdesk.model.exceptions.MessageNotFoundException;
-import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.repositories.MessageRepository;
 import com.terflo.helpdesk.model.services.interfaces.MessageService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 
 /**

@@ -2,7 +2,6 @@ package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.User;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.security.core.session.SessionInformation;

@@ -4,7 +4,9 @@ import lombok.*;
 import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -27,6 +29,18 @@ public class VerificationToken {
     @Lob
     @Column(name = "activate_code", nullable = false)
     private String activateCode;
+
+    @Column(name = "date", nullable = false)
+    private Date date;
+
+    public static VerificationToken generateToken(User user) {
+        return new VerificationToken(
+                null,
+                user,
+                UUID.randomUUID().toString(),
+                new Date()
+        );
+    }
 
     @Override
     public boolean equals(Object o) {

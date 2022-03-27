@@ -6,7 +6,7 @@ import com.terflo.helpdesk.model.validators.Username;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -22,26 +22,26 @@ public class RegistrationRequest {
     /**
      * Имя пользователя
      */
-    @NotNull
+    @NotBlank
     @Username
     private String username;
 
     /**
      * email пользователя
      */
-    @NotNull
+    @NotBlank
     @Email
     private String email;
 
     /**
      * Пароль пользователя
      */
-    @NotNull
+    @NotBlank
     private String password;
 
     /**
      * Подтверждение пароля пользователя
      */
-    @NotNull
+    @NotBlank
     private String passwordConfirm;
 }

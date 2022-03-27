@@ -3,6 +3,7 @@ package com.terflo.helpdesk.controllers;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.VerificationToken;
 import com.terflo.helpdesk.model.exceptions.*;
+import com.terflo.helpdesk.model.factories.UserFactory;
 import com.terflo.helpdesk.model.requests.RegistrationRequest;
 import com.terflo.helpdesk.model.services.CaptchaService;
 import com.terflo.helpdesk.model.services.MailService;
@@ -52,6 +53,11 @@ public class RegistrationController {
     private final CaptchaService captchaService;
 
     /**
+     * Фабрика пользователей
+     */
+    private final UserFactory userFactory;
+
+    /**
      * Контроллер страницы регистрации (метод GET)
      * @return название страницы html
      */
@@ -82,17 +88,17 @@ public class RegistrationController {
             return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
         }
 
-        //Проверка наличия всех полей
-        if(request.getUsername().isEmpty() || request.getEmail().isEmpty() || request.getPassword().isEmpty())
-            return ResponseEntity.badRequest().body("\"Заполните все поля\"");
-
         //Сохранение пользователя в базе и создания токена подтверждения регистрации
         try {
-            User user = userService.saveNewUser(request.getUsername(), request.getEmail(), request.getPassword());
-            VerificationToken verificationToken = new VerificationToken(null, user, UUID.randomUUID().toString());
+            User user = userService.saveUser(userFactory.buildNewUser(
+                    request.getUsername(),
+                    request.getEmail(),
+                    request.getPassword()
+            ));
+            VerificationToken verificationToken = VerificationToken.generateToken(user);
             verificationTokenService.saveToken(verificationToken);
             mailService.sendRegistrationMail(user.getEmail(), user.getUsername(), verificationToken.getActivateCode());
-        } catch (UserAlreadyExistException | RoleNotFoundException | IOException | MessagingException e) {
+        } catch (UserAlreadyExistException | MessagingException e) {
             log.error(e.getMessage());
             return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
         }

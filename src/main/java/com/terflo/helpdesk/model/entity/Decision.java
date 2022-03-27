@@ -1,8 +1,5 @@
 package com.terflo.helpdesk.model.entity;
 
-import ch.qos.logback.core.net.ObjectWriter;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
 import org.hibernate.Hibernate;
 

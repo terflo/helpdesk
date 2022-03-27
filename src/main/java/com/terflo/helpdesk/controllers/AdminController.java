@@ -2,7 +2,6 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.factories.UserRequestFactory;
-import com.terflo.helpdesk.model.services.UserRequestServiceImpl;
 import com.terflo.helpdesk.model.services.interfaces.UserRequestService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;

@@ -9,12 +9,17 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Calendar;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class VerificationTokenServiceImpl implements VerificationTokenService {
 
+    private final static int DAYS_BEFORE_DELETE_NOT_ACTIVATED_USER = 7;
+
     private final VerificationTokenRepository verificationTokenRepository;
+
 
     @Override
     public VerificationToken findByActivateCode(String activateCode) throws VerificationTokenNotFoundException {
@@ -22,6 +27,15 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
                 .findByActivateCode(activateCode)
                 .orElseThrow(() -> new VerificationTokenNotFoundException("Токен верификации " + activateCode + " не найден"));
     }
+
+
+    @Override
+    public List<VerificationToken> findAllOldTokens() {
+        Calendar currentDate = Calendar.getInstance();
+        currentDate.add(Calendar.MINUTE, -DAYS_BEFORE_DELETE_NOT_ACTIVATED_USER);
+        return verificationTokenRepository.findByDateBefore(currentDate.getTime());
+    }
+
 
     @Override
     @Transactional
@@ -32,6 +46,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
             verificationTokenRepository.deleteById(id);
     }
 
+
     @Override
     @Transactional
     public void deleteByUser(User user) throws VerificationTokenNotFoundException {
@@ -41,6 +56,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
             verificationTokenRepository.deleteByUser(user);
     }
 
+
     @Override
     @Transactional
     public void deleteToken(VerificationToken verificationToken) throws VerificationTokenNotFoundException {
@@ -49,6 +65,16 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
         else
             verificationTokenRepository.delete(verificationToken);
     }
+
+
+    @Override
+    @Transactional
+    public void deleteToken(List<VerificationToken> verificationTokens) throws VerificationTokenNotFoundException {
+        for(VerificationToken token : verificationTokens) {
+            this.deleteToken(token);
+        }
+    }
+
 
     @Override
     public VerificationToken saveToken(VerificationToken verificationToken) {

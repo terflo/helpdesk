@@ -4,10 +4,17 @@ import com.terflo.helpdesk.model.entity.Role;
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.dto.UserDTO;
 import com.terflo.helpdesk.model.exceptions.UserNotFoundException;
+import com.terflo.helpdesk.model.services.interfaces.RoleService;
 import com.terflo.helpdesk.model.services.interfaces.UserService;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -17,6 +24,12 @@ import java.util.stream.Collectors;
 public class UserFactory {
 
     private final UserService userService;
+
+    private final RoleService roleService;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final ImageFactory imageFactory;
 
     /**
      * Метод преобразует объект User в UserDTO
@@ -60,6 +73,26 @@ public class UserFactory {
                 .stream()
                 .map(this::convertToUserDTO)
                 .collect(Collectors.toList());
+    }
+
+
+    @SneakyThrows
+    public User buildNewUser(String username, String email, String password) {
+        return new User(
+                null,
+                username,
+                passwordEncoder.encode(password),
+                email,
+                new Date(),
+                null,
+                imageFactory.getImage(new File(ResourceUtils.getFile("classpath:static/img/user.png").getPath())),
+                null,
+                Collections.singleton(roleService.getRoleByName("ROLE_USER")),
+                false,
+                false,
+                false,
+                true
+        );
     }
 
 }
