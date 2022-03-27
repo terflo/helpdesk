@@ -88,10 +88,11 @@ public class UserFactory {
                 imageFactory.getImage(new File(ResourceUtils.getFile("classpath:static/img/user.png").getPath())),
                 null,
                 Collections.singleton(roleService.getRoleByName("ROLE_USER")),
+                null,
                 false,
                 false,
                 false,
-                true
+                false
         );
     }
 

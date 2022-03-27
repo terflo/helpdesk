@@ -83,6 +83,13 @@ public class User implements UserDetails {
     private Set<Role> roles;
 
     /**
+     * Токен верификации регистрации пользователя (удаляется при активации пользователя)
+     */
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private VerificationToken verificationToken;
+
+    /**
      * Просроченность аккаунта
      */
     @Column(name = "expired")

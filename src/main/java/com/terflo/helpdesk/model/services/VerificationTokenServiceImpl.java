@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class VerificationTokenServiceImpl implements VerificationTokenService {
 
+    //TODO: Получать кол-во дней просроченности аккаунта в конфиге приложения
     private final static int DAYS_BEFORE_DELETE_NOT_ACTIVATED_USER = 7;
 
     private final VerificationTokenRepository verificationTokenRepository;
@@ -32,7 +33,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
     @Override
     public List<VerificationToken> findAllOldTokens() {
         Calendar currentDate = Calendar.getInstance();
-        currentDate.add(Calendar.MINUTE, -DAYS_BEFORE_DELETE_NOT_ACTIVATED_USER);
+        currentDate.add(Calendar.DAY_OF_WEEK, -DAYS_BEFORE_DELETE_NOT_ACTIVATED_USER);
         return verificationTokenRepository.findByDateBefore(currentDate.getTime());
     }
 
