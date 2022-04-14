@@ -24,7 +24,7 @@ public class Image {
     @Column(name = "type", nullable = false)
     private String type;
 
-    public String getBase64Image() {
-        return Base64.getEncoder().encodeToString(this.bytes);
+    public String getBase64ImageWithType() {
+        return "data:" + this.type + ";base64," + Base64.getEncoder().encodeToString(this.bytes);
     }
 }

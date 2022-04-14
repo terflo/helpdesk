@@ -9,5 +9,10 @@
       "name": "application.name",
       "type": "java.lang.String",
       "description": "Description for application.name."
+    },
+    {
+      "name": "domain.name",
+      "type": "java.lang.String",
+      "description": "Description for domain.name."
     }
   ] }

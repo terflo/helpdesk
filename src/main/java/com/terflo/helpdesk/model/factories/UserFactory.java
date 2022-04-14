@@ -85,7 +85,7 @@ public class UserFactory {
                 email,
                 new Date(),
                 null,
-                imageFactory.getImage(new File(ResourceUtils.getFile("classpath:static/img/user.png").getPath())),
+                imageFactory.getImage(getClass().getResourceAsStream("/static/img/user.png"), "image/png"),
                 null,
                 Collections.singleton(roleService.getRoleByName("ROLE_USER")),
                 null,

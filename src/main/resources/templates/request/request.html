@@ -60,28 +60,26 @@
                         </label>
                     </div>
                 </div>
-
-
-
-
-
             <br>
             <h5 class="h5">Чат с оператором тех-поддержки:</h5>
             <div class="container-fluid chat-container">
                     <ul id="chat-box" class="chat-box chatContainerScroll" style="min-height: 40vw; max-height: 40vw">
-                        <li class="chat-right" th:each="message : ${messages}" th:attr="class=${message.sender.username == user.username ? 'chat-right' : 'chat-left'}">
+                        <li th:each="message : ${messages}" th:attr="class=${message.sender.username == user.username ? 'chat-right' : 'chat-left'}">
                             <div th:unless="${message?.sender.username != user.username}" class="chat-hour" th:text="${#dates.format(message?.date, 'HH:mm')}">
                                 <span class="fa fa-check-circle"></span>
                             </div>
                             <div th:if="${message?.sender.username != user.username}" class="chat-avatar">
-                                <img th:if="${avatars.get(message?.sender.id)} != null" th:src="${avatars.get(message?.sender.id)}" alt="Avatar">
-                                <img th:unless="${avatars.get(message?.sender.id)} != null" th:src="@{~/img/user.png}" alt="Avatar">
+                                <img th:if="${avatars.get(message?.sender.id)} != null" th:src="${avatars.get(message?.sender.id)}" alt="Avatar" class="chat-avatar">
+                                <img th:unless="${avatars.get(message?.sender.id)} != null" th:src="@{~/img/user.png}" alt="Avatar" class="chat-avatar">
                                 <div class="chat-name" th:text="${message?.sender.username}"></div>
                             </div>
-                            <div class="chat-text" th:text="${message?.message}"></div>
+                            <div class="chat-text">
+                                <div style="text-align: left" th:text="${message?.message}"></div>
+                                <img th:if="${message?.imageBase64 != null}" th:src="${message?.imageBase64}" alt="message image" class="message-image minimized">
+                            </div>
                             <div th:unless="${message?.sender.username != user.username}" class="chat-avatar">
-                                <img th:if="${avatars.get(message?.sender.id)} != null" th:src="${avatars.get(message?.sender.id)}" alt="Avatar">
-                                <img th:unless="${avatars.get(message?.sender.id)} != null" th:src="@{~/img/user.png}" alt="Avatar">
+                                <img th:if="${avatars.get(message?.sender.id)} != null" th:src="${avatars.get(message?.sender.id)}" class="chat-avatar" alt="Avatar">
+                                <img th:unless="${avatars.get(message?.sender.id)} != null" th:src="@{~/img/user.png}" alt="Avatar" class="chat-avatar">
                                 <div class="chat-name" th:text="${message?.sender.username}"></div>
                             </div>
                             <div th:if="${message?.sender.username != user.username}" class="chat-hour" th:text="${#dates.format(message?.date, 'HH:mm')}"> <span class="fa fa-check-circle"></span></div>
@@ -89,8 +87,9 @@
                     </ul>
                 <div class="row">
                     <label>Ваше сообщение
-                        <textarea id="message" style="resize: none" class="col-sm-4 form-control" rows="3" placeholder="Введите текст сообщения..."></textarea>
-                        <button id="send-button" class="col-sm-2 form-control" onclick="sendMessage()">Отправить</button>
+                        <textarea id="message" style="resize: none" class="form-control row col-sm-12" rows="3" placeholder="Введите текст сообщения..."></textarea>
+                        <input id="image-file" class="form-control" type="file" value="Выберите файл" accept=".jpg,.jpeg,.png">
+                        <button id="send-button" class="form-control" onclick="sendMessage()">Отправить</button>
                     </label>
                 </div>
                 </div>
@@ -98,6 +97,7 @@
         </main>
         <div th:insert="blocks/footer"></div>
     </body>
+
     <!-- Инициализация переменных и работа с элементами страницы -->
     <script th:inline="javascript">
         const messageContainer = document.getElementById('chat-box');

@@ -49,9 +49,9 @@ function showNewFreeRequest(messageOutput) {
             "                        <a href=\"/user/" + messageOutput["userRequestDTO"]["user"]["username"] + "\">" + messageOutput["userRequestDTO"]["user"]["username"] + "</a>\n" +
             "                    </td>\n" +
             "                    <td>\n" +
-            "                        <a href=\"/requests/ + " + messageOutput["userRequestID"] + "\"><img src=\"/static/img/loupe.png\" style=\"height: 2vw\" alt=\"see details\"></a>\n" +
+            "                        <a href=\"/requests/ + " + messageOutput["userRequestID"] + "\"><img src=\"../img/loupe.png\" style=\"height: 2vw\" alt=\"see details\"></a>\n" +
             "                    </td>\n" +
-            "                    <td><input onclick=\"acceptRequest(" + messageOutput["userRequestID"] + ")\" style=\"width: 2vw\" class=\"panel-button\" type=\"image\" src=\"/static/img/ok.png\" alt=\"accept request\"></td>\n" +
+            "                    <td><input onclick=\"acceptRequest(" + messageOutput["userRequestID"] + ")\" style=\"width: 2vw\" class=\"panel-button\" type=\"image\" src=\"../img/ok.png\" alt=\"accept request\"></td>\n" +
             "                </tr>"
     )
 }

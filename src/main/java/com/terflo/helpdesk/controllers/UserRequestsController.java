@@ -283,7 +283,7 @@ public class UserRequestsController {
             for (Message message : messages) {
                 Long senderID = message.getSender().getId();
                 Image image = message.getSender().getAvatar();
-                avatarsBase64.put(senderID, "data:" + image.getType() + ";base64," + image.getBase64Image());
+                avatarsBase64.put(senderID, image.getBase64ImageWithType());
             }
 
             model.addAttribute("userRequest", userRequestFactory.convertToUserRequestDTO(userRequest));

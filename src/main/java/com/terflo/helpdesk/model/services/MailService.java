@@ -21,11 +21,8 @@ public class MailService {
 
     private final SpringTemplateEngine springTemplateEngine;
 
-    //@Value("${server.address}")
-    private final String SERVER_ADDRESS = "5.129.199.198";
-
-    @Value("${server.port}")
-    private int SERVER_PORT;
+    @Value("${domain.name}")
+    private String SERVER_ADDRESS;
 
     @Value("${application.name}")
     private String FROM;
@@ -47,9 +44,8 @@ public class MailService {
         Context context = new Context();
         context.setVariable("username", username);
         context.setVariable("activateCode", activateCode);
-        context.setVariable("URL", String.format("http://%s:%s/activate/%s/%s",
+        context.setVariable("URL", String.format("http://%s/activate/%s/%s",
                 SERVER_ADDRESS,
-                SERVER_PORT,
                 username,
                 activateCode));
 
@@ -76,9 +72,8 @@ public class MailService {
         Context context = new Context();
         context.setVariable("username", username);
         context.setVariable("activateCode", activateCode);
-        context.setVariable("URL", String.format("http://%s:%s/activate/%s/%s",
+        context.setVariable("URL", String.format("http://%s/activate/%s/%s",
                 SERVER_ADDRESS,
-                SERVER_PORT,
                 username,
                 activateCode));
 

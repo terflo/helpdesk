@@ -39,8 +39,7 @@ public class MessageDTO implements Serializable {
     /**
      * Содержание сообщения
      */
-    @NotBlank(message = "Сообщение должно иметь содержание")
-    @Size(min = 1, max = 255, message = "Длина сообщения не должна превышать длину в 255 символов")
+    @Size(max = 255, message = "Длина сообщения не должна превышать длину в 255 символов")
     public String message;
 
     /**
@@ -54,5 +53,11 @@ public class MessageDTO implements Serializable {
      */
     @Nullable
     public MessageStatus status;
+
+    /**
+     * Base64 хэш изображения
+     */
+    @Nullable
+    public String imageBase64;
 
 }

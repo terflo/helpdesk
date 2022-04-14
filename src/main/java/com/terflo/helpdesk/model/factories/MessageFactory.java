@@ -12,6 +12,9 @@ import com.terflo.helpdesk.model.services.interfaces.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Date;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -27,18 +30,21 @@ public class MessageFactory {
 
     private final UserFactory userFactory;
 
+    private final ImageFactory imageFactory;
+
     private final UserService userService;
 
     private final UserRequestService userRequestService;
 
-    public Message convertToNewMessage(MessageDTO messageDTO) throws UserNotFoundException, UserRequestNotFoundException {
+    public Message convertToNewMessage(MessageDTO messageDTO) throws UserNotFoundException, UserRequestNotFoundException, IOException {
         return new Message(
                 null,
                 messageDTO.sender == null ? null : userService.findUserById(messageDTO.sender.id),
                 messageDTO.userRequest == null ? null : userRequestService.findUserRequestByID(messageDTO.userRequest),
                 messageDTO.message,
                 messageDTO.date,
-                messageDTO.status);
+                messageDTO.status,
+                messageDTO.imageBase64 == null ? null : imageFactory.getImage(messageDTO.imageBase64));
     }
 
     public MessageDTO convertToMessageDTO(Message message) {
@@ -47,7 +53,8 @@ public class MessageFactory {
                 message.getUserRequest().getId(),
                 message.getMessage(),
                 message.getDate(),
-                message.getStatus()
+                message.getStatus(),
+                message.getImage() != null ? message.getImage().getBase64ImageWithType() : null
         );
     }
 
@@ -65,7 +72,8 @@ public class MessageFactory {
                 userRequest,
                 String.format("Обращение закрыто оператором %s", operator.getUsername()),
                 new Date(),
-                MessageStatus.RECEIVED
+                MessageStatus.RECEIVED,
+                null
         );
     }
 
@@ -76,7 +84,8 @@ public class MessageFactory {
                 userRequest,
                 String.format("Оператор %s принял обращение в обработку", operator.getUsername()),
                 new Date(),
-                MessageStatus.RECEIVED
+                MessageStatus.RECEIVED,
+                null
         );
     }
 }

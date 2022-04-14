@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Objects;
 
@@ -76,6 +77,7 @@ public class ChatController {
                 log.error("Попытка отправить сообщение в закрытое обращение пользователем " + Objects.requireNonNull(messageDTO.sender).username);
                 return ResponseEntity.badRequest().body("Обращение закрыто");
             }
+
         } catch (UserRequestNotFoundException e) {
             log.error(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -94,7 +96,7 @@ public class ChatController {
                             message.getId(),
                             message.getUserRequest().getId(),
                             message.getSender().getId()));
-        } catch (UserNotFoundException | UserRequestNotFoundException e) {
+        } catch (UserNotFoundException | UserRequestNotFoundException | IOException e) {
             log.error(e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -130,6 +132,7 @@ public class ChatController {
         try {
             Message message = messageService.findMessageByID(id);
             message.setStatus(MessageStatus.DELIVERED);
+            log.debug("Отправлено: " + message);
             return ResponseEntity.ok(messageFactory.convertToMessageDTO(message));
         } catch (MessageNotFoundException e) {
             log.error(e.getMessage());

@@ -4,6 +4,10 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+### Project Files ###
+key_centos.pem
+**/src/main/resources/*.properties
+
 ### STS ###
 .apt_generated
 .classpath

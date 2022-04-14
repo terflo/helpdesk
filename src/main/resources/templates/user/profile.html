@@ -23,7 +23,7 @@
                                 <div class="account-settings">
                                     <div class="user-profile">
                                         <div class="user-avatar">
-                                            <img th:src="'data:image/png;base64,' + ${avatar.getBase64Image()}"
+                                            <img th:src="${avatar.getBase64ImageWithType()}"
                                                  alt="User avatar"
                                                  id="user-avatar">
                                         </div>
@@ -54,9 +54,9 @@
                                             <input
                                                     th:value="${user?.username}"
                                                     type="text"
-                                                   class="form-control"
-                                                   id="username"
-                                                   readonly>
+                                                    class="form-control"
+                                                    id="username"
+                                                    readonly>
                                         </div>
                                     </div>
                                     <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">

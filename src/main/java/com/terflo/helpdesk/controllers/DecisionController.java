@@ -64,9 +64,8 @@ public class DecisionController {
      */
     @ResponseBody
     @PostMapping("/decisions")
-    public ResponseEntity<String> addDecision(@Valid @RequestBody DecisionDTO decision, Authentication authentication) {
+    public ResponseEntity<String> addDecision(@Valid @RequestBody DecisionDTO decision, Authentication authentication) throws UserNotFoundException, DecisionNameAlreadyExistsException, JsonProcessingException {
 
-        try {
             Decision newDecision = decisionFactory.convertToDecision(decision);
             newDecision.setAuthor(userService.findUserByUsername(authentication.getName()));
             newDecision.setDate(new Date());
@@ -74,10 +73,6 @@ public class DecisionController {
 
             log.info("Добавлен новый частый вопрос #" + newDecision.getId());
             return ResponseEntity.ok().body(decisionFactory.convertToDecisionDTO(newDecision).toJSON());
-
-        } catch (UserNotFoundException | DecisionNameAlreadyExistsException | JsonProcessingException e) {
-            return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
-        }
     }
 
     /**

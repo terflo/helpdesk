@@ -62,4 +62,11 @@ public class Message {
     @Column(name = "status", nullable = false)
     private MessageStatus status;
 
+    /**
+     * Изображение в сообщении
+     */
+    @JoinColumn(name = "image_id")
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Image image;
+
 }

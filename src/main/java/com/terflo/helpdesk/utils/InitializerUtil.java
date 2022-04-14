@@ -13,15 +13,16 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ResourceUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Log4j2
 @Component
@@ -68,7 +69,7 @@ public class InitializerUtil {
             root.setCredentials_expired(false);
             root.setExpired(false);
             root.setLocked(false);
-            root.setAvatar(imageFactory.getImage(new File(ResourceUtils.getFile("classpath:static/img/user.png").getPath())));
+            root.setAvatar(imageFactory.getImage(getClass().getResourceAsStream("/static/img/user.png"), "image/png"));
             root.setRoles(roleServiceImpl.findAll());
             root.setDate(new Date());
             try {

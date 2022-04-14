@@ -41,10 +41,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class UserController {
 
-    private final static List<String> allowedContent = Arrays.asList("image/png", "image/jpeg", "image/jpg");
-
-    private final RegexUtil regexUtil;
-
     private final SessionService sessionService;
 
     private final UserService userService;
@@ -111,16 +107,16 @@ public class UserController {
     @PutMapping("/user/{id}/avatar")
     public ResponseEntity<String> updateUserAvatar(@PathVariable(name = "id") Long id, @RequestParam MultipartFile file) {
 
-        if(!allowedContent.contains(file.getContentType()))
-            return ResponseEntity.badRequest().body("Не поддерживаемый тип изображения");
-
         try {
+
             User user = userService.findUserById(id);
             user.setAvatar(imageFactory.getImage(file));
             userService.updateUser(user);
+
         } catch (UserNotFoundException | IOException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+
         return ResponseEntity.ok().body("\"\"");
     }
 
@@ -136,7 +132,7 @@ public class UserController {
 
         try {
             Image image = userService.findUserById(id).getAvatar();
-            return ResponseEntity.ok("\"data:" + image.getType() + ";base64," + image.getBase64Image() + "\"");
+            return ResponseEntity.ok("\"" + image.getBase64ImageWithType() + "\"");
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -259,7 +255,8 @@ public class UserController {
 
     @ResponseBody
     @DeleteMapping("/users/{id}/{roleName}")
-    public ResponseEntity<String> deleteUserRole(@PathVariable("id") Long id, @PathVariable("roleName") String roleName) {
+    public ResponseEntity<String> deleteUserRole(@PathVariable("id") Long id,
+                                                 @PathVariable("roleName") String roleName) {
 
         try {
             Role role = roleService.getRoleByName(roleName);
@@ -267,6 +264,15 @@ public class UserController {
         } catch (RoleNotFoundException | UserNotFoundException e) {
             return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
         }
+
+        return ResponseEntity.ok().body("\"\"");
+    }
+
+
+    //TODO: Написать логику восстановления пароля
+    @ResponseBody
+    @PostMapping("users/restorePassword")
+    public ResponseEntity<String> restorePassword(@RequestBody String email) {
 
         return ResponseEntity.ok().body("\"\"");
     }
