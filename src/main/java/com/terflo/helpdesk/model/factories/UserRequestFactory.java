@@ -1,10 +1,14 @@
 package com.terflo.helpdesk.model.factories;
 
+import java.io.IOException;
 import java.util.List;
+
+import com.terflo.helpdesk.model.entity.Image;
 import com.terflo.helpdesk.model.entity.UserRequest;
 import com.terflo.helpdesk.model.entity.dto.UserRequestDTO;
 import com.terflo.helpdesk.model.exceptions.UserRequestNotFoundException;
 import com.terflo.helpdesk.model.services.interfaces.UserRequestService;
+import com.terflo.helpdesk.utils.LambdaExceptionUtil;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -14,13 +18,15 @@ import java.util.stream.Collectors;
 /**
  * Класс фабрика для создания сущностей "Запрос пользователя" (также в Data Transfer Object виде)
  * @author Danil Krivoschiokov
- * @version 1.3
+ * @version 1.5
  */
 @Component
 @AllArgsConstructor
 public class UserRequestFactory {
 
     private final UserRequestService userRequestService;
+
+    private final ImageFactory imageFactory;
 
     private final UserFactory userFactory;
 
@@ -33,11 +39,37 @@ public class UserRequestFactory {
                     userRequest.getPriority(),
                     userRequest.getName(),
                     userRequest.getDescription(),
-                    userRequest.getDate()
+                    userRequest.getDate(),
+                    userRequest.getImages() != null ? userRequest.getImages()
+                            .stream()
+                            .map(Image::getId)
+                            .collect(Collectors.toList()) : null,
+                    null
             );
     }
 
-    public UserRequest convertToUserRequest(UserRequestDTO userRequestDTO) {
+    public UserRequestDTO convertToUserRequestDTOWithBase64Images(UserRequest userRequest) {
+        return new UserRequestDTO(
+                userRequest.getId(),
+                userRequest.getOperator() != null ? userFactory.convertToUserDTO(userRequest.getOperator()) : null,
+                userRequest.getUser() != null ? userFactory.convertToUserDTO(userRequest.getUser()) : null,
+                userRequest.getStatus(),
+                userRequest.getPriority(),
+                userRequest.getName(),
+                userRequest.getDescription(),
+                userRequest.getDate(),
+                userRequest.getImages() != null ? userRequest.getImages()
+                        .stream()
+                        .map(Image::getId)
+                        .collect(Collectors.toList()) : null,
+                userRequest.getImages() != null ? userRequest.getImages()
+                        .stream()
+                        .map(Image::getBase64ImageWithType)
+                        .collect(Collectors.toList()) : null
+        );
+    }
+
+    public UserRequest convertToUserRequest(UserRequestDTO userRequestDTO) throws IOException {
 
         try {
             //Поиск запроса в базе данных
@@ -60,7 +92,11 @@ public class UserRequestFactory {
                     userRequestDTO.name,
                     userRequestDTO.description,
                     userRequestDTO.date,
-                    null
+                    null,
+                    userRequestDTO.imagesBase64 != null ? userRequestDTO.imagesBase64
+                            .stream()
+                            .map(LambdaExceptionUtil.rethrowFunction(imageFactory::getImage))
+                            .collect(Collectors.toList()) : null
             );
         }
     }

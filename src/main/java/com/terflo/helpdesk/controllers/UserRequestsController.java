@@ -23,6 +23,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -189,6 +190,7 @@ public class UserRequestsController {
     @PostMapping("/requests")
     public ResponseEntity<String> addRequest(Authentication authentication,
                                              @Valid @RequestBody UserRequestDTO userRequestDTO) {
+
         try {
 
             UserRequest userRequest = userRequestFactory.convertToUserRequest(userRequestDTO);
@@ -206,7 +208,7 @@ public class UserRequestsController {
 
             return ResponseEntity.ok().body("\"\"");
 
-        } catch (UserNotFoundException e) { //в случае если пользователь не был найден
+        } catch (UserNotFoundException | IOException e) {
             return ResponseEntity.badRequest().body("\"" + e.getMessage() + "\"");
         }
     }
@@ -286,7 +288,7 @@ public class UserRequestsController {
                 avatarsBase64.put(senderID, image.getBase64ImageWithType());
             }
 
-            model.addAttribute("userRequest", userRequestFactory.convertToUserRequestDTO(userRequest));
+            model.addAttribute("userRequest", userRequestFactory.convertToUserRequestDTOWithBase64Images(userRequest));
             model.addAttribute("user", userFactory.convertToUserDTO(user));
             model.addAttribute("messages", messageFactory.convertToMessageDTO(messages));
             model.addAttribute("avatars", avatarsBase64);

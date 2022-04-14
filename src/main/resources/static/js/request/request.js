@@ -59,8 +59,7 @@ async function sendMessage() {
     let imageBase64 = null
     if(fileField.files.length !== 0) {
         let file = $('#image-file')[0].files[0];
-        await getBase64(file).then(
-            data => imageBase64 = data)
+        await getBase64(file).then(data => imageBase64 = data)
     }
 
     if(textField.val().trim().length > 255) {

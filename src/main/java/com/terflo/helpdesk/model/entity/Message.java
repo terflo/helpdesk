@@ -11,7 +11,7 @@ import java.util.Date;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.0
+ * @version 1.1
  * Класс-сущность для хранения сообщений в базе данных
  */
 @Data

@@ -441,7 +441,6 @@ ul {
 .minimized {
     width: 300px;
     cursor: pointer;
-    border: 1px solid #FFF;
 }
 .minimized:hover {
     border: 1px solid gray;
@@ -488,4 +487,9 @@ ul {
     border-radius: 15px;
     background-size: 30px 30px;
     display: block;
+}
+
+.user-request-img {
+    max-height: 20vh;
+    max-width: 20vw;
 }

@@ -148,7 +148,7 @@ public class UserController {
     @ResponseBody
     @PutMapping("/users/{id}")
     public ResponseEntity<String> updateUser(@PathVariable(name = "id") Long id,
-                                             @Valid @RequestBody UserDTO userDTO,
+                                             @RequestBody UserDTO userDTO,
                                              Authentication authentication) {
 
         try {

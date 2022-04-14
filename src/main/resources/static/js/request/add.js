@@ -1,11 +1,25 @@
-function add() {
+async function add() {
+
+    let inputFile = $("#files")[0]
+    if(inputFile.files.length > 3) {
+        showToast("Выберите до 3 файлов", 'warning')
+        return
+    }
+
+    let imagesBase64 = []
+
+    for(let i = 0; i < inputFile.files.length; i++) {
+        await getBase64(inputFile.files[i]).then(data => imagesBase64.push(data))
+    }
+
     $.ajax({
         type: "POST",
         url: "/requests",
         data: JSON.stringify({
             name: $("#name").val(),
             description: $("#description").val(),
-            priority: $("#priority").val()
+            priority: $("#priority").val(),
+            imagesBase64: imagesBase64
         }),
         dataType: "json",
         contentType: "application/json",
@@ -21,6 +35,8 @@ function add() {
     });
 }
 
+
+
 function showToast(text, theme) {
     new Toast({
         title: false,
@@ -29,4 +45,13 @@ function showToast(text, theme) {
         autohide: true,
         interval: 2500
     })
+}
+
+function getBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
 }

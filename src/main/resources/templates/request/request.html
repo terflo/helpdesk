@@ -59,6 +59,13 @@
                             <textarea readonly rows="6" class="form-control" id="requestDescription" style="resize: none; overflow-y: scroll;" th:text="${userRequest.description}"></textarea>
                         </label>
                     </div>
+
+                    <div th:if="${userRequest != null}" class="col-12">
+                        <label class="form-label">Изображения</label>
+                            <div class="row container-fluid justify-content-center">
+                                <img th:each="imageBase64: ${userRequest?.imagesBase64}" th:src="${imageBase64}" alt="User request image" class="col user-request-img minimized">
+                            </div>
+                    </div>
                 </div>
             <br>
             <h5 class="h5">Чат с оператором тех-поддержки:</h5>

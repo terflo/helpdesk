@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Danil Krivoschiokov
@@ -58,14 +59,14 @@ public class UserRequestDTO implements Serializable {
      * Имя запроса
      */
     @NotBlank
-    @Size(min = 10, max = 255, message = "Длина наименования обращения может быть от 10 до 255 символов")
+    @Size(min = 10, max = 255, message = "Длина наименования обращения должна быть от 10 до 255 символов")
     public String name;
 
     /**
      * Описание запроса
      */
     @NotBlank
-    @Size(min = 10, max = 2048, message = "Длина описания обращения может быть от 10 до 2048 символов")
+    @Size(min = 10, max = 2048, message = "Длина описания обращения должна быть от 10 до 2048 символов")
     public String description;
 
     /**
@@ -73,4 +74,16 @@ public class UserRequestDTO implements Serializable {
      */
     @Nullable
     public Date date;
+
+    /**
+     * Индификаторы изображений
+     */
+    @Nullable
+    public List<Long> imageIds;
+
+    /**
+     * Base64 хэш изображений
+     */
+    @Nullable
+    public List<String> imagesBase64;
 }

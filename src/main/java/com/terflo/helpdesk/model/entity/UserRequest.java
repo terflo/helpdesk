@@ -85,4 +85,15 @@ public class UserRequest {
     )
     @ToString.Exclude
     private List<Message> messages;
+
+    /**
+     * Изображения в обращении
+     */
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @ToString.Exclude
+    private List<Image> images;
 }
