@@ -14,7 +14,6 @@ import com.terflo.helpdesk.model.services.SessionService;
 import com.terflo.helpdesk.model.services.interfaces.RoleService;
 import com.terflo.helpdesk.model.services.interfaces.UserRequestService;
 import com.terflo.helpdesk.model.services.interfaces.UserService;
-import com.terflo.helpdesk.utils.RegexUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +24,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,7 +66,7 @@ public class UserController {
         try {
             user = userService.findUserByUsername(username);
         } catch (UserNotFoundException e) {
-            log.error("Попытка получения профиля несуществующего пользователя " + username);
+            log.warn("Попытка получения профиля несуществующего пользователя " + username);
             model.addAttribute("status", 404);
             model.addAttribute("message", e.getMessage());
             return "error";
@@ -112,6 +109,7 @@ public class UserController {
             User user = userService.findUserById(id);
             user.setAvatar(imageFactory.getImage(file));
             userService.updateUser(user);
+            log.info(String.format("Пользователь %s изменил свой аватар", user.getUsername()));
 
         } catch (UserNotFoundException | IOException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -174,6 +172,8 @@ public class UserController {
             userService.updateUser(user);
 
             if (needLogout) sessionService.expireUserSessions(authentication.getName());
+
+            log.info(String.format("Пользователь %s изменил информацию профиля", authentication.getName()));
             return ResponseEntity.ok().body("\"\"");
 
         } catch (UserNotFoundException e) {

@@ -78,7 +78,7 @@
                             <div th:if="${message?.sender.username != user.username}" class="chat-avatar">
                                 <img th:if="${avatars.get(message?.sender.id)} != null" th:src="${avatars.get(message?.sender.id)}" alt="Avatar" class="chat-avatar">
                                 <img th:unless="${avatars.get(message?.sender.id)} != null" th:src="@{~/img/user.png}" alt="Avatar" class="chat-avatar">
-                                <div class="chat-name" th:text="${message?.sender.username}"></div>
+                                <div class="chat-name"><a th:href="'/user/' + ${message?.sender.username}" th:text="${message?.sender.username}"></a></div>
                             </div>
                             <div class="chat-text">
                                 <div style="text-align: left" th:text="${message?.message}"></div>
@@ -87,7 +87,7 @@
                             <div th:unless="${message?.sender.username != user.username}" class="chat-avatar">
                                 <img th:if="${avatars.get(message?.sender.id)} != null" th:src="${avatars.get(message?.sender.id)}" class="chat-avatar" alt="Avatar">
                                 <img th:unless="${avatars.get(message?.sender.id)} != null" th:src="@{~/img/user.png}" alt="Avatar" class="chat-avatar">
-                                <div class="chat-name" th:text="${message?.sender.username}"></div>
+                                <div class="chat-name"><a th:href="'/user/' + ${message?.sender.username}" th:text="${message?.sender.username}"></a></div>
                             </div>
                             <div th:if="${message?.sender.username != user.username}" class="chat-hour" th:text="${#dates.format(message?.date, 'HH:mm')}"> <span class="fa fa-check-circle"></span></div>
                         </li>
@@ -107,13 +107,14 @@
 
     <!-- Инициализация переменных и работа с элементами страницы -->
     <script th:inline="javascript">
-        const messageContainer = document.getElementById('chat-box');
-        const request = [[${userRequest}]];
-        const user = [[${user}]];
-        messageContainer.scrollTop = messageContainer.scrollHeight;
+        const messageContainer = document.getElementById('chat-box')
+        const request = [[${userRequest}]]
+        const user = [[${user}]]
+        messageContainer.scrollTop = messageContainer.scrollHeight
         if(request.status === 'CLOSED') {
-            $('#send-button').prop('disabled', true);
-            $('#message').prop('disabled', true);
+            $('#send-button').prop('disabled', true)
+            $('#message').prop('disabled', true)
+            $('#image-file').prop('disabled', true)
         }
     </script>
 </html>

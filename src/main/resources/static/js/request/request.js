@@ -94,13 +94,13 @@ function showMessageOutput(messageOutput) {
                 '                            </div>')
             .append('<div class="chat-avatar">\n' +
                 '                                <img src="' + avatar + '" alt="Avatar" class="chat-avatar">\n' +
-                '                                <div class="chat-name">' + message.sender.username + '</div>\n' +
+                '                                <div class="chat-name"><a href="/user/' + message.sender.username +'">' + message.sender.username + '</a></div>\n' +
                 '                            </div>')
     } else {
         element = $('<li class="chat-left">')
             .append('<div class="chat-avatar">\n' +
                 '                                <img src="' + avatar + '" alt="Avatar" class="chat-avatar">\n' +
-                '                                <div class="chat-name">' + message.sender.username + '</div>\n' +
+                '                                <div class="chat-name"><a href="/user/' + message.sender.username +'">' + message.sender.username + '</a></div>\n' +
                 '                            </div>')
             .append('<div class="chat-text">\n' +
                 '                                <div style="text-align: left">' + message['message'] + '</div>\n' +
