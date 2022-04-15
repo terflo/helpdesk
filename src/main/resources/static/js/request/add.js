@@ -12,6 +12,13 @@ async function add() {
         await getBase64(inputFile.files[i]).then(data => imagesBase64.push(data))
     }
 
+    let modal = new bootstrap.Modal(document.getElementById('loaderModal'), {
+        keyboard: false,
+        backdrop: 'static'
+    })
+
+    modal.show()
+
     $.ajax({
         type: "POST",
         url: "/requests",
@@ -29,13 +36,12 @@ async function add() {
                 window.location.replace("/requests")
         },
         error: function (data) {
+            modal.hide()
             data.responseJSON.forEach(element => showToast(element, 'warning'))
         }
 
     });
 }
-
-
 
 function showToast(text, theme) {
     new Toast({
