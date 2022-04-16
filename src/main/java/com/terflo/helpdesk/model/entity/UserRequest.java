@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * @author Danil Krivoschiokov
- * @version 1.3
+ * @version 1.4
  * Обращение пользователя для связи с сотрудником тех-поддержки
  */
 @Data

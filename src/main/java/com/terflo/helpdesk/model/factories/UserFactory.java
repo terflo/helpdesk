@@ -51,7 +51,6 @@ public class UserFactory {
     }
 
     public User convertToUser(UserDTO userDTO) {
-
         try {
             User user = userService.findUserByUsername(userDTO.username);
 
@@ -75,25 +74,29 @@ public class UserFactory {
                 .collect(Collectors.toList());
     }
 
-
+    /**
+     * Метод создает нового пользователя
+     * @param username имя пользователя
+     * @param email адрес электронной почты пользователя
+     * @param password пароль пользователя
+     * @return новвый пользователь
+     */
     @SneakyThrows
     public User buildNewUser(String username, String email, String password) {
-        return new User(
-                null,
-                username,
-                passwordEncoder.encode(password),
-                email,
-                new Date(),
-                null,
-                imageFactory.getImage(getClass().getResourceAsStream("/static/img/user.png"), "image/png"),
-                null,
-                Collections.singleton(roleService.getRoleByName("ROLE_USER")),
-                null,
-                false,
-                false,
-                false,
-                false
-        );
+        return User.builder()
+                .id(null)
+                .username(username)
+                .password(passwordEncoder.encode(password))
+                .email(email)
+                .date(new Date())
+                .description(null)
+                .avatar(imageFactory.getImage(getClass().getResourceAsStream("/static/img/user.png"), "image/png"))
+                .requests(null)
+                .roles(Collections.singleton(roleService.getRoleByName("ROLE_USER")))
+                .expired(false)
+                .locked(false)
+                .credentials_expired(false)
+                .enabled(false)
+                .build();
     }
-
 }

@@ -87,4 +87,32 @@ public class MailService {
 
         log.info("Письмо с подтверждением нового почтового ящика на адрес " + address + " отправлено");
     }
+
+    @Async
+    public void sendChangePasswordEmail(String username, String address, String activateCode) throws MessagingException {
+        log.info("Письмо с подтверждением изменения пароля на адрес " + address + " принято в обработку");
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message,
+                MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+                StandardCharsets.UTF_8.name());
+
+        Context context = new Context();
+        context.setVariable("username", username);
+        context.setVariable("activateCode", activateCode);
+        context.setVariable("URL", String.format("http://%s/users/changePassword?username=%s&activate_code=%s",
+                SERVER_ADDRESS,
+                username,
+                activateCode));
+
+        String emailContent = springTemplateEngine.process("mail/password-change", context);
+
+        mimeMessageHelper.setTo(address);
+        mimeMessageHelper.setFrom(FROM);
+        mimeMessageHelper.setSubject("Изменение пароля");
+        mimeMessageHelper.setText(emailContent, true);
+        javaMailSender.send(message);
+
+        log.info("Письмо с подтверждением изменения пароля на адрес " + address + " отправлено");
+    }
 }

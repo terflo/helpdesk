@@ -2,6 +2,7 @@ package com.terflo.helpdesk.model.services;
 
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.VerificationToken;
+import com.terflo.helpdesk.model.entity.enums.VerificationTypeToken;
 import com.terflo.helpdesk.model.exceptions.VerificationTokenNotFoundException;
 import com.terflo.helpdesk.model.repositories.VerificationTokenRepository;
 import com.terflo.helpdesk.model.services.interfaces.VerificationTokenService;
@@ -23,18 +24,22 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
 
 
     @Override
-    public VerificationToken findByActivateCode(String activateCode) throws VerificationTokenNotFoundException {
+    public VerificationToken findByActivateCodeAndUser(String activateCode, User user, VerificationTypeToken type) throws VerificationTokenNotFoundException {
         return verificationTokenRepository
-                .findByActivateCode(activateCode)
-                .orElseThrow(() -> new VerificationTokenNotFoundException("Токен верификации " + activateCode + " не найден"));
+                .findByActivateCodeAndUserAndType(activateCode, user, type)
+                .orElseThrow(
+                        () -> new VerificationTokenNotFoundException(
+                                String.format("Токен верификации %s не найден пользователя %s не найден",
+                                        activateCode,
+                                        user.getUsername())));
     }
 
 
     @Override
-    public List<VerificationToken> findAllOldTokens() {
+    public List<VerificationToken> findAllOldTokens(VerificationTypeToken type) {
         Calendar currentDate = Calendar.getInstance();
         currentDate.add(Calendar.DAY_OF_WEEK, -DAYS_BEFORE_DELETE_NOT_ACTIVATED_USER);
-        return verificationTokenRepository.findByDateBefore(currentDate.getTime());
+        return verificationTokenRepository.findByDateBeforeAndType(currentDate.getTime(), type);
     }
 
 
@@ -50,11 +55,11 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
 
     @Override
     @Transactional
-    public void deleteByUser(User user) throws VerificationTokenNotFoundException {
-        if(!verificationTokenRepository.findByUser(user).isPresent())
+    public void deleteByUser(User user, VerificationTypeToken type) throws VerificationTokenNotFoundException {
+        if(!verificationTokenRepository.findByUserAndType(user, type).isPresent())
             throw new VerificationTokenNotFoundException("Токен верификации пользователя " + user.getUsername() + " не найден");
         else
-            verificationTokenRepository.deleteByUser(user);
+            verificationTokenRepository.deleteByUserAndType(user, type);
     }
 
 
@@ -78,6 +83,7 @@ public class VerificationTokenServiceImpl implements VerificationTokenService {
 
 
     @Override
+    @Transactional
     public VerificationToken saveToken(VerificationToken verificationToken) {
         return verificationTokenRepository.save(verificationToken);
     }

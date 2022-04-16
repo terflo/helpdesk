@@ -2,6 +2,8 @@ package com.terflo.helpdesk.model.entity.enums;
 
 /**
  * Статус нового обращения
+ * @author Danil Krivoschiokov
+ * @version 1.0
  */
 public enum FreeRequestStatus {
     NEW("Новый"),

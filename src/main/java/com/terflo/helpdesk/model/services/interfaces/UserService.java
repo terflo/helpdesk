@@ -16,6 +16,8 @@ public interface UserService {
 
     User findUserByUsername(String username) throws UserNotFoundException;
 
+    User findUserByEmail(String email) throws UserNotFoundException;
+
     User saveUser(User user) throws UserAlreadyExistException;
 
     void deleteUserById(Long id) throws UserNotFoundException;

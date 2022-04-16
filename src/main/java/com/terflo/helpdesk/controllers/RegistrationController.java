@@ -2,6 +2,7 @@ package com.terflo.helpdesk.controllers;
 
 import com.terflo.helpdesk.model.entity.User;
 import com.terflo.helpdesk.model.entity.VerificationToken;
+import com.terflo.helpdesk.model.entity.enums.VerificationTypeToken;
 import com.terflo.helpdesk.model.exceptions.*;
 import com.terflo.helpdesk.model.factories.UserFactory;
 import com.terflo.helpdesk.model.requests.RegistrationRequest;
@@ -95,7 +96,7 @@ public class RegistrationController {
                     request.getEmail(),
                     request.getPassword()
             ));
-            VerificationToken verificationToken = VerificationToken.generateToken(user);
+            VerificationToken verificationToken = VerificationToken.generateToken(user, VerificationTypeToken.REGISTRATION_CONFIRM);
             verificationTokenService.saveToken(verificationToken);
             mailService.sendRegistrationMail(user.getEmail(), user.getUsername(), verificationToken.getActivateCode());
         } catch (UserAlreadyExistException | MessagingException e) {
@@ -123,7 +124,12 @@ public class RegistrationController {
         log.info("Попытка активации пользователя " + username + " токеном верификации " + activateCode);
 
         try {
-            VerificationToken verificationToken = verificationTokenService.findByActivateCode(activateCode);
+            VerificationToken verificationToken = verificationTokenService.
+                    findByActivateCodeAndUser(
+                            activateCode,
+                            userService.findUserByUsername(username),
+                            VerificationTypeToken.REGISTRATION_CONFIRM
+                    );
             userService.activateUserByUsername(username);
             verificationTokenService.deleteToken(verificationToken);
         } catch (UserNotFoundException | UserAlreadyActivatedException | VerificationTokenNotFoundException e) {

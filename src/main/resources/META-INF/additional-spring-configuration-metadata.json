@@ -3,16 +3,16 @@
     {
       "name": "google.recaptcha.key.site",
       "type": "java.lang.String",
-      "description": "Description for google.recaptcha.key.site."
+      "description": "Ключ Google reCaptcha."
     },
     {
       "name": "application.name",
       "type": "java.lang.String",
-      "description": "Description for application.name."
+      "description": "Имя приложения."
     },
     {
       "name": "domain.name",
       "type": "java.lang.String",
-      "description": "Description for domain.name."
+      "description": "Имя домена."
     }
   ] }

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users")
+@Builder(toBuilder = true)
 public class User implements UserDetails {
 
     /**
@@ -81,13 +82,6 @@ public class User implements UserDetails {
      */
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
-
-    /**
-     * Токен верификации регистрации пользователя (удаляется при активации пользователя)
-     */
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @ToString.Exclude
-    private VerificationToken verificationToken;
 
     /**
      * Просроченность аккаунта

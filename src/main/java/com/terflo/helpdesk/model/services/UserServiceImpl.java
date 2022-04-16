@@ -68,6 +68,20 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     /**
+     * Метод поиска пользователя в базе данных по email
+     * @param email email пользователя
+     * @return пользователь
+     * @throws UserNotFoundException возникает в случае не нахождения пользователя
+     */
+    public User findUserByEmail(String email) throws UserNotFoundException {
+        return userRepository
+                .findByEmail(email)
+                .orElseThrow(
+                        () -> new UsernameNotFoundException(String.format("Пользователь с email %s не найден", email))
+                );
+    }
+
+    /**
      * Функция ищет пользователя в базе данных
      *
      * @param username имя пользователя
